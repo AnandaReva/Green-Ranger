@@ -11,7 +11,7 @@ class GlobalVar extends ChangeNotifier {
     'profile_image': 'assets/images/logo.png',
     'username': 'admin',
     'level': 'Mythrill',
-    'exp': '1500',
+    'exp': '2000',
     'wallet_value': '750000',
   };
 
@@ -20,7 +20,14 @@ class GlobalVar extends ChangeNotifier {
     'instance': '',
     'tasks': [],
     'address': '',
+    'duration': '',
+    'totalRangers': '',
+    'reward': '',
+    'levelRequirements': '',
+    'description': '',
   };
+
+//levels: Mythrill, Legendary, Epic, Rookie (500, 1000, 1500, 2000)
 
   final List<QuestSummary> _currentQuestData = [
     QuestSummary(
@@ -28,7 +35,7 @@ class GlobalVar extends ChangeNotifier {
       instance: 'PT Paragon',
       duration: '2',
       totalRangers: '10',
-      levelRequirements: 'Mythrill',
+      levelRequirements: 'Rookie',
       reward: '800000',
       description: 'Find Sample Cosmetics Trash',
       taskList: ['Organizing Rangers', 'Gathering Trash'],
@@ -50,7 +57,7 @@ class GlobalVar extends ChangeNotifier {
       instance: 'Green Earth Organization',
       duration: '3',
       totalRangers: '15',
-      levelRequirements: 'Heroic',
+      levelRequirements: 'Mythrill',
       reward: '1000000',
       description: 'Clean up plastic and waste from beaches',
       taskList: ['Organizing volunteers', 'Collecting plastic waste'],

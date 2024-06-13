@@ -3,16 +3,35 @@ import 'package:green_ranger/pages/createQuest.dart';
 import 'package:green_ranger/pages/homePage.dart';
 import 'package:green_ranger/globalVar.dart';
 import 'package:green_ranger/onboarding/onboarding_screen.dart';
+import 'package:green_ranger/pages/login_register_page.dart';
 import 'package:green_ranger/pages/searchPage.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-int initScreen = 0;
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
 
-void main() {
-  runApp(MyApp());
+  bool hasLoggedInOnce = prefs.getBool("hasLoggedInOnce") ?? false;
+
+  print('Has Logged In Once: $hasLoggedInOnce');
+
+  runApp(MyApp(initialRoute: getInitialRoute(hasLoggedInOnce)));
+}
+
+String getInitialRoute(bool hasLoggedInOnce) {
+  if (hasLoggedInOnce) {
+    return 'homeScreen';
+  } else {
+    return 'onboardScreen';
+  }
 }
 
 class MyApp extends StatelessWidget {
+  final String initialRoute;
+
+  MyApp({required this.initialRoute});
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
@@ -20,11 +39,11 @@ class MyApp extends StatelessWidget {
       child: Consumer<GlobalVar>(
         builder: (context, globalVar, _) {
           return MaterialApp(
-            initialRoute: 'onboard',
+            initialRoute: initialRoute,
             routes: {
-              'home': (context) => MainPage(),
-              'onboard': (context) => OnBoardingScreen(),
-              'createQuest': (context) => CreateQuest()
+              'homeScreen': (context) => MainPage(),
+              'onboardScreen': (context) => OnBoardingScreen(),
+              'loginPage': (context) => LoginPage(),
               // Add other routes here as needed
             },
           );
@@ -80,7 +99,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
           case 1:
             return SearchPage();
           case 3:
-            return CreateQuest();
+            return CreateQuest(globalVar: globalVar);
 
           default:
             return Container();

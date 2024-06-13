@@ -5,6 +5,7 @@ import 'package:green_ranger/globalVar.dart';
 import 'package:green_ranger/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 bool loginForm = true; // Inisialisasi di luar blok if
 
@@ -45,6 +46,9 @@ class LoginPageState extends State<LoginPage> {
       // Dummy validation
       if (_controllerEmail.text == 'admin@gmail.com' &&
           _controllerPassword.text == 'admin123') {
+        final SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setBool("hasLoggedInOnce", true);
+
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (context) => MainPage()),
