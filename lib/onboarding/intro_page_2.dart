@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:green_ranger/globalVar.dart';
 
 class IntroPage2 extends StatelessWidget {
-  final GlobalVar globalVar;
-  const IntroPage2({super.key, required this.globalVar});
+  const IntroPage2({super.key});
 
   @override
   Widget build(BuildContext context) {

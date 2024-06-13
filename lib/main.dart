@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:green_ranger/components/homePage.dart';
+import 'package:green_ranger/pages/createQuest.dart';
+import 'package:green_ranger/pages/homePage.dart';
 import 'package:green_ranger/globalVar.dart';
 import 'package:green_ranger/onboarding/onboarding_screen.dart';
+import 'package:green_ranger/pages/searchPage.dart';
 import 'package:provider/provider.dart';
 
 int initScreen = 0;
@@ -21,7 +23,8 @@ class MyApp extends StatelessWidget {
             initialRoute: 'onboard',
             routes: {
               'home': (context) => MainPage(),
-              'onboard': (context) => OnBoardingScreen(globalVar: globalVar),
+              'onboard': (context) => OnBoardingScreen(),
+              'createQuest': (context) => CreateQuest()
               // Add other routes here as needed
             },
           );
@@ -41,12 +44,13 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
   late List<GlobalKey<NavigatorState>> navigatorKeys;
   late List<AnimationController> destinationFaders;
   late List<Widget> destinationViews;
+
   final List<Destination> allDestinations = [
     Destination(0, '', Icons.home, GlobalVar.baseColor),
     Destination(1, '', Icons.search, GlobalVar.baseColor),
-    Destination(2, '', Icons.add_circle, GlobalVar.baseColor),
     Destination(3, '', Icons.task, GlobalVar.baseColor),
-    Destination(4, '', Icons.person, GlobalVar.baseColor),
+    Destination(2, '', Icons.add_circle, GlobalVar.baseColor), // create quest
+    Destination(4, '', Icons.person, GlobalVar.baseColor), //profile
   ];
 
   @override
@@ -71,7 +75,12 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
       (index) {
         switch (index) {
           case 0:
-            return HomePage(userData: globalVar.userLoginData);
+            return HomePage();
+
+          case 1:
+            return SearchPage();
+          case 3:
+            return CreateQuest();
 
           default:
             return Container();
@@ -101,7 +110,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
         }).toList(),
       ),
       bottomNavigationBar: NavigationBar(
-        backgroundColor: GlobalVar.mainColor, // Keep the background color here
+        backgroundColor: GlobalVar.mainColor,
         selectedIndex: globalVar.selectedIndex,
         onDestinationSelected: (index) {
           setState(() {
@@ -110,7 +119,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
         },
         destinations: allDestinations.map((destination) {
           return NavigationDestination(
-            icon: Icon(destination.icon, color: GlobalVar.baseColor), // Change icon color here
+            icon: Icon(destination.icon, color: GlobalVar.baseColor),
             label: destination.title,
           );
         }).toList(),

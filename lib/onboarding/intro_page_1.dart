@@ -4,11 +4,8 @@ import 'package:green_ranger/globalVar.dart';
 
 class IntroPage1 extends StatelessWidget {
 
-
-  final GlobalVar globalVar;
-
   
-  const IntroPage1({super.key, required this.globalVar});
+  const IntroPage1({super.key});
   
 
   @override

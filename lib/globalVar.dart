@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:green_ranger/components/infiniteScorllPagination.dart';
 
 class GlobalVar extends ChangeNotifier {
   static final GlobalVar _instance = GlobalVar._internal();
@@ -6,23 +7,100 @@ class GlobalVar extends ChangeNotifier {
   static const secondaryColor = Color.fromARGB(255, 211, 255, 30);
   static const baseColor = Color.fromRGBO(240, 240, 240, 1.0);
 
-  dynamic _userLoginData;
-  dynamic _currentOrderData;
-  dynamic _currentPickUpData;
-  dynamic _currentSweeperData;
+  Map<String, dynamic> _userLoginData = {
+    'profile_image': 'assets/images/logo.png',
+    'username': 'admin',
+    'level': 'Mythrill',
+    'exp': '1500',
+    'wallet_value': '750000',
+  };
 
-  dynamic _orderDataList;
+  Map<String, dynamic> _newQuestData = {
+    'questName': '',
+    'instance': '',
+    'tasks': [],
+    'address': '',
+  };
+
+  final List<QuestSummary> _currentQuestData = [
+    QuestSummary(
+      questName: 'Find Sample Cosmetics Trash',
+      instance: 'PT Paragon',
+      duration: '2',
+      totalRangers: '10',
+      levelRequirements: 'Mythrill',
+      reward: '800000',
+      description: 'Find Sample Cosmetics Trash',
+      taskList: ['Organizing Rangers', 'Gathering Trash'],
+      address: 'Jalan Swadarma Raya Kampung Baru IV No. 1. Jakarta - 12250',
+    ),
+    QuestSummary(
+      questName: 'Recycle Oil and Biodiesel',
+      instance: 'CV Prima Oil Slepet',
+      duration: '5',
+      totalRangers: '20',
+      levelRequirements: 'Legendary',
+      reward: '1200000',
+      description: 'Find Oil and Biodiesel Trash and Recycle',
+      taskList: ['Collecting Oil Barrels', 'Sorting Biodiesel Waste'],
+      address: 'Jl Kemana Saja Sukanasi Jakarta',
+    ),
+    QuestSummary(
+      questName: 'Clean Up Beach Pollution',
+      instance: 'Green Earth Organization',
+      duration: '3',
+      totalRangers: '15',
+      levelRequirements: 'Heroic',
+      reward: '1000000',
+      description: 'Clean up plastic and waste from beaches',
+      taskList: ['Organizing volunteers', 'Collecting plastic waste'],
+      address: 'Ocean Drive, Beach City',
+    ),
+    QuestSummary(
+      questName: 'Plant Trees in Urban Areas',
+      instance: 'EcoGreen Foundation',
+      duration: '7',
+      totalRangers: '30',
+      levelRequirements: 'Legendary',
+      reward: '1500000',
+      description: 'Plant trees in urban areas to increase green cover',
+      taskList: ['Preparation of saplings', 'Planting in designated areas'],
+      address: 'City Parks and Recreation Center',
+    ),
+    QuestSummary(
+      questName: 'Restore River Ecosystem',
+      instance: 'Water Conservation Alliance',
+      duration: '4',
+      totalRangers: '25',
+      levelRequirements: 'Epic',
+      reward: '1800000',
+      description: 'Restore natural habitat and improve water quality',
+      taskList: ['Monitoring water quality', 'Restocking fish population'],
+      address: 'Riverside Drive, Riverside City',
+    ),
+  ];
+
+  // Simulated asynchronous fetch of quest data
+  Future<List<QuestSummary>> getQuests(int pageKey, int pageSize) async {
+    await Future.delayed(
+        Duration(milliseconds: 500)); // Simulating network delay
+
+    final startIndex = pageKey * pageSize;
+    if (startIndex >= _currentQuestData.length) {
+      return []; // No more items
+    }
+
+    return _currentQuestData.sublist(
+        startIndex,
+        startIndex + pageSize < _currentQuestData.length
+            ? startIndex + pageSize
+            : _currentQuestData.length);
+  }
 
   bool _isLogin = false;
   bool _isLoading = false;
-  bool _isInOrder = false;
+
   int _selectedIndex = 0;
-  String _selected_role_onboarding = "";
-  String _userLocation = "";
-
-  int _initScreen = 0;
-
-  List<int> _selectedTrashIndexes = []; // Initialize with an empty list
 
   int get selectedIndex => _selectedIndex;
   set selectedIndex(int value) {
@@ -30,53 +108,13 @@ class GlobalVar extends ChangeNotifier {
     notifyListeners();
   }
 
-  List<int> get selectedTrashIndexes => _selectedTrashIndexes;
-  set selectedTrashIndexes(List<int> value) {
-    _selectedTrashIndexes = value;
-    notifyListeners();
-  }
-
-/*   int get initScreen => _initScreen;
-  set initScreen(int value) {
-    _initScreen = value;
-    notifyListeners();
-  } */
-
-  String get selected_role_onboarding => _selected_role_onboarding;
-  String get userLocation => _userLocation;
-
-  dynamic get userLoginData => _userLoginData;
-  dynamic get currentOrderData => _currentOrderData;
-  dynamic get orderDataList => _orderDataList;
-  dynamic get currentPickUpData => _currentPickUpData;
-  dynamic get currentSweeperData => _currentSweeperData;
+  Map<String, dynamic> get userLoginData => _userLoginData;
 
   bool get isLogin => _isLogin;
   bool get isLoading => _isLoading;
-  bool get isInOrder => _isInOrder;
 
-  set userLoginData(dynamic value) {
+  set userLoginData(Map<String, dynamic> value) {
     _userLoginData = value;
-    notifyListeners();
-  }
-
-  set currentOrderData(dynamic value) {
-    _currentOrderData = value;
-    notifyListeners();
-  }
-
-  set currentPickUpData(dynamic value) {
-    _currentPickUpData = value;
-    notifyListeners();
-  }
-
-  set orderDataList(dynamic value) {
-    _orderDataList = value;
-    notifyListeners();
-  }
-
-  set currentSweeperData(dynamic value) {
-    _currentSweeperData = value;
     notifyListeners();
   }
 
@@ -88,18 +126,18 @@ class GlobalVar extends ChangeNotifier {
     _isLoading = value;
   }
 
-  set isInOrder(bool value) {
-    _isInOrder = value;
+  // Getter for newQuestData
+  Map<String, dynamic> get newQuestData => _newQuestData;
+
+  // Setter for newQuestData
+  set newQuestData(Map<String, dynamic> value) {
+    _newQuestData = value;
     notifyListeners();
   }
 
-  set selected_role_onboarding(String value) {
-    _selected_role_onboarding = value;
-    notifyListeners();
-  }
-
-  set userLocation(String value) {
-    _userLocation = value;
+  // Update a specific field in newQuestData
+  void updateNewQuestData(String key, dynamic value) {
+    _newQuestData[key] = value;
     notifyListeners();
   }
 

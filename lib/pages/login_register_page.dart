@@ -107,9 +107,9 @@ class LoginPageState extends State<LoginPage> {
         decoration: BoxDecoration(
             color: Colors.grey[200],
             border: Border.all(
-              color: Colors.white,
+              color: GlobalVar.baseColor,
             ),
-            borderRadius: BorderRadius.circular(12)),
+            borderRadius: BorderRadius.circular(50)),
         child: Padding(
           padding: EdgeInsets.only(left: 20),
           child: TextField(
@@ -270,6 +270,10 @@ class LoginPageState extends State<LoginPage> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Center(
+                        child: Image.asset(
+                      "assets/images/logo.png",
+                    )),
                     Padding(
                         padding: const EdgeInsets.all(25),
                         child: Center(

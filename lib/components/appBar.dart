@@ -10,10 +10,7 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
     return Consumer<GlobalVar>(
       builder: (context, globalVar, _) {
         // Menggunakan data dummy
-        Map<String, dynamic> userData = {
-          'profile_image': 'assets/images/logo.png',
-          'username': 'admin123',
-        };
+        Map<String, dynamic> userData = globalVar.userLoginData;
 
         return AppBar(
           backgroundColor: GlobalVar.mainColor,
@@ -31,7 +28,7 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
             children: <Widget>[
               Text(userData['username'] ?? '',
                   style: const TextStyle(
-                      color: GlobalVar.baseColor,
+                      color: Color.fromRGBO(171, 147, 224, 1),
                       fontSize: 16,
                       fontWeight: FontWeight.bold)),
             ],
