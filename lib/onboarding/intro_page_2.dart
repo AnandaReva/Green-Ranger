@@ -35,7 +35,7 @@ class IntroPage2 extends StatelessWidget {
                       "Environment",
                       textAlign: TextAlign.center, // Add textAlign here
                       style: TextStyle(
-                        color: GlobalVar.secondaryColor,
+                        color: GlobalVar.secondaryColorGreen,
                         fontWeight: FontWeight.normal,
                         fontSize: 35,
                         fontStyle: FontStyle.italic,

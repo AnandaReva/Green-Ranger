@@ -95,7 +95,7 @@ class SearchPage extends StatelessWidget {
                                 'Popular Search',
                                 style: TextStyle(
                                   fontSize: 18,
-                                  color: GlobalVar.secondaryColor,
+                                  color: GlobalVar.secondaryColorGreen,
                                   fontWeight: FontWeight.w400,
                                   fontStyle: FontStyle.italic,
                                 ),
@@ -107,7 +107,7 @@ class SearchPage extends StatelessWidget {
                                 'Categories',
                                 style: TextStyle(
                                   fontSize: 18,
-                                  color: GlobalVar.secondaryColor,
+                                  color: GlobalVar.secondaryColorGreen,
                                   fontWeight: FontWeight.w400,
                                   fontStyle: FontStyle.italic,
                                 ),

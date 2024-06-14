@@ -1,0 +1,134 @@
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, sort_child_properties_last
+
+import 'package:flutter/material.dart';
+import 'package:flutter_sliding_up_panel/sliding_up_panel_widget.dart';
+import 'package:green_ranger/globalVar.dart';
+
+class QuestDetailSlidePanel extends StatefulWidget {
+  final SlidingUpPanelController panelController;
+
+  QuestDetailSlidePanel({required this.panelController});
+
+  @override
+  _QuestDetailSlidePanelState createState() => _QuestDetailSlidePanelState();
+}
+
+class _QuestDetailSlidePanelState extends State<QuestDetailSlidePanel> {
+  final ScrollController scrollController = ScrollController();
+  bool isDisposed = false;
+
+  final double minBound = 0;
+  final double upperBound = 1.0;
+
+  @override
+  void initState() {
+    super.initState();
+    scrollController.addListener(_scrollListener);
+  }
+
+  @override
+  void dispose() {
+    isDisposed = true;
+    scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollListener() {
+    if (!isDisposed) {
+      if (scrollController.offset >=
+              scrollController.position.maxScrollExtent &&
+          !scrollController.position.outOfRange) {
+        widget.panelController.expand();
+      } else if (scrollController.offset <=
+              scrollController.position.minScrollExtent &&
+          !scrollController.position.outOfRange) {
+        widget.panelController.anchor();
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SlidingUpPanelWidget(
+      child: Container(
+        margin: EdgeInsets.symmetric(horizontal: 15.0),
+        decoration: ShapeDecoration(
+          color: Color.fromRGBO(50, 51, 50, 1),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20.0),
+              topRight: Radius.circular(20.0),
+            ),
+          ),
+        ),
+        child: Column(
+          children: <Widget>[
+            Container(
+              alignment: Alignment.center,
+              child: Row(
+                children: <Widget>[
+                  Icon(
+                    Icons.arrow_drop_down,
+                    size: 30,
+                    color: GlobalVar.baseColor,
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(
+                      left: 8.0,
+                    ),
+                  ),
+                  Text(
+                    'click or drag',
+                    style: TextStyle(
+                      color: GlobalVar.baseColor,
+                    ),
+                  )
+                ],
+                mainAxisAlignment: MainAxisAlignment.center,
+              ),
+              height: 50.0,
+            ),
+            Divider(
+              height: 0.5,
+              color: GlobalVar.baseColor,
+            ),
+            // Add your ListView or other widgets here as needed
+          ],
+          mainAxisSize: MainAxisSize.min,
+        ),
+      ),
+      controlHeight: 50.0,
+      anchor: 0.4,
+      minimumBound: minBound,
+      upperBound: upperBound,
+      panelController: widget.panelController,
+      onTap: () {
+        if (!isDisposed) {
+          widget.panelController.collapse();
+          /* if (widget.panelController.status == SlidingUpPanelStatus.expanded) {
+            widget.panelController.collapse();
+          } else {
+            widget.panelController.expand();
+          } */
+        } else {}
+      },
+      enableOnTap: true,
+      dragDown: (details) {
+        print('dragDown');
+      },
+      dragStart: (details) {
+        print('dragStart');
+      },
+      dragCancel: () {
+        print('dragCancel');
+      },
+      dragUpdate: (details) {
+        print(
+            'dragUpdate,${widget.panelController.status == SlidingUpPanelStatus.dragging ? 'dragging' : ''}');
+      },
+      dragEnd: (details) {
+        print('dragEnd');
+      },
+    );
+  }
+}

@@ -220,7 +220,7 @@ class _CreateQuestState extends State<CreateQuest> {
                                   }
                                   // Set the button color when it is enabled
                                   return GlobalVar
-                                      .secondaryColor; // Default enabled color
+                                      .secondaryColorGreen; // Default enabled color
                                 }),
                               ),
                               child: Text(
