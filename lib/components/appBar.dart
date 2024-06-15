@@ -3,7 +3,7 @@ import 'package:green_ranger/globalVar.dart';
 import 'package:flutter/material.dart';
 
 class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const MyAppBar({Key? key}) : super(key: key);
+  const MyAppBar({super.key});
 
   @override
   Widget build(BuildContext context) {

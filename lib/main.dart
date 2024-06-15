@@ -4,6 +4,7 @@ import 'package:green_ranger/pages/homePage.dart';
 import 'package:green_ranger/globalVar.dart';
 import 'package:green_ranger/onboarding/onboarding_screen.dart';
 import 'package:green_ranger/pages/login_register_page.dart';
+import 'package:green_ranger/pages/profile_pages.dart';
 import 'package:green_ranger/pages/searchPage.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -100,6 +101,9 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
             return SearchPage();
           case 3:
             return CreateQuest(globalVar: globalVar);
+
+          case 4:
+            return const ProfilePages(key: null,);
 
           default:
             return Container();
