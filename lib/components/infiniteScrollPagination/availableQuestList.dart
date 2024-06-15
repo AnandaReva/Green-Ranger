@@ -8,14 +8,14 @@ import 'package:provider/provider.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:intl/intl.dart';
 
-class QuestListPage extends StatefulWidget {
-  QuestListPage({Key? key}) : super(key: key);
+class AvailableQuestList extends StatefulWidget {
+  AvailableQuestList({Key? key}) : super(key: key);
 
   @override
-  _QuestListPageState createState() => _QuestListPageState();
+  _AvailableQuestListState createState() => _AvailableQuestListState();
 }
 
-class _QuestListPageState extends State<QuestListPage> {
+class _AvailableQuestListState extends State<AvailableQuestList> {
   late final PagingController<int, QuestSummary> _pagingController;
 
   final List<Color> questColors = [
@@ -96,16 +96,16 @@ class QuestListItem extends StatelessWidget {
         // Menampilkan notifikasi "Quest Selected" dengan nama quest dan warna yang dipilih
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              'Quest ${quest.questName} Selected',
-              style: TextStyle(
-                  color:
-                      color), // Menyesuaikan warna teks sesuai dengan warna card
-            ),
-            duration: Duration(seconds: 1), // Durasi notifikasi
-            backgroundColor:
-                Colors.white, // Mengubah warna latar belakang menjadi putih
-          ),
+              content: Text(
+                'Quest ${quest.questName} Selected',
+                style: TextStyle(
+                    color:
+                        GlobalVar.mainColor), // Menyesuaikan warna teks sesuai dengan warna card
+              ),
+              duration: Duration(seconds: 1), // Durasi notifikasi
+              backgroundColor:
+                  GlobalVar.baseColor // Mengubah warna latar belakang menjadi putih
+              ),
         );
       },
       child: Card(
@@ -178,7 +178,7 @@ class QuestListItem extends StatelessWidget {
                             'Lvl ${quest.levelRequirements}',
                             style: TextStyle(
                               fontSize: 10,
-                              color: GlobalVar.baseColor,
+                              color: color,
                               fontWeight: FontWeight.w400,
                             ),
                           ),
@@ -195,7 +195,7 @@ class QuestListItem extends StatelessWidget {
                             '${quest.duration} days',
                             style: TextStyle(
                               fontSize: 10,
-                              color: GlobalVar.baseColor,
+                              color: color,
                               fontWeight: FontWeight.w400,
                             ),
                           ),
@@ -211,7 +211,7 @@ class QuestListItem extends StatelessWidget {
                             '${quest.totalRangers} Peoples',
                             style: TextStyle(
                               fontSize: 10,
-                              color: GlobalVar.baseColor,
+                              color: color,
                               fontWeight: FontWeight.w400,
                             ),
                           ),

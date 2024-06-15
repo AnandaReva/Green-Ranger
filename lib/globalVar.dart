@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:green_ranger/components/infiniteScorllPagination.dart';
+import 'package:green_ranger/components/infiniteScrollPagination/UserMarkedQuestList%20.dart';
+import 'package:green_ranger/components/infiniteScrollPagination/availableQuestList.dart';
 
 class GlobalVar extends ChangeNotifier {
   static final GlobalVar _instance = GlobalVar._internal();
@@ -115,6 +116,45 @@ class GlobalVar extends ChangeNotifier {
     ),
   ];
 
+
+   final List<MarkedQuestSummary> _UserMarkedQuest= [
+    MarkedQuestSummary(
+      objectId: '507f1f77bcf86cd799439011',
+      questName: 'Find Sample Cosmetics Trash',
+      instance: 'PT Paragon',
+      duration: '2',
+      totalRangers: '10',
+      levelRequirements: 'Rookie',
+      reward: '800000',
+      description:
+          'Find and organize samples of cosmetics trash. This quest involves gathering trash from various sources and organizing rangers to effectively manage the cleanup operation.',
+      taskList: [
+        'Organizing Rangers',
+        'Gathering Trash',
+        'Collect data results from rangers and calculation each ranger prizes',
+        'Prizes distribution'
+      ],
+      address: 'Jalan Swadarma Raya Kampung Baru IV No. 1. Jakarta - 12250',
+      date: '2024-06-14T12:00:00Z',
+    ),
+   
+   
+    MarkedQuestSummary(
+      objectId: '507f1f77bcf86cd799433rwe11',
+      questName: 'Plant Trees in Urban Areas',
+      instance: 'EcoGreen Foundation',
+      duration: '7',
+      totalRangers: '30',
+      levelRequirements: 'Legendary',
+      reward: '1500000',
+      description:
+          'Join the EcoGreen Foundation in planting trees in urban areas to increase green cover. This quest involves preparing saplings and planting them in designated areas to improve the environment.',
+      taskList: ['Preparation of saplings', 'Planting in designated areas'],
+      address: 'City Parks and Recreation Center',
+      date: '2024-06-17T08:00:00Z',
+    ),
+  ];
+
   // Simulated asynchronous fetch of quest data
   Future<List<QuestSummary>> getQuests(int pageKey, int pageSize) async {
     await Future.delayed(
@@ -132,6 +172,22 @@ class GlobalVar extends ChangeNotifier {
             : _currentQuestData.length);
   }
 
+  Future<List<MarkedQuestSummary>> getmarkedQuests(int pageKey, int pageSize) async {
+    await Future.delayed(
+        Duration(milliseconds: 500)); // Simulating network delay
+
+    final startIndex = pageKey * pageSize;
+    if (startIndex >= _UserMarkedQuest.length) {
+      return []; // No more items
+    }
+
+    return _UserMarkedQuest.sublist(
+        startIndex,
+        startIndex + pageSize < _UserMarkedQuest.length
+            ? startIndex + pageSize
+            : _UserMarkedQuest.length);
+  }
+
   bool _isLogin = false;
   bool _isLoading = false;
 
@@ -146,6 +202,9 @@ class GlobalVar extends ChangeNotifier {
   Map<String, dynamic> get userLoginData => _userLoginData;
 
   Map<String, dynamic> get questDataSelected => _questDataSelected;
+
+
+
 
   bool get isPanelOpened => _isPanelOpened;
   bool get isLogin => _isLogin;

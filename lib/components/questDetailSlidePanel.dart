@@ -11,22 +11,22 @@ class QuestDetailSlidePanel extends StatefulWidget {
 
   QuestDetailSlidePanel(
       {required this.panelController, required GlobalVar globalVar});
-
+/* 
   void expandPanel() {
     panelController.expand();
   }
 
   void collapsePanel() {
     panelController.collapse();
-  }
-/*    void expandPanel() {
+  } */ /* 
+    void expandPanel() {
 
     this.widget.panelController.expand();
   }
 
   void collapsePanel() {
     this.widget.panelController.collapse();
-  } */
+  }  */
 
   @override
   QuestDetailSlidePanelState createState() => QuestDetailSlidePanelState();
@@ -84,7 +84,7 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
         return SlidingUpPanelWidget(
           child: Container(
             width: double.infinity,
-            margin: EdgeInsets.symmetric(horizontal: 15.0),
+            margin: EdgeInsets.only(top: 10.0),
             decoration: ShapeDecoration(
               color: Color.fromRGBO(50, 51, 50, 1),
               shape: RoundedRectangleBorder(
@@ -107,7 +107,7 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
                       ),
                       SizedBox(width: 8.0),
                       Text(
-                        'click or drag',
+                        'See Quest Detail',
                         style: TextStyle(
                           color: GlobalVar.baseColor,
                         ),
@@ -124,7 +124,8 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
                 Flexible(
                   child: questData.isEmpty
                       ? Padding(
-                          padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 10),
+                          padding: EdgeInsets.symmetric(
+                              vertical: 20.0, horizontal: 10),
                           child: Center(
                             child: Column(
                               children: [
@@ -559,10 +560,8 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
               if (widget.panelController.status ==
                   SlidingUpPanelStatus.expanded) {
                 widget.panelController.collapse();
-                globalVar.isPanelOpened = false;
               } else {
                 widget.panelController.expand();
-                globalVar.isPanelOpened = true;
               }
             }
           },

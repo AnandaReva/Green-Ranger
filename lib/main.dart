@@ -7,6 +7,7 @@ import 'package:green_ranger/onboarding/onboarding_screen.dart';
 import 'package:green_ranger/pages/login_register_page.dart';
 import 'package:green_ranger/pages/searchPage.dart';
 import 'package:flutter_sliding_up_panel/sliding_up_panel_widget.dart';
+import 'package:green_ranger/pages/userQuestPage.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -101,6 +102,8 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
             return HomePage();
           case 1:
             return SearchPage();
+          case 2:
+            return UserQuestPage();
           case 3:
             return CreateQuest(globalVar: globalVar);
           default:

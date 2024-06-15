@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:green_ranger/components/appBar.dart';
-import 'package:green_ranger/components/infiniteScorllPagination.dart';
+import 'package:green_ranger/components/infiniteScrollPagination/availableQuestList.dart';
 
 import 'package:provider/provider.dart';
 import 'package:green_ranger/globalVar.dart';
@@ -164,7 +164,7 @@ class HomePage extends StatelessWidget {
                     ),
                     SizedBox(height: 10),
                     Expanded(
-                      child: QuestListPage(),
+                      child: AvailableQuestList(),
                     ),
                   ],
                 ),
