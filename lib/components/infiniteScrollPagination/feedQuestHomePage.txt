@@ -1,9 +1,8 @@
-// ignore_for_file: prefer_const_constructors, use_super_parameters
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 import 'package:flutter/material.dart';
-import 'package:flutter_sliding_up_panel/sliding_up_panel_widget.dart';
-import 'package:green_ranger/components/questDetailSlidePanel.dart';
 import 'package:green_ranger/globalVar.dart';
+import 'package:green_ranger/mongoDB/questMongodb.dart';
 import 'package:provider/provider.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:intl/intl.dart';
@@ -16,7 +15,8 @@ class AvailableQuestList extends StatefulWidget {
 }
 
 class _AvailableQuestListState extends State<AvailableQuestList> {
-  late final PagingController<int, QuestSummary> _pagingController;
+  late final PagingController<int, QuestFeedSummary> _pagingController;
+  bool _isLoading = false; // Variabel untuk mengecek status loading
 
   final List<Color> questColors = [
     GlobalVar.secondaryColorGreen,
@@ -35,14 +35,21 @@ class _AvailableQuestListState extends State<AvailableQuestList> {
 
   Future<void> _fetchPage(int pageKey) async {
     try {
-      final newItems = await GlobalVar.instance.getQuests(pageKey, 10);
-      final isLastPage = newItems.isEmpty;
+      await QuestMongodb.fetchQuestDataHomePage();
+
+      // Simulasi penundaan untuk menunjukkan proses loading
+      await Future.delayed(Duration(seconds: 2));
+
+      // Fetch feed quests from GlobalVar
+      final allItems = GlobalVar.instance.homePageQuestFeed ?? [];
+      final newItems = allItems.skip(pageKey * 10).take(10).toList();
+      final isLastPage = newItems.length < 10 ||
+          pageKey * 10 + newItems.length >= allItems.length;
       if (isLastPage) {
-        _pagingController.appendLastPage(newItems.cast<QuestSummary>());
+        _pagingController.appendLastPage(newItems);
       } else {
         final nextPageKey = pageKey + 1;
-        _pagingController.appendPage(
-            newItems.cast<QuestSummary>(), nextPageKey);
+        _pagingController.appendPage(newItems, nextPageKey);
       }
     } catch (error) {
       _pagingController.error = error;
@@ -52,21 +59,77 @@ class _AvailableQuestListState extends State<AvailableQuestList> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: PagedListView<int, QuestSummary>(
-        pagingController: _pagingController,
-        builderDelegate: PagedChildBuilderDelegate<QuestSummary>(
-          itemBuilder: (context, item, index) => QuestListItem(
-            quest: item,
-            colorPattern: questColors[index % questColors.length],
+      child: Column(
+        children: [
+          Align(
+            alignment: Alignment.topRight,
+            child: IconButton(
+              onPressed: _isLoading ? null : () => _pagingController.refresh(),
+              icon: Icon(Icons.refresh, color: GlobalVar.baseColor),
+            ),
           ),
-        ),
+          Expanded(
+            child: PagedListView<int, QuestFeedSummary>(
+              pagingController: _pagingController,
+              builderDelegate: PagedChildBuilderDelegate<QuestFeedSummary>(
+                itemBuilder: (context, item, index) => QuestListItem(
+                  quest: item,
+                  colorPattern: questColors[index % questColors.length],
+                ),
+                noItemsFoundIndicatorBuilder: (context) {
+                  if (_isLoading) {
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  } else {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'No Quests Shown, Please Try Again',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: GlobalVar.mainColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                },
+              ),
+            ),
+          ),
+          Align(
+            alignment: Alignment.center,
+            child: Container(
+              decoration: BoxDecoration(
+                color: GlobalVar.baseColor, // Warna latar belakang
+                borderRadius: BorderRadius.circular(
+                    20.0), // Melengkungkan sudut container
+              ),
+      
+              child: TextButton(
+                onPressed:
+                    _isLoading ? null : () => _pagingController.refresh(),
+                child: Text(
+                  'Load More',
+                  style: TextStyle(color: GlobalVar.mainColor),
+                ),
+              ),
+            ),
+          ),
+          SizedBox(height: 10,)
+        ],
       ),
     );
   }
 }
 
 class QuestListItem extends StatelessWidget {
-  final QuestSummary quest;
+  final QuestFeedSummary quest;
   final Color colorPattern;
 
   const QuestListItem({
@@ -99,16 +162,16 @@ class QuestListItem extends StatelessWidget {
         // Menampilkan notifikasi "Quest Selected" dengan nama quest dan warna yang dipilih
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(
-                'Quest ${quest.questName} Selected',
-                style: TextStyle(
-                    color: GlobalVar
-                        .mainColor), // Menyesuaikan warna teks sesuai dengan warna card
-              ),
-              duration: Duration(seconds: 1), // Durasi notifikasi
-              backgroundColor: GlobalVar
-                  .baseColor // Mengubah warna latar belakang menjadi putih
-              ),
+            content: Text(
+              'Quest ${quest.questName} Selected',
+              style: TextStyle(
+                  color: GlobalVar
+                      .mainColor), // Menyesuaikan warna teks sesuai dengan warna card
+            ),
+            duration: Duration(seconds: 1), // Durasi notifikasi
+            backgroundColor: GlobalVar
+                .baseColor, // Mengubah warna latar belakang menjadi putih
+          ),
         );
       },
       child: Card(
@@ -238,7 +301,7 @@ class QuestListItem extends StatelessWidget {
   }
 }
 
-class QuestSummary {
+class QuestFeedSummary {
   final String questName;
   final String instance;
   final String duration;
@@ -250,12 +313,12 @@ class QuestSummary {
   final String address;
   final String objectId;
   final String date;
+  final List<String> rangers;
   final List<String> categories;
   final String status;
-  final List<String> rangers;
   final String questOwnerPhone;
 
-  QuestSummary({
+  QuestFeedSummary({
     required this.questName,
     required this.instance,
     required this.duration,
@@ -267,9 +330,9 @@ class QuestSummary {
     required this.address,
     required this.objectId,
     required this.date,
+    required this.rangers,
     required this.categories,
     required this.status,
-    required this.rangers,
     required this.questOwnerPhone,
   });
 }

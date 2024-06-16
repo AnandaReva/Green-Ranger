@@ -1,19 +1,22 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/foundation.dart';
+import 'package:green_ranger/components/loadingUI.dart';
 import 'package:green_ranger/globalVar.dart';
 import 'package:green_ranger/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:green_ranger/mongoDB/authMongodb.dart';
 import 'package:green_ranger/mongoDB/questMongodb.dart';
+import 'package:green_ranger/mongoDB/userQuestMongodb.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
 bool loginForm = true; // Inisialisasi di luar blok if
 
 class SignInPage extends StatefulWidget {
-  const SignInPage({Key? key}) : super(key: key);
+  const SignInPage({Key? key, required GlobalVar globalVar}) : super(key: key);
 
   @override
   State<SignInPage> createState() => LoginPageState();
@@ -73,6 +76,10 @@ class LoginPageState extends State<SignInPage> {
       //   });
       // }
 
+      setState(() {
+        globalVar.isLoading = true;
+      });
+
       bool loginSuccess = await AuthMongodb.findUserDataMongodb(
         _controllerEmail.text,
         _controllerPassword.text,
@@ -82,29 +89,27 @@ class LoginPageState extends State<SignInPage> {
       if (!loginSuccess) {
         // Jika gagal login, set pesan error
         setState(() {
+          globalVar.isLoading = false;
+        });
+
+        setState(() {
           errorMessage = 'Invalid Email or Password';
         });
         return;
       }
-
-
-
-      await QuestMongodb.fetchUserMarkedQuest();
+      // fetch feed quest content
+      // await QuestMongodb.fetchQuestDataHomePage();
+      await UserQuestMongodb.fetchUserMarkedQuest();
       // await QuestMongodb.fetchUserOnProgressQuest();
       // await QuestMongodb.fetchUserCompletedQuest();
 
-
-
-
-
-
-
-
-
-
-
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setBool("hasLoggedInOnce", true);
+
+      setState(() {
+        globalVar.isLoading = false;
+      });
+
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => MainPage()),
@@ -113,6 +118,10 @@ class LoginPageState extends State<SignInPage> {
 
       // Jika berhasil login, kosongkan pesan error
     } catch (e) {
+      setState(() {
+        globalVar.isLoading = false;
+      });
+
       setState(() {
         errorMessage = 'Failed connecting to server, check internet connection';
       });
@@ -311,97 +320,103 @@ class LoginPageState extends State<SignInPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(backgroundColor: GlobalVar.mainColor),
-      backgroundColor: GlobalVar
-          .mainColor, // Tambahkan ini untuk mengubah warna latar belakang
-      body: CustomScrollView(
-        slivers: [
-          SliverFillRemaining(
-            hasScrollBody: false,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Center(
-                        child: Image.asset(
-                      "assets/images/logo.png",
-                    )),
-                    Padding(
-                        padding: const EdgeInsets.all(25),
-                        child: Center(
-                          child: Text(
-                            loginForm ? 'Masuk' : 'Daftar',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 30,
-                            ),
+        // appBar: AppBar(backgroundColor: GlobalVar.mainColor),
+        backgroundColor: GlobalVar.mainColor,
+        body: globalVar.isLoading
+            ? LoadingUi()
+            : SafeArea(
+                child: CustomScrollView(
+                  slivers: [
+                    SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Center(
+                                  child: Image.asset(
+                                "assets/images/logo.png",
+                              )),
+                              Padding(
+                                  padding: const EdgeInsets.all(25),
+                                  child: Center(
+                                    child: Text(
+                                      loginForm ? 'Masuk' : 'Daftar',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 30,
+                                      ),
+                                    ),
+                                  )),
+                              if (!loginForm) ...[
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 25),
+                                  child: Text(
+                                    "Username",
+                                    style: TextStyle(
+                                      color: GlobalVar.baseColor,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 17,
+                                    ),
+                                  ),
+                                ),
+                                _entryFieldUsername(
+                                    'Username', _controllerUsername),
+                                const SizedBox(height: 10),
+                              ],
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 25),
+                                child: Text(
+                                  "Email",
+                                  style: TextStyle(
+                                    color: GlobalVar.baseColor,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 17,
+                                  ),
+                                ),
+                              ),
+                              _entryField('Email', _controllerEmail),
+                              const SizedBox(height: 10),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 25),
+                                child: Text(
+                                  "Password",
+                                  style: TextStyle(
+                                    color: GlobalVar.baseColor,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 17,
+                                  ),
+                                ),
+                              ),
+                              _entryField('Password', _controllerPassword),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              _errorMessage(),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              _submitButton(),
+                              Divider(
+                                height: 50,
+                                thickness: 1,
+                                indent: 30,
+                                endIndent: 30,
+                                color: Colors.black,
+                              ),
+                            ],
                           ),
-                        )),
-                    if (!loginForm) ...[
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 25),
-                        child: Text(
-                          "Username",
-                          style: TextStyle(
-                            color: GlobalVar.baseColor,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 17,
-                          ),
-                        ),
+                          _loginRegisterButton(),
+                        ],
                       ),
-                      _entryFieldUsername('Username', _controllerUsername),
-                      const SizedBox(height: 10),
-                    ],
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 25),
-                      child: Text(
-                        "Email",
-                        style: TextStyle(
-                          color: GlobalVar.baseColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 17,
-                        ),
-                      ),
-                    ),
-                    _entryField('Email', _controllerEmail),
-                    const SizedBox(height: 10),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 25),
-                      child: Text(
-                        "Password",
-                        style: TextStyle(
-                          color: GlobalVar.baseColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 17,
-                        ),
-                      ),
-                    ),
-                    _entryField('Password', _controllerPassword),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    _errorMessage(),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    _submitButton(),
-                    Divider(
-                      height: 50,
-                      thickness: 1,
-                      indent: 30,
-                      endIndent: 30,
-                      color: Colors.black,
                     ),
                   ],
                 ),
-                _loginRegisterButton(),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
+              ));
   }
 }

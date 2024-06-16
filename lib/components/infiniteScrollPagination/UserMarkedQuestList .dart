@@ -36,7 +36,8 @@ class _UserMarkedQuestListState extends State<UserMarkedQuestList> {
       // Fetch marked quests from GlobalVar
       final allItems = GlobalVar.instance.userMarkedQuest ?? [];
       final newItems = allItems.skip(pageKey * 10).take(10).toList();
-      final isLastPage = newItems.length < 10 || pageKey * 10 + newItems.length >= allItems.length;
+      final isLastPage = newItems.length < 10 ||
+          pageKey * 10 + newItems.length >= allItems.length;
 
       if (isLastPage) {
         _pagingController.appendLastPage(newItems);

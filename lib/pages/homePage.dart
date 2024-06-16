@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:green_ranger/components/appBar.dart';
-import 'package:green_ranger/components/infiniteScrollPagination/availableQuestList.dart';
+import 'package:green_ranger/components/infiniteScrollPagination/feedQuestHomePage.dart';
 import 'package:provider/provider.dart';
 import 'package:green_ranger/globalVar.dart';
 import 'package:flutter_sliding_up_panel/flutter_sliding_up_panel.dart';
@@ -85,7 +85,7 @@ class HomePage extends StatelessWidget {
                             ),
                           ),
                           Divider(
-                            color: Colors.grey,
+                            color: GlobalVar.baseColor,
                             thickness: 2,
                             endIndent: 185,
                           ),
@@ -119,7 +119,7 @@ class HomePage extends StatelessWidget {
                               ),
                             ],
                           ),
-                          SizedBox(height: 20),
+                          SizedBox(height: 5),
                           Text(
                             'GreenRangerWalletValue',
                             style: TextStyle(

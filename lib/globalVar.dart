@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:green_ranger/components/infiniteScrollPagination/UserMarkedQuestList%20.dart';
-import 'package:green_ranger/components/infiniteScrollPagination/availableQuestList.dart';
+import 'package:green_ranger/components/infiniteScrollPagination/feedQuestHomePage.dart';
 
 class GlobalVar extends ChangeNotifier {
   static final GlobalVar _instance = GlobalVar._internal();
@@ -33,143 +33,9 @@ class GlobalVar extends ChangeNotifier {
 
 //levels: Mythrill, Legendary, Epic, Rookie (500, 1000, 1500, 2000)
 
-  final List<QuestSummary> _currentQuestData = [
-    QuestSummary(
-        objectId: '507f1f77bcf86cd799439011',
-        questName: 'Find Sample Cosmetics Trash',
-        instance: 'PT Paragon',
-        duration: '2',
-        maxRangers: '10',
-        levelRequirements: 'Rookie',
-        reward: '800000',
-        description:
-            'Find and organize samples of cosmetics trash. This quest involves gathering trash from various sources and organizing rangers to effectively manage the cleanup operation.',
-        taskList: [
-          'Organizing Rangers',
-          'Gathering Trash',
-          'Collect data results from rangers and calculation each ranger prizes',
-          'Prizes distribution'
-        ],
-        address: 'Jalan Swadarma Raya Kampung Baru IV No. 1. Jakarta - 12250',
-        date: '2024-06-14T12:00:00Z',
-        categories: ['Trash Collection'],
-        status: 'in_progress',
-        rangers: [
-          '666d9eaac4192284f5974377',
-          '666d9eaac4192284f5974378',
-          '666d9eaac4192284f5974379'
-        ],
-        questOwnerPhone: '081234567890',),
-    QuestSummary(
-        objectId: '507f1f77bcffrcd799439424',
-        questName: 'Recycle Oil and Biodiesel',
-        instance: 'CV Prima Oil Slepet',
-        duration: '5',
-        maxRangers: '20',
-        levelRequirements: 'Legendary',
-        reward: '1200000',
-        description:
-            'Find oil and biodiesel trash in the city and recycle them. This quest requires collecting oil barrels and sorting biodiesel waste for recycling purposes.',
-        taskList: ['Collecting Oil Barrels', 'Sorting Biodiesel Waste'],
-        address: 'Jl Kemana Saja Sukanasi Jakarta',
-        date: '2024-06-15T14:00:00Z',
-        categories: ['Trash Collection'],
-        status: 'completed',
-        rangers: ['666d9eaac4192284f5974379', '666d9eaac4192284f597437a'],
-        questOwnerPhone: '081234567890',),
-    QuestSummary(
-        objectId: '507fdgfdg77bcf86cd799439011',
-        questName: 'Clean Up Beach Pollution',
-        instance: 'Green Earth Organization',
-        duration: '3',
-        maxRangers: '15',
-        levelRequirements: 'Mythrill',
-        reward: '1000000',
-        description:
-            'Join the Green Earth Organization in cleaning up plastic and waste from beaches. This quest involves organizing volunteers and collecting plastic waste to protect marine life.',
-        taskList: ['Organizing volunteers', 'Collecting plastic waste'],
-        address: 'Ocean Drive, Beach City',
-        date: '2024-06-16T10:30:00Z',
-        categories: ['Trash Collection', 'Nature Conservative'],
-        status: 'pending',
-        rangers: [],
-        questOwnerPhone: '081234567890',),
-    QuestSummary(
-        objectId: '507f1f77bcf86cd799433rwe11',
-        questName: 'Plant Trees in Urban Areas',
-        instance: 'EcoGreen Foundation',
-        duration: '7',
-        maxRangers: '30',
-        levelRequirements: 'Legendary',
-        reward: '1500000',
-        description:
-            'Join the EcoGreen Foundation in planting trees in urban areas to increase green cover. This quest involves preparing saplings and planting them in designated areas to improve the environment.',
-        taskList: ['Preparation of saplings', 'Planting in designated areas'],
-        address: 'City Parks and Recreation Center',
-        date: '2024-06-17T08:00:00Z',
-        categories: ['Nature Conservative'],
-        status: 'in_progress',
-        rangers: [
-          '666d9eaac4192284f5974378',
-          '666d9eaac4192284f5974379',
-          '666d9eaac4192284f597437b'
-        ],
-        questOwnerPhone: '081234567890',),
-    QuestSummary(
-        objectId: '50fsfs1f77bcf86cd799439011',
-        questName: 'Restore River Ecosystem',
-        instance: 'Water Conservation Alliance',
-        duration: '4',
-        maxRangers: '25',
-        levelRequirements: 'Epic',
-        reward: '1800000',
-        description:
-            'Join the Water Conservation Alliance to restore the natural habitat and improve water quality in rivers. This quest involves monitoring water quality and restocking fish population for ecological balance.',
-        taskList: ['Monitoring water quality', 'Restocking fish population'],
-        address: 'Riverside Drive, Riverside City',
-        date: '2024-06-18T15:45:00Z',
-        categories: ['Nature Conservative', 'Pollution Control'],
-        status: 'pending',
-        rangers: [],
-        questOwnerPhone: '081234567890',),
-  ];
-
+  var _homePageQuestFeed;
   var _userMarkedQuest;
   var _userOnProgressQuest;
-
-  // Simulated asynchronous fetch of quest data
-  Future<List<QuestSummary>> getQuests(int pageKey, int pageSize) async {
-    await Future.delayed(
-        Duration(milliseconds: 500)); // Simulating network delay
-
-    final startIndex = pageKey * pageSize;
-    if (startIndex >= _currentQuestData.length) {
-      return []; // No more items
-    }
-
-    return _currentQuestData.sublist(
-        startIndex,
-        startIndex + pageSize < _currentQuestData.length
-            ? startIndex + pageSize
-            : _currentQuestData.length);
-  }
-
-  // Future<List<MarkedQuestSummary>> getmarkedQuests(
-  //     int pageKey, int pageSize) async {
-  //   await Future.delayed(
-  //       Duration(milliseconds: 500)); // Simulating network delay
-
-  //   final startIndex = pageKey * pageSize;
-  //   if (startIndex >= _UserMarkedQuest.length) {
-  //     return []; // No more items
-  //   }
-
-  //   return _UserMarkedQuest.sublist(
-  //       startIndex,
-  //       startIndex + pageSize < _UserMarkedQuest.length
-  //           ? startIndex + pageSize
-  //           : _UserMarkedQuest.length);
-  // }
 
   String _errorMessageGlobal = "";
   bool _isLoading = false;
@@ -181,15 +47,14 @@ class GlobalVar extends ChangeNotifier {
     _selectedIndex = value;
     notifyListeners();
   }
-  // dont delete
-  // Map<String, dynamic> get userLoginData => _userLoginData;
 
   dynamic get userLoginData => _userLoginData;
+  dynamic get homePageQuestFeed => _homePageQuestFeed;
   dynamic get userMarkedQuest => _userMarkedQuest;
   dynamic get userOnProgressQuest => _userOnProgressQuest;
 
-
   Map<String, dynamic> get questDataSelected => _questDataSelected;
+  Map<String, dynamic> get newQuestData => _newQuestData;
 
   bool get isPanelOpened => _isPanelOpened;
   String get errorMessageGlobal => _errorMessageGlobal;
@@ -203,6 +68,10 @@ class GlobalVar extends ChangeNotifier {
 
   set userLoginData(dynamic value) {
     _userLoginData = value;
+  }
+
+  set homePageQuestFeed(dynamic value) {
+    _homePageQuestFeed = value;
   }
 
   set userMarkedQuest(dynamic value) {
@@ -230,9 +99,6 @@ class GlobalVar extends ChangeNotifier {
   set isLoading(bool value) {
     _isLoading = value;
   }
-
-  // Getter for newQuestData
-  Map<String, dynamic> get newQuestData => _newQuestData;
 
   // Setter for newQuestData
   set newQuestData(Map<String, dynamic> value) {
