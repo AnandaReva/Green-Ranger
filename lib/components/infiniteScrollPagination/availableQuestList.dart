@@ -57,7 +57,7 @@ class _AvailableQuestListState extends State<AvailableQuestList> {
         builderDelegate: PagedChildBuilderDelegate<QuestSummary>(
           itemBuilder: (context, item, index) => QuestListItem(
             quest: item,
-            color: questColors[index % questColors.length],
+            colorPattern: questColors[index % questColors.length],
           ),
         ),
       ),
@@ -67,12 +67,12 @@ class _AvailableQuestListState extends State<AvailableQuestList> {
 
 class QuestListItem extends StatelessWidget {
   final QuestSummary quest;
-  final Color color;
+  final Color colorPattern;
 
   const QuestListItem({
     Key? key,
     required this.quest,
-    required this.color,
+    required this.colorPattern,
   }) : super(key: key);
 
   @override
@@ -99,18 +99,18 @@ class QuestListItem extends StatelessWidget {
               content: Text(
                 'Quest ${quest.questName} Selected',
                 style: TextStyle(
-                    color:
-                        GlobalVar.mainColor), // Menyesuaikan warna teks sesuai dengan warna card
+                    color: GlobalVar
+                        .mainColor), // Menyesuaikan warna teks sesuai dengan warna card
               ),
               duration: Duration(seconds: 1), // Durasi notifikasi
-              backgroundColor:
-                  GlobalVar.baseColor // Mengubah warna latar belakang menjadi putih
+              backgroundColor: GlobalVar
+                  .baseColor // Mengubah warna latar belakang menjadi putih
               ),
         );
       },
       child: Card(
         margin: EdgeInsets.all(8),
-        color: color,
+        color: colorPattern,
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Row(
@@ -178,7 +178,7 @@ class QuestListItem extends StatelessWidget {
                             'Lvl ${quest.levelRequirements}',
                             style: TextStyle(
                               fontSize: 10,
-                              color: color,
+                              color: colorPattern,
                               fontWeight: FontWeight.w400,
                             ),
                           ),
@@ -195,7 +195,7 @@ class QuestListItem extends StatelessWidget {
                             '${quest.duration} days',
                             style: TextStyle(
                               fontSize: 10,
-                              color: color,
+                              color: colorPattern,
                               fontWeight: FontWeight.w400,
                             ),
                           ),
@@ -211,7 +211,7 @@ class QuestListItem extends StatelessWidget {
                             '${quest.totalRangers} Peoples',
                             style: TextStyle(
                               fontSize: 10,
-                              color: color,
+                              color: colorPattern,
                               fontWeight: FontWeight.w400,
                             ),
                           ),
@@ -247,6 +247,9 @@ class QuestSummary {
   final String address;
   final String objectId;
   final String date;
+  final List<String> categories;
+  final String status;
+  final List<String> rangers;
 
   QuestSummary({
     required this.questName,
@@ -260,5 +263,8 @@ class QuestSummary {
     required this.address,
     required this.objectId,
     required this.date,
+    required this.categories,
+    required this.status,
+    required this.rangers,
   });
 }

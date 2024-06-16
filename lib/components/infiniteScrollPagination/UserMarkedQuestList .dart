@@ -54,7 +54,7 @@ class _UserMarkedQuestListState extends State<UserMarkedQuestList> {
       builderDelegate: PagedChildBuilderDelegate<MarkedQuestSummary>(
         itemBuilder: (context, item, index) => QuestListItem(
           quest: item,
-          color: questColors[index % questColors.length],
+          colorPattern: questColors[index % questColors.length],
         ),
       ),
     );
@@ -63,12 +63,12 @@ class _UserMarkedQuestListState extends State<UserMarkedQuestList> {
 
 class QuestListItem extends StatelessWidget {
   final MarkedQuestSummary quest;
-  final Color color;
+  final Color colorPattern;
 
   const QuestListItem({
     Key? key,
     required this.quest,
-    required this.color,
+    required this.colorPattern,
   }) : super(key: key);
 
   @override
@@ -107,7 +107,7 @@ class QuestListItem extends StatelessWidget {
       },
       child: Card(
         margin: EdgeInsets.all(8),
-        color: color,
+        color: colorPattern,
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Column(
@@ -173,7 +173,7 @@ class QuestListItem extends StatelessWidget {
                           'Lvl ${quest.levelRequirements}',
                           style: TextStyle(
                             fontSize: 10,
-                            color: color,
+                            color: colorPattern,
                             fontWeight: FontWeight.w400,
                           ),
                         ),
@@ -190,7 +190,7 @@ class QuestListItem extends StatelessWidget {
                           '${quest.duration} days',
                           style: TextStyle(
                             fontSize: 10,
-                            color: color,
+                            color: colorPattern,
                             fontWeight: FontWeight.w400,
                           ),
                         ),
@@ -206,7 +206,7 @@ class QuestListItem extends StatelessWidget {
                           '${quest.totalRangers} Peoples',
                           style: TextStyle(
                             fontSize: 10,
-                            color: color,
+                            color: colorPattern,
                             fontWeight: FontWeight.w400,
                           ),
                         ),
@@ -235,6 +235,7 @@ class MarkedQuestSummary {
   final String address;
   final String objectId;
   final String date;
+  final List<String> categories;
 
   MarkedQuestSummary({
     required this.questName,
@@ -248,5 +249,6 @@ class MarkedQuestSummary {
     required this.address,
     required this.objectId,
     required this.date,
+    required this.categories,
   });
 }

@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:green_ranger/components/appBar.dart';
 import 'package:green_ranger/components/infiniteScrollPagination/availableQuestList.dart';
-
 import 'package:provider/provider.dart';
 import 'package:green_ranger/globalVar.dart';
 import 'package:flutter_sliding_up_panel/flutter_sliding_up_panel.dart';
@@ -22,6 +21,33 @@ class HomePage extends StatelessWidget {
     return Consumer<GlobalVar>(
       builder: (context, globalVar, _) {
         Map<String, dynamic> userData = globalVar.userLoginData;
+
+        // Define _userLevel variable
+        String _userLevel;
+        String _nextLevelExp;
+
+        // Determine user level
+        int userExp = userData['exp'] ??
+            0; // Directly access the value, no need for int.parse()
+        int levelStep = 1500;
+        int userLevelValue = (userExp / levelStep).floor();
+
+        if (userLevelValue < 1) {
+          _userLevel = 'rookie';
+          _nextLevelExp = (levelStep * 1).toString();
+        } else if (userLevelValue < 2) {
+          _userLevel = 'epic';
+          _nextLevelExp = (levelStep * 2).toString();
+        } else if (userLevelValue < 3) {
+          _userLevel = 'legendary';
+          _nextLevelExp = (levelStep * 3).toString();
+        } else if (userLevelValue < 4) {
+          _userLevel = 'mythic';
+          _nextLevelExp = (levelStep * 4).toString();
+        } else {
+          _userLevel = 'mythic';
+          _nextLevelExp = 'max'; // max level reached
+        }
 
         return Stack(
           children: <Widget>[
@@ -64,7 +90,7 @@ class HomePage extends StatelessWidget {
                             endIndent: 185,
                           ),
                           Text(
-                            userData['level'] ?? '',
+                            _userLevel,
                             style: TextStyle(
                               fontSize: 14,
                               color: Color.fromRGBO(255, 175, 64, 1),
@@ -75,7 +101,7 @@ class HomePage extends StatelessWidget {
                           Row(
                             children: [
                               Text(
-                                '${userData['exp'] ?? ''} / 2500',
+                                '${userExp.toString()}/${_nextLevelExp}',
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: GlobalVar.baseColor,
@@ -114,7 +140,7 @@ class HomePage extends StatelessWidget {
                                 width: 30,
                               ),
                               Text(
-                                'Rp. ${NumberFormat.currency(locale: 'id_ID', decimalDigits: 0, symbol: '').format(int.parse(userData['wallet_value'] ?? '0'))}',
+                                'Rp. ${NumberFormat.currency(locale: 'id_ID', decimalDigits: 0, symbol: '').format(userData['wallet_value'] ?? 0)}',
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: GlobalVar.baseColor,

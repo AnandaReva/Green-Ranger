@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:green_ranger/components/infiniteScrollPagination/UserMarkedQuestList%20.dart';
 import 'package:green_ranger/components/infiniteScrollPagination/availableQuestList.dart';
@@ -11,15 +12,16 @@ class GlobalVar extends ChangeNotifier {
   static const baseColor = Color.fromRGBO(240, 240, 240, 1.0);
 
   bool _isPanelOpened = false;
+  // dont delete
+  // Map<String, dynamic> _userLoginData = {
+  //   'objectId': '507f1f77bcf86cd799439011',
+  //   'profile_image': 'assets/images/logo.png',
+  //   'username': 'admin',
+  //   'exp': '2450',
+  //   'wallet_value': '750000',
+  // };
 
-  Map<String, dynamic> _userLoginData = {
-    'objectId': '507f1f77bcf86cd799439011',
-    'profile_image': 'assets/images/logo.png',
-    'username': 'admin',
-    'level': 'Mythrill',
-    'exp': '2000',
-    'wallet_value': '750000',
-  };
+  var _userLoginData;
 
   Map<String, dynamic> _newQuestData = {
     'questName': '',
@@ -32,6 +34,7 @@ class GlobalVar extends ChangeNotifier {
     'levelRequirements': '',
     'description': '',
     'date': '',
+    'categories': [],
   };
 
   Map<String, dynamic> _questDataSelected = {};
@@ -40,119 +43,134 @@ class GlobalVar extends ChangeNotifier {
 
   final List<QuestSummary> _currentQuestData = [
     QuestSummary(
-      objectId: '507f1f77bcf86cd799439011',
-      questName: 'Find Sample Cosmetics Trash',
-      instance: 'PT Paragon',
-      duration: '2',
-      totalRangers: '10',
-      levelRequirements: 'Rookie',
-      reward: '800000',
-      description:
-          'Find and organize samples of cosmetics trash. This quest involves gathering trash from various sources and organizing rangers to effectively manage the cleanup operation.',
-      taskList: [
-        'Organizing Rangers',
-        'Gathering Trash',
-        'Collect data results from rangers and calculation each ranger prizes',
-        'Prizes distribution'
-      ],
-      address: 'Jalan Swadarma Raya Kampung Baru IV No. 1. Jakarta - 12250',
-      date: '2024-06-14T12:00:00Z',
-    ),
+        objectId: '507f1f77bcf86cd799439011',
+        questName: 'Find Sample Cosmetics Trash',
+        instance: 'PT Paragon',
+        duration: '2',
+        totalRangers: '10',
+        levelRequirements: 'Rookie',
+        reward: '800000',
+        description:
+            'Find and organize samples of cosmetics trash. This quest involves gathering trash from various sources and organizing rangers to effectively manage the cleanup operation.',
+        taskList: [
+          'Organizing Rangers',
+          'Gathering Trash',
+          'Collect data results from rangers and calculation each ranger prizes',
+          'Prizes distribution'
+        ],
+        address: 'Jalan Swadarma Raya Kampung Baru IV No. 1. Jakarta - 12250',
+        date: '2024-06-14T12:00:00Z',
+        categories: ['Trash Collection'],
+        status: 'in_progress',
+        rangers: [
+          '666d9eaac4192284f5974377',
+          '666d9eaac4192284f5974378',
+          '666d9eaac4192284f5974379'
+        ]),
     QuestSummary(
-      objectId: '507f1f77bcffrcd799439424',
-      questName: 'Recycle Oil and Biodiesel',
-      instance: 'CV Prima Oil Slepet',
-      duration: '5',
-      totalRangers: '20',
-      levelRequirements: 'Legendary',
-      reward: '1200000',
-      description:
-          'Find oil and biodiesel trash in the city and recycle them. This quest requires collecting oil barrels and sorting biodiesel waste for recycling purposes.',
-      taskList: ['Collecting Oil Barrels', 'Sorting Biodiesel Waste'],
-      address: 'Jl Kemana Saja Sukanasi Jakarta',
-      date: '2024-06-15T14:00:00Z',
-    ),
+        objectId: '507f1f77bcffrcd799439424',
+        questName: 'Recycle Oil and Biodiesel',
+        instance: 'CV Prima Oil Slepet',
+        duration: '5',
+        totalRangers: '20',
+        levelRequirements: 'Legendary',
+        reward: '1200000',
+        description:
+            'Find oil and biodiesel trash in the city and recycle them. This quest requires collecting oil barrels and sorting biodiesel waste for recycling purposes.',
+        taskList: ['Collecting Oil Barrels', 'Sorting Biodiesel Waste'],
+        address: 'Jl Kemana Saja Sukanasi Jakarta',
+        date: '2024-06-15T14:00:00Z',
+        categories: ['Trash Collection'],
+        status: 'completed',
+        rangers: ['666d9eaac4192284f5974379', '666d9eaac4192284f597437a']),
     QuestSummary(
-      objectId: '507fdgfdg77bcf86cd799439011',
-      questName: 'Clean Up Beach Pollution',
-      instance: 'Green Earth Organization',
-      duration: '3',
-      totalRangers: '15',
-      levelRequirements: 'Mythrill',
-      reward: '1000000',
-      description:
-          'Join the Green Earth Organization in cleaning up plastic and waste from beaches. This quest involves organizing volunteers and collecting plastic waste to protect marine life.',
-      taskList: ['Organizing volunteers', 'Collecting plastic waste'],
-      address: 'Ocean Drive, Beach City',
-      date: '2024-06-16T10:30:00Z',
-    ),
+        objectId: '507fdgfdg77bcf86cd799439011',
+        questName: 'Clean Up Beach Pollution',
+        instance: 'Green Earth Organization',
+        duration: '3',
+        totalRangers: '15',
+        levelRequirements: 'Mythrill',
+        reward: '1000000',
+        description:
+            'Join the Green Earth Organization in cleaning up plastic and waste from beaches. This quest involves organizing volunteers and collecting plastic waste to protect marine life.',
+        taskList: ['Organizing volunteers', 'Collecting plastic waste'],
+        address: 'Ocean Drive, Beach City',
+        date: '2024-06-16T10:30:00Z',
+        categories: ['Trash Collection', 'Nature Conservative'],
+        status: 'pending',
+        rangers: []),
     QuestSummary(
-      objectId: '507f1f77bcf86cd799433rwe11',
-      questName: 'Plant Trees in Urban Areas',
-      instance: 'EcoGreen Foundation',
-      duration: '7',
-      totalRangers: '30',
-      levelRequirements: 'Legendary',
-      reward: '1500000',
-      description:
-          'Join the EcoGreen Foundation in planting trees in urban areas to increase green cover. This quest involves preparing saplings and planting them in designated areas to improve the environment.',
-      taskList: ['Preparation of saplings', 'Planting in designated areas'],
-      address: 'City Parks and Recreation Center',
-      date: '2024-06-17T08:00:00Z',
-    ),
+        objectId: '507f1f77bcf86cd799433rwe11',
+        questName: 'Plant Trees in Urban Areas',
+        instance: 'EcoGreen Foundation',
+        duration: '7',
+        totalRangers: '30',
+        levelRequirements: 'Legendary',
+        reward: '1500000',
+        description:
+            'Join the EcoGreen Foundation in planting trees in urban areas to increase green cover. This quest involves preparing saplings and planting them in designated areas to improve the environment.',
+        taskList: ['Preparation of saplings', 'Planting in designated areas'],
+        address: 'City Parks and Recreation Center',
+        date: '2024-06-17T08:00:00Z',
+        categories: ['Nature Conservative'],
+        status: 'in_progress',
+        rangers: [
+          '666d9eaac4192284f5974378',
+          '666d9eaac4192284f5974379',
+          '666d9eaac4192284f597437b'
+        ]),
     QuestSummary(
-      objectId: '50fsfs1f77bcf86cd799439011',
-      questName: 'Restore River Ecosystem',
-      instance: 'Water Conservation Alliance',
-      duration: '4',
-      totalRangers: '25',
-      levelRequirements: 'Epic',
-      reward: '1800000',
-      description:
-          'Join the Water Conservation Alliance to restore the natural habitat and improve water quality in rivers. This quest involves monitoring water quality and restocking fish population for ecological balance.',
-      taskList: ['Monitoring water quality', 'Restocking fish population'],
-      address: 'Riverside Drive, Riverside City',
-      date: '2024-06-18T15:45:00Z',
-    ),
+        objectId: '50fsfs1f77bcf86cd799439011',
+        questName: 'Restore River Ecosystem',
+        instance: 'Water Conservation Alliance',
+        duration: '4',
+        totalRangers: '25',
+        levelRequirements: 'Epic',
+        reward: '1800000',
+        description:
+            'Join the Water Conservation Alliance to restore the natural habitat and improve water quality in rivers. This quest involves monitoring water quality and restocking fish population for ecological balance.',
+        taskList: ['Monitoring water quality', 'Restocking fish population'],
+        address: 'Riverside Drive, Riverside City',
+        date: '2024-06-18T15:45:00Z',
+        categories: ['Nature Conservative', 'Pollution Control'],
+        status: 'pending',
+        rangers: [])
   ];
 
-
-   final List<MarkedQuestSummary> _UserMarkedQuest= [
+  final List<MarkedQuestSummary> _UserMarkedQuest = [
     MarkedQuestSummary(
-      objectId: '507f1f77bcf86cd799439011',
-      questName: 'Find Sample Cosmetics Trash',
-      instance: 'PT Paragon',
-      duration: '2',
-      totalRangers: '10',
-      levelRequirements: 'Rookie',
-      reward: '800000',
-      description:
-          'Find and organize samples of cosmetics trash. This quest involves gathering trash from various sources and organizing rangers to effectively manage the cleanup operation.',
-      taskList: [
-        'Organizing Rangers',
-        'Gathering Trash',
-        'Collect data results from rangers and calculation each ranger prizes',
-        'Prizes distribution'
-      ],
-      address: 'Jalan Swadarma Raya Kampung Baru IV No. 1. Jakarta - 12250',
-      date: '2024-06-14T12:00:00Z',
-    ),
-   
-   
+        objectId: '507f1f77bcf86cd799439011',
+        questName: 'Find Sample Cosmetics Trash',
+        instance: 'PT Paragon',
+        duration: '2',
+        totalRangers: '10',
+        levelRequirements: 'Rookie',
+        reward: '800000',
+        description:
+            'Find and organize samples of cosmetics trash. This quest involves gathering trash from various sources and organizing rangers to effectively manage the cleanup operation.',
+        taskList: [
+          'Organizing Rangers',
+          'Gathering Trash',
+          'Collect data results from rangers and calculation each ranger prizes',
+          'Prizes distribution'
+        ],
+        address: 'Jalan Swadarma Raya Kampung Baru IV No. 1. Jakarta - 12250',
+        date: '2024-06-14T12:00:00Z',
+        categories: ['Trash Collection']),
     MarkedQuestSummary(
-      objectId: '507f1f77bcf86cd799433rwe11',
-      questName: 'Plant Trees in Urban Areas',
-      instance: 'EcoGreen Foundation',
-      duration: '7',
-      totalRangers: '30',
-      levelRequirements: 'Legendary',
-      reward: '1500000',
-      description:
-          'Join the EcoGreen Foundation in planting trees in urban areas to increase green cover. This quest involves preparing saplings and planting them in designated areas to improve the environment.',
-      taskList: ['Preparation of saplings', 'Planting in designated areas'],
-      address: 'City Parks and Recreation Center',
-      date: '2024-06-17T08:00:00Z',
-    ),
+        objectId: '507f1f77bcf86cd799433rwe11',
+        questName: 'Plant Trees in Urban Areas',
+        instance: 'EcoGreen Foundation',
+        duration: '7',
+        totalRangers: '30',
+        levelRequirements: 'Legendary',
+        reward: '1500000',
+        description:
+            'Join the EcoGreen Foundation in planting trees in urban areas to increase green cover. This quest involves preparing saplings and planting them in designated areas to improve the environment.',
+        taskList: ['Preparation of saplings', 'Planting in designated areas'],
+        address: 'City Parks and Recreation Center',
+        date: '2024-06-17T08:00:00Z',
+        categories: ['Nature Conservative']),
   ];
 
   // Simulated asynchronous fetch of quest data
@@ -172,7 +190,8 @@ class GlobalVar extends ChangeNotifier {
             : _currentQuestData.length);
   }
 
-  Future<List<MarkedQuestSummary>> getmarkedQuests(int pageKey, int pageSize) async {
+  Future<List<MarkedQuestSummary>> getmarkedQuests(
+      int pageKey, int pageSize) async {
     await Future.delayed(
         Duration(milliseconds: 500)); // Simulating network delay
 
@@ -198,21 +217,25 @@ class GlobalVar extends ChangeNotifier {
     _selectedIndex = value;
     notifyListeners();
   }
+  // dont delete
+  // Map<String, dynamic> get userLoginData => _userLoginData;
 
-  Map<String, dynamic> get userLoginData => _userLoginData;
+  dynamic get userLoginData => _userLoginData;
 
   Map<String, dynamic> get questDataSelected => _questDataSelected;
-
-
-
 
   bool get isPanelOpened => _isPanelOpened;
   bool get isLogin => _isLogin;
   bool get isLoading => _isLoading;
 
-  set userLoginData(Map<String, dynamic> value) {
+  // dont delete
+  // set userLoginData(Map<String, dynamic> value) {
+  //   _userLoginData = value;
+  //   notifyListeners();
+  // }
+
+  set userLoginData(dynamic value) {
     _userLoginData = value;
-    notifyListeners();
   }
 
   set questDataSelected(Map<String, dynamic> value) {
@@ -222,7 +245,7 @@ class GlobalVar extends ChangeNotifier {
 
   set isPanelOpened(bool value) {
     _isPanelOpened = value;
-    notifyListeners(); 
+    notifyListeners();
   }
 
   set isLogin(bool value) {

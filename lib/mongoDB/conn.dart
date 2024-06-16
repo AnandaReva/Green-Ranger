@@ -1,0 +1,71 @@
+import 'dart:developer';
+
+import 'package:mongo_dart/mongo_dart.dart';
+
+class MongoConnection {
+  static const String MONGO_CONN_URL =
+      "mongodb+srv://whitegateincorporations:qwerqwer@greenranger.xpglyf3.mongodb.net/green_ranger_db?retryWrites=true&w=majority&appName=GreenRanger";
+
+  static const String USER_COLLECTION = "users";
+  static const String QUEST_COLLECTION = "quests";
+
+  late Db _db;
+
+  Future<void> openConnection() async {
+    try {
+      _db = await Db.create(MONGO_CONN_URL);
+      await _db.open();
+      print('Connected to MongoDB!');
+
+      // Inspect the database
+      inspect(_db);
+
+      // Get server status
+      var status = await _db.serverStatus();
+      print('status: $status');
+
+      // // Example: Find all documents in the 'users' collection
+      // var usersCollection = _db.collection(USER_COLLECTION);
+      // var allUsers = await usersCollection.find().toList();
+      // print('All users: $allUsers');
+
+      // Example: Find all documents in the 'quests' collection
+      // var questsCollection = _db.collection(QUEST_COLLECTION);
+      // var allQuests = await questsCollection.find().toList();
+      // print('All quests: $allQuests');
+      
+    } catch (e) {
+      print('Error connecting to MongoDB: $e');
+      rethrow; // Rethrow the exception to propagate it to the caller
+    }
+  }
+
+  Db get db {
+    if (!_db.isConnected) {
+      throw StateError("MongoDB connection has not been opened yet.");
+    }
+    return _db;
+  }
+
+  Future<void> closeConnection() async {
+    if (_db.isConnected) {
+      await _db.close();
+      print('Connection closed.');
+    }
+  }
+}
+
+void main() async {
+  final mongoConnection = MongoConnection();
+
+  try {
+    await mongoConnection.openConnection();
+
+    // Perform other MongoDB operations here if needed
+    
+  } catch (e) {
+    print('Error: $e');
+  } finally {
+    await mongoConnection.closeConnection();
+  }
+}

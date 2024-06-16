@@ -5,6 +5,7 @@ import 'package:green_ranger/globalVar.dart';
 import 'package:green_ranger/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:green_ranger/mongoDB/authMongodb.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 bool loginForm = true; // Inisialisasi di luar blok if
@@ -38,27 +39,62 @@ class LoginPageState extends State<LoginPage> {
     try {
       if (_controllerEmail.text.isEmpty || _controllerPassword.text.isEmpty) {
         setState(() {
-          errorMessage = 'Kolom data tidak boleh kosong';
+          errorMessage = 'Please fill in all the data';
+        });
+
+        return;
+      }
+
+      //  if (_controllerPassword.text.length < 8) {
+      //   setState(() {
+      //     errorMessage = 'Panjang kata sandi minimal 8';
+      //   });
+      //   return;
+      // }
+
+      // // Dummy validation dont delete
+      // if (_controllerEmail.text == 'admin@gmail.com' &&
+      //     _controllerPassword.text == 'admin123') {
+      //   final SharedPreferences prefs = await SharedPreferences.getInstance();
+      //   await prefs.setBool("hasLoggedInOnce", true);
+
+      //   Navigator.pushAndRemoveUntil(
+      //     context,
+      //     MaterialPageRoute(builder: (context) => MainPage()),
+      //     (route) => false,
+      //   );
+      // } else {
+      //   setState(() {
+      //     errorMessage = 'Email atau password salah';
+      //   });
+      // }
+
+      bool loginSuccess = await AuthMongodb.findUserDataMongodb(
+          _controllerEmail.text, _controllerPassword.text);
+
+      // Cek apakahdata berhasil ditemukan
+      if (!loginSuccess) {
+        // Jika gagal login, set pesan error
+        setState(() {
+          errorMessage = 'Invalid email or password.';
         });
         return;
       }
 
-      // Dummy validation
-      if (_controllerEmail.text == 'admin@gmail.com' &&
-          _controllerPassword.text == 'admin123') {
-        final SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setBool("hasLoggedInOnce", true);
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setBool("hasLoggedInOnce", true);
 
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => MainPage()),
-          (route) => false,
-        );
-      } else {
-        setState(() {
-          errorMessage = 'Email atau password salah';
-        });
-      }
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => MainPage()),
+        (route) => false,
+      );
+
+      // Jika berhasil login, kosongkan pesan error
+
+      setState(() {
+        errorMessage = '';
+      });
     } catch (e) {
       setState(() {
         errorMessage = 'Terjadi kesalahan: $e';

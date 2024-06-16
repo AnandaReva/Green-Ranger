@@ -24,7 +24,7 @@ Future<void> main() async {
 
 String getInitialRoute(bool hasLoggedInOnce) {
   if (hasLoggedInOnce) {
-    return 'homeScreen';
+    return 'loginPage';
   } else {
     return 'onboardScreen';
   }

@@ -40,6 +40,8 @@ dependencies:
   intl: ^0.19.0
   infinite_scroll_pagination: ^4.0.0
   flutter_sliding_up_panel: ^2.1.1
+  mongo_dart: ^0.10.3
+    
 
 dev_dependencies:
   flutter_test:
