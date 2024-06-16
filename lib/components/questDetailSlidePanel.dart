@@ -505,7 +505,7 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
                                   ),
                                   SizedBox(height: 5),
                                   Text(
-                                    questData['address'] ?? 'No data',
+                                    questData['contact'] ?? 'No data',
                                     style: TextStyle(
                                       color: GlobalVar.baseColor,
                                       fontWeight: FontWeight.w500,

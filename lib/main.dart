@@ -46,7 +46,7 @@ class MyApp extends StatelessWidget {
             routes: {
               'homeScreen': (context) => MainPage(),
               'onboardScreen': (context) => OnBoardingScreen(),
-              'loginPage': (context) => LoginPage(),
+              'loginPage': (context) => SignInPage(),
               // Add other routes here as needed
             },
           );

@@ -86,11 +86,14 @@ class QuestListItem extends StatelessWidget {
           'tasks': quest.taskList,
           'address': quest.address,
           'duration': quest.duration,
-          'totalRangers': quest.totalRangers,
+          'maxRangers': quest.maxRangers,
           'reward': quest.reward,
           'levelRequirements': quest.levelRequirements,
           'description': quest.description,
           'date': quest.date,
+          'status': quest.status,
+          'contact': quest.questOwnerPhone,
+          'rangers': quest.rangers
         };
 
         // Menampilkan notifikasi "Quest Selected" dengan nama quest dan warna yang dipilih
@@ -208,7 +211,7 @@ class QuestListItem extends StatelessWidget {
                           padding:
                               EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           child: Text(
-                            '${quest.totalRangers} Peoples',
+                            '${quest.maxRangers} Peoples',
                             style: TextStyle(
                               fontSize: 10,
                               color: colorPattern,
@@ -239,7 +242,7 @@ class QuestSummary {
   final String questName;
   final String instance;
   final String duration;
-  final String totalRangers;
+  final String maxRangers;
   final String levelRequirements;
   final String reward;
   final String description;
@@ -250,12 +253,13 @@ class QuestSummary {
   final List<String> categories;
   final String status;
   final List<String> rangers;
+  final String questOwnerPhone;
 
   QuestSummary({
     required this.questName,
     required this.instance,
     required this.duration,
-    required this.totalRangers,
+    required this.maxRangers,
     required this.levelRequirements,
     required this.reward,
     required this.description,
@@ -266,5 +270,6 @@ class QuestSummary {
     required this.categories,
     required this.status,
     required this.rangers,
+    required this.questOwnerPhone,
   });
 }

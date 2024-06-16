@@ -33,14 +33,16 @@ class _UserMarkedQuestListState extends State<UserMarkedQuestList> {
 
   Future<void> _fetchPage(int pageKey) async {
     try {
-      final newItems = await GlobalVar.instance.getmarkedQuests(pageKey, 10);
-      final isLastPage = newItems.isEmpty;
+      // Fetch marked quests from GlobalVar
+      final allItems = GlobalVar.instance.userMarkedQuest ?? [];
+      final newItems = allItems.skip(pageKey * 10).take(10).toList();
+      final isLastPage = newItems.length < 10 || pageKey * 10 + newItems.length >= allItems.length;
+
       if (isLastPage) {
-        _pagingController.appendLastPage(newItems.cast<MarkedQuestSummary>());
+        _pagingController.appendLastPage(newItems);
       } else {
         final nextPageKey = pageKey + 1;
-        _pagingController.appendPage(
-            newItems.cast<MarkedQuestSummary>(), nextPageKey);
+        _pagingController.appendPage(newItems, nextPageKey);
       }
     } catch (error) {
       _pagingController.error = error;
@@ -82,11 +84,13 @@ class QuestListItem extends StatelessWidget {
           'tasks': quest.taskList,
           'address': quest.address,
           'duration': quest.duration,
-          'totalRangers': quest.totalRangers,
+          'maxRangers': quest.maxRangers,
           'reward': quest.reward,
           'levelRequirements': quest.levelRequirements,
           'description': quest.description,
           'date': quest.date,
+          'status': quest.status,
+          'contact': quest.questOwnerPhone
         };
 
         // Menampilkan notifikasi "Quest Selected" dengan nama quest dan warna yang dipilih
@@ -203,7 +207,7 @@ class QuestListItem extends StatelessWidget {
                         padding:
                             EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         child: Text(
-                          '${quest.totalRangers} Peoples',
+                          '${quest.maxRangers} Peoples',
                           style: TextStyle(
                             fontSize: 10,
                             color: colorPattern,
@@ -227,7 +231,7 @@ class MarkedQuestSummary {
   final String questName;
   final String instance;
   final String duration;
-  final String totalRangers;
+  final String maxRangers;
   final String levelRequirements;
   final String reward;
   final String description;
@@ -236,12 +240,14 @@ class MarkedQuestSummary {
   final String objectId;
   final String date;
   final List<String> categories;
+  final String status;
+  final String questOwnerPhone; // New property
 
   MarkedQuestSummary({
     required this.questName,
     required this.instance,
     required this.duration,
-    required this.totalRangers,
+    required this.maxRangers,
     required this.levelRequirements,
     required this.reward,
     required this.description,
@@ -250,5 +256,7 @@ class MarkedQuestSummary {
     required this.objectId,
     required this.date,
     required this.categories,
+    required this.status,
+    required this.questOwnerPhone, // New property
   });
 }

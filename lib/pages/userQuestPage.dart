@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 import 'package:flutter/material.dart';
 import 'package:green_ranger/components/infiniteScrollPagination/UserMarkedQuestList%20.dart';
@@ -15,7 +15,8 @@ class UserQuestPage extends StatefulWidget {
   _UserQuestPageState createState() => _UserQuestPageState();
 }
 
-class _UserQuestPageState extends State<UserQuestPage> with SingleTickerProviderStateMixin {
+class _UserQuestPageState extends State<UserQuestPage>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final TextEditingController _controllerSearcQuest = TextEditingController();
   final SlidingUpPanelController panelController = SlidingUpPanelController();
@@ -87,7 +88,8 @@ class _UserQuestPageState extends State<UserQuestPage> with SingleTickerProvider
                                       decoration: InputDecoration(
                                         border: InputBorder.none,
                                         hintText: 'Search Quest',
-                                        contentPadding: EdgeInsets.symmetric(vertical: 10),
+                                        contentPadding:
+                                            EdgeInsets.symmetric(vertical: 10),
                                       ),
                                     ),
                                   ),
@@ -179,6 +181,7 @@ class _UserQuestPageState extends State<UserQuestPage> with SingleTickerProvider
                           children: [
                             // Marked
                             UserMarkedQuestList(),
+                            // Center(child: Text('On Marked Quests')),
                             // On Progress
                             Center(child: Text('On Progress Quests')),
                             // Finished

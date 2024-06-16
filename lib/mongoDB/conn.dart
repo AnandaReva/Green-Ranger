@@ -11,7 +11,7 @@ class MongoConnection {
 
   late Db _db;
 
-  Future<void> openConnection() async {
+  Future<bool> openConnection() async {
     try {
       _db = await Db.create(MONGO_CONN_URL);
       await _db.open();
@@ -33,10 +33,11 @@ class MongoConnection {
       // var questsCollection = _db.collection(QUEST_COLLECTION);
       // var allQuests = await questsCollection.find().toList();
       // print('All quests: $allQuests');
-      
+
+      return true;
     } catch (e) {
       print('Error connecting to MongoDB: $e');
-      rethrow; // Rethrow the exception to propagate it to the caller
+      return false;
     }
   }
 
@@ -52,20 +53,5 @@ class MongoConnection {
       await _db.close();
       print('Connection closed.');
     }
-  }
-}
-
-void main() async {
-  final mongoConnection = MongoConnection();
-
-  try {
-    await mongoConnection.openConnection();
-
-    // Perform other MongoDB operations here if needed
-    
-  } catch (e) {
-    print('Error: $e');
-  } finally {
-    await mongoConnection.closeConnection();
   }
 }

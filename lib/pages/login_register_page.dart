@@ -6,18 +6,20 @@ import 'package:green_ranger/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:green_ranger/mongoDB/authMongodb.dart';
+import 'package:green_ranger/mongoDB/questMongodb.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 bool loginForm = true; // Inisialisasi di luar blok if
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({Key? key}) : super(key: key);
+class SignInPage extends StatefulWidget {
+  const SignInPage({Key? key}) : super(key: key);
 
   @override
-  State<LoginPage> createState() => LoginPageState();
+  State<SignInPage> createState() => LoginPageState();
 }
 
-class LoginPageState extends State<LoginPage> {
+class LoginPageState extends State<SignInPage> {
   GlobalVar globalVar = GlobalVar.instance;
 
   @override
@@ -29,11 +31,13 @@ class LoginPageState extends State<LoginPage> {
     });
   }
 
-  String? errorMessage = '';
+  static String? errorMessage = '';
 
   final TextEditingController _controllerEmail = TextEditingController();
   final TextEditingController _controllerPassword = TextEditingController();
   final TextEditingController _controllerUsername = TextEditingController();
+
+  //Cek connection first:
 
   Future<void> signInWithEmailAndPassword() async {
     try {
@@ -70,20 +74,37 @@ class LoginPageState extends State<LoginPage> {
       // }
 
       bool loginSuccess = await AuthMongodb.findUserDataMongodb(
-          _controllerEmail.text, _controllerPassword.text);
+        _controllerEmail.text,
+        _controllerPassword.text,
+      );
 
-      // Cek apakahdata berhasil ditemukan
+      // Cek apakah data berhasil ditemukan
       if (!loginSuccess) {
         // Jika gagal login, set pesan error
         setState(() {
-          errorMessage = 'Invalid email or password.';
+          errorMessage = 'Invalid Email or Password';
         });
         return;
       }
 
+
+
+      await QuestMongodb.fetchUserMarkedQuest();
+      // await QuestMongodb.fetchUserOnProgressQuest();
+      // await QuestMongodb.fetchUserCompletedQuest();
+
+
+
+
+
+
+
+
+
+
+
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setBool("hasLoggedInOnce", true);
-
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => MainPage()),
@@ -91,13 +112,9 @@ class LoginPageState extends State<LoginPage> {
       );
 
       // Jika berhasil login, kosongkan pesan error
-
-      setState(() {
-        errorMessage = '';
-      });
     } catch (e) {
       setState(() {
-        errorMessage = 'Terjadi kesalahan: $e';
+        errorMessage = 'Failed connecting to server, check internet connection';
       });
       if (kDebugMode) {
         print('Error during sign in: $e');
@@ -217,9 +234,6 @@ class LoginPageState extends State<LoginPage> {
   }
 
   Widget _submitButton() {
-    if (kDebugMode) {
-      print('sub button: ${globalVar.isLogin}');
-    }
     return Align(
       alignment: Alignment.center,
       child: Padding(
