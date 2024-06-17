@@ -36,7 +36,7 @@ class QuestMongodb {
   "maxRangers": "10"
 } */
 
-  static Future<void> fetchQuestDataHomePage() async {
+  static Future<bool> fetchQuestDataHomePage() async {
     final mongoConnection = MongoConnection();
 
     try {
@@ -44,7 +44,7 @@ class QuestMongodb {
 
       if (!isConnected) {
         print('Failed to connect to MongoDB.');
-        return;
+        return false;
       }
 
       var questCollection =
@@ -97,8 +97,11 @@ class QuestMongodb {
         // Save quest summaries to GlobalVar
         GlobalVar.instance.homePageQuestFeed = questFeedSummaryList;
       }
+      //true walau kosong
+      return true;
     } catch (e) {
       print('Error during fetching quests: $e');
+      return false;
     } finally {
       await mongoConnection.closeConnection();
     }

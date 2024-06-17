@@ -97,7 +97,7 @@ class UserQuestMongodb {
   //   }
   // }
 
-  static Future<void> fetchUserMarkedQuest() async {
+  static Future<bool> fetchUserMarkedQuest() async {
     final mongoConnection = MongoConnection();
 
     try {
@@ -105,7 +105,7 @@ class UserQuestMongodb {
 
       if (!isConnected) {
         print('Failed to connect to MongoDB.');
-        return;
+        return false;
       }
 
       // Get updated user data including marked quest ids
@@ -118,7 +118,7 @@ class UserQuestMongodb {
 
       if (updatedUserData == null) {
         print('User data not found or updated.');
-        return;
+        return false;
       }
 
       var markedQuestIds = updatedUserData['quest']['marked'] as List<dynamic>;
@@ -126,7 +126,7 @@ class UserQuestMongodb {
       if (markedQuestIds == null || markedQuestIds.isEmpty) {
         print('No marked quests found for the user.');
         GlobalVar.instance.userMarkedQuest = []; // Clear existing data
-        return;
+        return true;
       }
 
       var questCollection =
@@ -179,8 +179,10 @@ class UserQuestMongodb {
         // Print for verification (optional)
         print("Marked Quests found: $markedQuestSummaries");
       }
+      return true;
     } catch (e) {
       print('Error during fetching marked quests: $e');
+      return false;
     } finally {
       await mongoConnection.closeConnection();
     }

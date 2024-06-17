@@ -17,8 +17,7 @@ class AvailableQuestList extends StatefulWidget {
 
 class _AvailableQuestListState extends State<AvailableQuestList> {
   late final PagingController<int, QuestFeedSummary> _pagingController;
-  bool _isLoading = false; 
-
+  bool _isLoading = false;
 
   final List<Color> questColors = [
     GlobalVar.secondaryColorGreen,
@@ -35,23 +34,33 @@ class _AvailableQuestListState extends State<AvailableQuestList> {
     });
   }
 
- Future<void> _fetchPage(int pageKey) async {
+  Future<void> _fetchPage(int pageKey) async {
     try {
-      await QuestMongodb.fetchQuestDataHomePage();
+      bool isSuccess = await QuestMongodb.fetchQuestDataHomePage();
+
+      if (!isSuccess) {
+        _pagingController.error = "Failed to fetch quest data";
+        return;
+      }
 
       // Fetch feed quests from GlobalVar
       final allItems = GlobalVar.instance.homePageQuestFeed ?? [];
-      final newItems = allItems.skip(pageKey * 10).take(10).toList();
+      final reversedItems = List.from(allItems.reversed); // Reverse the array
+
+      final newItems = reversedItems.skip(pageKey * 10).take(10).toList();
       final isLastPage = newItems.length < 10 ||
-          pageKey * 10 + newItems.length >= allItems.length;
+          pageKey * 10 + newItems.length >= reversedItems.length;
+
       if (isLastPage) {
-        _pagingController.appendLastPage(newItems);
+        _pagingController.appendLastPage(newItems.cast<QuestFeedSummary>());
       } else {
         final nextPageKey = pageKey + 1;
-        _pagingController.appendPage(newItems, nextPageKey);
+        _pagingController.appendPage(
+            newItems.cast<QuestFeedSummary>(), nextPageKey);
       }
     } catch (error) {
-      _pagingController.error = error;
+      _pagingController.error =
+          error.toString(); // Set error to string representation of error
     }
   }
 
@@ -101,7 +110,6 @@ class _AvailableQuestListState extends State<AvailableQuestList> {
               ),
             ),
           ),
-          
         ],
       ),
     );
@@ -143,8 +151,6 @@ class QuestListItem extends StatelessWidget {
           'contact': quest.questOwnerPhone,
           'rangers': quest.rangers
         };
-
-       
       },
       child: Card(
         margin: EdgeInsets.all(8),
@@ -209,7 +215,8 @@ class QuestListItem extends StatelessWidget {
                             color: GlobalVar.mainColor,
                             borderRadius: BorderRadius.circular(20),
                           ),
-                          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           margin: EdgeInsets.only(right: 8),
                           child: Text(
                             'Lvl ${quest.levelRequirements}',
@@ -225,7 +232,8 @@ class QuestListItem extends StatelessWidget {
                             color: GlobalVar.mainColor,
                             borderRadius: BorderRadius.circular(20),
                           ),
-                          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           margin: EdgeInsets.only(right: 8),
                           child: Text(
                             '${quest.duration} days',
@@ -241,7 +249,8 @@ class QuestListItem extends StatelessWidget {
                             color: GlobalVar.mainColor,
                             borderRadius: BorderRadius.circular(20),
                           ),
-                          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           child: Text(
                             '${quest.maxRangers} Peoples',
                             style: TextStyle(
@@ -269,6 +278,7 @@ class QuestListItem extends StatelessWidget {
     );
   }
 }
+
 class QuestFeedSummary {
   final String questName;
   final String instance;
@@ -286,7 +296,6 @@ class QuestFeedSummary {
   final String status;
   final String questOwnerPhone;
 
-
   QuestFeedSummary({
     required this.questName,
     required this.instance,
@@ -303,7 +312,5 @@ class QuestFeedSummary {
     required this.categories,
     required this.status,
     required this.questOwnerPhone,
-   
   });
-
 }

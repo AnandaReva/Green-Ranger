@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:flutter/material.dart';
 import 'package:green_ranger/globalVar.dart';
 import 'package:green_ranger/mongoDB/userQuestMongodb.dart';
@@ -30,16 +32,22 @@ class _UserMarkedQuestListState extends State<UserMarkedQuestList> {
     });
   }
 
- 
   Future<void> _fetchMarkedQuests(int pageKey) async {
     try {
       // Fetch marked quests from MongoDB or any other source
-      await UserQuestMongodb.fetchUserMarkedQuest();
+      bool isSuccess = await UserQuestMongodb.fetchUserMarkedQuest();
+
+      if (!isSuccess) {
+        _pagingController.error = "Failed to fetch quest data";
+        return;
+      }
 
       final allItems = GlobalVar.instance.userMarkedQuest ?? [];
-      final newItems = allItems.skip(pageKey * 10).take(10).toList();
+      final reversedItems = List.from(allItems.reversed); // Reverse the array
+
+      final newItems = reversedItems.skip(pageKey * 10).take(10).toList();
       final isLastPage = newItems.length < 10 ||
-          pageKey * 10 + newItems.length >= allItems.length;
+          pageKey * 10 + newItems.length >= reversedItems.length;
 
       // Clear existing data if it's the first page
       if (pageKey == 0) {
@@ -48,20 +56,22 @@ class _UserMarkedQuestListState extends State<UserMarkedQuestList> {
 
       // Append data to _pagingController
       if (isLastPage) {
-        _pagingController.appendLastPage(newItems);
+        _pagingController.appendLastPage(newItems.cast<MarkedQuestSummary>());
       } else {
         final nextPageKey = pageKey + 1;
-        _pagingController.appendPage(newItems, nextPageKey);
+        _pagingController.appendPage(
+            newItems.cast<MarkedQuestSummary>(), nextPageKey);
       }
     } catch (error) {
       print("Error fetching marked quests: $error");
-      _pagingController.error = error;
+      _pagingController.error =   error.toString();
     }
   }
 
   Future<void> _refreshList() async {
     _pagingController.refresh();
   }
+
   @override
   Widget build(BuildContext context) {
     return RefreshIndicator(
