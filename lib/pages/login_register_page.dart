@@ -7,6 +7,7 @@ import 'package:green_ranger/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:green_ranger/mongoDB/authMongodb.dart';
+import 'package:green_ranger/mongoDB/questMongodb.dart';
 import 'package:green_ranger/mongoDB/userQuestMongodb.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
@@ -98,7 +99,7 @@ class LoginPageState extends State<SignInPage> {
       }
       // fetch feed quest content
       // await QuestMongodb.fetchQuestDataHomePage();
-      await UserQuestMongodb.fetchUserMarkedQuest();
+      // await UserQuestMongodb.fetchUserMarkedQuest();
       // await QuestMongodb.fetchUserOnProgressQuest();
       // await QuestMongodb.fetchUserCompletedQuest();
 

@@ -56,7 +56,7 @@ class QuestMongodb {
       var quests = await questCollection.find(questQuery).toList();
 
       if (quests.isNotEmpty) {
-        print('Quests found: $quests');
+        print('Feed Quests found: $quests');
 
         var userCollection =
             mongoConnection.db.collection(MongoConnection.USER_COLLECTION);

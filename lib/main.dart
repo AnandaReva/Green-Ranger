@@ -1,5 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:green_ranger/components/questDetailSlidePanel.dart';
 import 'package:green_ranger/pages/createQuestPage.dart';
@@ -63,20 +65,27 @@ class MyApp extends StatelessWidget {
 }
 
 class MainPage extends StatefulWidget {
-  const MainPage({super.key});
+  MainPage({Key? key}) : super(key: key);
+
+  static MainPageState of(BuildContext context) {
+    return context.findAncestorStateOfType<MainPageState>()!;
+  }
 
   @override
-  State<MainPage> createState() => _MainPageState();
+  State<MainPage> createState() => MainPageState();
 }
 
-class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
+class MainPageState extends State<MainPage> with TickerProviderStateMixin {
   late GlobalVar globalVar;
   late List<GlobalKey<NavigatorState>> navigatorKeys;
   late List<AnimationController> destinationFaders;
   late List<Widget> destinationViews;
 
   final SlidingUpPanelController panelController = SlidingUpPanelController();
+  final StreamController<VoidCallback?> onTapController =
+      StreamController<VoidCallback?>();
 
+  @override
   final List<Destination> allDestinations = [
     Destination(0, '', Icons.home, GlobalVar.baseColor),
     Destination(1, '', Icons.search, GlobalVar.baseColor),
@@ -88,7 +97,12 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    globalVar = Provider.of<GlobalVar>(context, listen: false);
+    globalVar = Provider.of<GlobalVar>(context as BuildContext, listen: false);
+
+    // Listen to onTapController and call the callbacks
+    onTapController.stream.listen((VoidCallback? onTap) {
+      onTap?.call(); // Call the onTap function received from QuestListItem
+    });
 
     navigatorKeys = List.generate(
       allDestinations.length,

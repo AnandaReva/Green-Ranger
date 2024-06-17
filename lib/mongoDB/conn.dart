@@ -11,6 +11,8 @@ class MongoConnection {
 
   late Db _db;
 
+  bool get isConnected => _db.isConnected;
+
   Future<bool> openConnection() async {
     try {
       _db = await Db.create(MONGO_CONN_URL);
@@ -24,6 +26,30 @@ class MongoConnection {
       var status = await _db.serverStatus();
       print('status: $status');
 
+      return true;
+    } catch (e) {
+      print('Error connecting to MongoDB: $e');
+      return false;
+    }
+  }
+
+  Db get db {
+    if (!isConnected) {
+      throw StateError("MongoDB connection has not been opened yet.");
+    }
+    return _db;
+  }
+
+  Future<void> closeConnection() async {
+    if (isConnected) {
+      await _db.close();
+      print('Connection closed.');
+    }
+  }
+}
+
+
+// dont delete
       // // Example: Find all documents in the 'users' collection
       // var usersCollection = _db.collection(USER_COLLECTION);
       // var allUsers = await usersCollection.find().toList();
@@ -33,25 +59,3 @@ class MongoConnection {
       // var questsCollection = _db.collection(QUEST_COLLECTION);
       // var allQuests = await questsCollection.find().toList();
       // print('All quests: $allQuests');
-
-      return true;
-    } catch (e) {
-      print('Error connecting to MongoDB: $e');
-      return false;
-    }
-  }
-
-  Db get db {
-    if (!_db.isConnected) {
-      throw StateError("MongoDB connection has not been opened yet.");
-    }
-    return _db;
-  }
-
-  Future<void> closeConnection() async {
-    if (_db.isConnected) {
-      await _db.close();
-      print('Connection closed.');
-    }
-  }
-}

@@ -1,7 +1,6 @@
-// ignore_for_file: prefer_const_constructors, use_super_parameters
-
 import 'package:flutter/material.dart';
 import 'package:green_ranger/globalVar.dart';
+import 'package:green_ranger/mongoDB/questMongodb.dart';
 import 'package:provider/provider.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:intl/intl.dart';
@@ -34,6 +33,8 @@ class _UserMarkedQuestListState extends State<UserMarkedQuestList> {
   Future<void> _fetchPage(int pageKey) async {
     try {
       // Fetch marked quests from GlobalVar
+      await QuestMongodb.fetchQuestDataHomePage();
+
       final allItems = GlobalVar.instance.userMarkedQuest ?? [];
       final newItems = allItems.skip(pageKey * 10).take(10).toList();
       final isLastPage = newItems.length < 10 ||
@@ -50,14 +51,24 @@ class _UserMarkedQuestListState extends State<UserMarkedQuestList> {
     }
   }
 
+  Future<void> _refreshList() async {
+    // Optionally, you could update the data here by calling an API or database.
+
+    _pagingController.refresh();
+    print('refresh user marked qusts');
+  }
+
   @override
   Widget build(BuildContext context) {
-    return PagedListView<int, MarkedQuestSummary>(
-      pagingController: _pagingController,
-      builderDelegate: PagedChildBuilderDelegate<MarkedQuestSummary>(
-        itemBuilder: (context, item, index) => QuestListItem(
-          quest: item,
-          colorPattern: questColors[index % questColors.length],
+    return RefreshIndicator(
+      onRefresh: _refreshList,
+      child: PagedListView<int, MarkedQuestSummary>(
+        pagingController: _pagingController,
+        builderDelegate: PagedChildBuilderDelegate<MarkedQuestSummary>(
+          itemBuilder: (context, item, index) => QuestListItem(
+            quest: item,
+            colorPattern: questColors[index % questColors.length],
+          ),
         ),
       ),
     );
@@ -164,7 +175,6 @@ class QuestListItem extends StatelessWidget {
                   ),
                   SizedBox(height: 10),
                   Row(
-                    //
                     children: [
                       Container(
                         decoration: BoxDecoration(

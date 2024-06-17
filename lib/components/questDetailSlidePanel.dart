@@ -8,21 +8,10 @@ import 'package:provider/provider.dart';
 
 class QuestDetailSlidePanel extends StatefulWidget {
   final SlidingUpPanelController panelController;
+  final GlobalVar globalVar;
 
   QuestDetailSlidePanel(
-      {required this.panelController, required GlobalVar globalVar});
-
-
-
-  /* 
-    void expandPanel() {
-
-    this.widget.panelController.expand();
-  }
-
-  void collapsePanel() {
-    this.widget.panelController.collapse();
-  }  */
+      {required this.panelController, required this.globalVar});
 
   @override
   QuestDetailSlidePanelState createState() => QuestDetailSlidePanelState();
@@ -40,7 +29,6 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
   @override
   void initState() {
     super.initState();
-    scrollController.addListener(_scrollListener);
     _animationController = AnimationController(
       vsync: this,
       duration: Duration(milliseconds: 300),
@@ -57,20 +45,6 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
     print('panel and animationController disposed');
   }
 
-  void _scrollListener() {
-    if (!isDisposed) {
-      if (scrollController.offset >=
-              scrollController.position.maxScrollExtent &&
-          !scrollController.position.outOfRange) {
-        widget.panelController.expand();
-      } else if (scrollController.offset <=
-              scrollController.position.minScrollExtent &&
-          !scrollController.position.outOfRange) {
-        widget.panelController.anchor();
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Consumer<GlobalVar>(
@@ -78,10 +52,11 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
         Map<String, dynamic> questData = globalVar.questDataSelected ?? {};
 
         return SlidingUpPanelWidget(
+          panelController: widget.panelController, // Add this line
           child: Container(
             width: double.infinity,
 
-            margin: EdgeInsets.only(top: 10.0),
+            // margin: EdgeInsets.only(top: 10.0),
             // margin: EdgeInsets.only(top: questData != null ? 50.0 : 20.0),
             decoration: ShapeDecoration(
               color: Color.fromRGBO(50, 51, 50, 1),
@@ -96,7 +71,10 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Container(
-                  child: Row(
+                  child: 
+                  
+                  Row(
+                    
                     children: <Widget>[
                       Icon(
                         Icons.arrow_drop_down,
@@ -104,8 +82,10 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
                         color: GlobalVar.baseColor,
                       ),
                       SizedBox(width: 8.0),
+                    
                       Text(
-                        'See Quest Detail',
+                        'Close',
+                        // textAlign: TextAlign.end,
                         style: TextStyle(
                           color: GlobalVar.baseColor,
                         ),
@@ -548,22 +528,7 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
               mainAxisSize: MainAxisSize.min,
             ),
           ),
-          controlHeight: 50.0,
-          anchor: 0.4,
-          minimumBound: minBound,
-          upperBound: upperBound,
-          panelController: widget.panelController,
-          onTap: () {
-            if (!isDisposed) {
-              if (widget.panelController.status ==
-                  SlidingUpPanelStatus.expanded) {
-                widget.panelController.collapse();
-              } else {
-                widget.panelController.expand();
-              }
-            }
-          },
-          enableOnTap: true,
+          controlHeight: 0,
         );
       },
     );

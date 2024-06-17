@@ -11,14 +11,10 @@ class QuestDetailSlidePanel extends StatefulWidget {
 
   QuestDetailSlidePanel(
       {required this.panelController, required GlobalVar globalVar});
-/* 
-  void expandPanel() {
-    panelController.expand();
-  }
 
-  void collapsePanel() {
-    panelController.collapse();
-  } */ /* 
+
+
+  /* 
     void expandPanel() {
 
     this.widget.panelController.expand();
@@ -84,7 +80,9 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
         return SlidingUpPanelWidget(
           child: Container(
             width: double.infinity,
+
             margin: EdgeInsets.only(top: 10.0),
+            // margin: EdgeInsets.only(top: questData != null ? 50.0 : 20.0),
             decoration: ShapeDecoration(
               color: Color.fromRGBO(50, 51, 50, 1),
               shape: RoundedRectangleBorder(
@@ -146,7 +144,7 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
                                 ),
                                 SizedBox(height: 20),
                                 Text(
-                                  'Pick a Quest First on the Home Page',
+                                  'Pick a Quest First to See Detail',
                                   style: TextStyle(
                                     color: GlobalVar.secondaryColorGreen,
                                     fontSize: 18,
@@ -507,7 +505,7 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
                                   ),
                                   SizedBox(height: 5),
                                   Text(
-                                    questData['address'] ?? 'No data',
+                                    questData['contact'] ?? 'No data',
                                     style: TextStyle(
                                       color: GlobalVar.baseColor,
                                       fontWeight: FontWeight.w500,
