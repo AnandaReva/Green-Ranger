@@ -7,9 +7,7 @@ import 'package:green_ranger/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:green_ranger/mongoDB/authMongodb.dart';
-import 'package:green_ranger/mongoDB/questMongodb.dart';
 import 'package:green_ranger/mongoDB/userQuestMongodb.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -39,6 +37,7 @@ class LoginPageState extends State<SignInPage> {
   final TextEditingController _controllerEmail = TextEditingController();
   final TextEditingController _controllerPassword = TextEditingController();
   final TextEditingController _controllerUsername = TextEditingController();
+  final TextEditingController _controllerPhone = TextEditingController();
 
   //Cek connection first:
 
@@ -131,33 +130,99 @@ class LoginPageState extends State<SignInPage> {
     }
   }
 
-  Future<void> createUserWithEmailAndPassword() async {
+  Future<void> signUpUserWithEmailAndPassword() async {
     try {
       if (_controllerEmail.text.isEmpty ||
           _controllerPassword.text.isEmpty ||
-          _controllerUsername.text.isEmpty) {
+          _controllerUsername.text.isEmpty ||
+          _controllerPhone.text.isEmpty) {
         setState(() {
-          errorMessage = 'Kolom data tidak boleh kosong';
+          errorMessage = 'Please fill the form';
         });
         return;
       }
 
-      // Dummy validation
-      if (_controllerEmail.text.contains('@') &&
-          _controllerPassword.text.length >= 8) {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => MainPage()),
-          (route) => false,
-        );
-      } else {
+      if (_controllerUsername.text.length < 2) {
         setState(() {
-          errorMessage = 'Email atau password tidak valid';
+          errorMessage = 'Username must be at least 2 characters long';
         });
+        return;
       }
+
+      // Validasi format email
+      bool isValidEmail(String email) {
+        // Validasi format email menggunakan regex
+        String emailPattern = r'^[\w-\.]+@[a-zA-Z]+\.[a-zA-Z]{2,4}$';
+        RegExp regex = RegExp(emailPattern);
+        return regex.hasMatch(email);
+      }
+
+      if (!isValidEmail(_controllerEmail.text.trim())) {
+        setState(() {
+          errorMessage = 'Please enter a valid email address';
+        });
+        return;
+      }
+
+      // Validasi minimal karakter password
+      if (_controllerPassword.text.length < 8) {
+        setState(() {
+          errorMessage = 'Password must be at least 8 characters long';
+        });
+        return;
+      }
+
+      if (_controllerPhone.text.length < 10) {
+        setState(() {
+          errorMessage = 'Please Enter Valid Phone Number';
+        });
+        return;
+      }
+
+      setState(() {
+        globalVar.isLoading = true;
+      });
+
+      bool registerSuccess = await AuthMongodb.createUserDataMongodb(
+        _controllerEmail.text,
+        _controllerPassword.text,
+        _controllerUsername.text,
+        _controllerPhone.text,
+      );
+
+      if (!registerSuccess) {
+        // Jika gagal register, set pesan error
+        setState(() {
+          globalVar.isLoading = false;
+        });
+
+        setState(() {
+          errorMessage = 'Error registering account Please try Again';
+        });
+        return;
+      }
+
+      // fetch feed quest content
+      // await QuestMongodb.fetchQuestDataHomePage();
+      await UserQuestMongodb.fetchUserMarkedQuest();
+      // await QuestMongodb.fetchUserOnProgressQuest();
+      // await QuestMongodb.fetchUserCompletedQuest();
+
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setBool("hasLoggedInOnce", true);
+
+      setState(() {
+        globalVar.isLoading = false;
+      });
+
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => MainPage()),
+        (route) => false,
+      );
     } catch (e) {
       setState(() {
-        errorMessage = 'Terjadi kesalahan: $e';
+        errorMessage = 'Error registering account: $e';
       });
       if (kDebugMode) {
         print('Error during account creation: $e');
@@ -167,25 +232,47 @@ class LoginPageState extends State<SignInPage> {
 
   Widget _entryField(String labelText, TextEditingController controller) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 25),
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 10),
-        decoration: BoxDecoration(
-            color: Colors.grey[200],
-            border: Border.all(
-              color: GlobalVar.baseColor,
-            ),
-            borderRadius: BorderRadius.circular(50)),
-        child: Padding(
-          padding: EdgeInsets.only(left: 20),
-          child: TextField(
-            controller: controller,
-            decoration: InputDecoration(
-              border: InputBorder.none,
-              labelText: labelText,
-            ),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              if (controller == _controllerEmail)
+                Icon(
+                  Icons.email,
+                  size: 25,
+                  color: GlobalVar.baseColor,
+                ),
+              if (controller == _controllerPassword)
+                Icon(
+                  Icons.lock_sharp,
+                  size: 25,
+                  color: GlobalVar.baseColor,
+                ),
+              SizedBox(width: 20),
+              Expanded(
+                child: TextField(
+                  style: TextStyle(
+                    color: GlobalVar.baseColor,
+                  ),
+                  controller: controller,
+                  decoration: InputDecoration(
+                    labelText: labelText,
+                    labelStyle: TextStyle(
+                      color: GlobalVar.baseColor,
+                      fontSize: 14,
+                    ),
+                    border: InputBorder.none,
+                  ),
+                ),
+              ),
+            ],
           ),
-        ),
+          Divider(
+            thickness: 1.0,
+            color: GlobalVar.baseColor,
+          ),
+        ],
       ),
     );
   }
@@ -193,32 +280,100 @@ class LoginPageState extends State<SignInPage> {
   Widget _entryFieldUsername(
       String labelText, TextEditingController controller) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 25),
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 10),
-        decoration: BoxDecoration(
-          color: GlobalVar.baseColor,
-          border: Border.all(
-            color: Colors.white,
-          ),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Padding(
-          padding: EdgeInsets.only(left: 20),
-          child: TextField(
-            keyboardType: TextInputType.text,
-            inputFormatters: [
-              FilteringTextInputFormatter.allow(
-                  RegExp(r'^[a-zA-Z0-9 ]*$')), // Allow only letters and numbers
-              LengthLimitingTextInputFormatter(25),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        // Use Column to stack widgets vertically
+        children: [
+          Row(
+            // Use Row for horizontal layout like _entryField
+            children: [
+              Icon(
+                Icons.person,
+                size: 25,
+                color: GlobalVar.baseColor,
+              ),
+              SizedBox(width: 20),
+              Expanded(
+                child: TextField(
+                  style: TextStyle(
+                    color: GlobalVar.baseColor,
+                  ),
+                  controller: controller,
+                  keyboardType: TextInputType.text,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(
+                        RegExp(r'^[a-zA-Z0-9 ]*$')),
+                    LengthLimitingTextInputFormatter(25),
+                  ],
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    labelText: labelText,
+                    labelStyle: TextStyle(
+                      color: GlobalVar.baseColor,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ),
             ],
-            controller: controller,
-            decoration: InputDecoration(
-              border: InputBorder.none,
-              labelText: labelText,
-            ),
           ),
-        ),
+          Divider(
+            // Add divider below the Row
+            thickness: 1.0,
+            color: GlobalVar.baseColor,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _entryFieldPhone(String labelText, TextEditingController controller) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.phone,
+                size: 25,
+                color: GlobalVar.baseColor,
+              ),
+              SizedBox(width: 20),
+              Expanded(
+                child: TextField(
+                  style: TextStyle(
+                    color: GlobalVar.baseColor,
+                  ),
+                  controller: controller,
+                  keyboardType:
+                      TextInputType.number, // Set keyboard type for numbers
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly, // Allow only digits
+                    // Phone number formatting (Indonesia specific)
+                    LengthLimitingTextInputFormatter(
+                        15), // Maximum length (including + and spaces)
+                    FilteringTextInputFormatter.allow(
+                      RegExp(r'^[+]*[0-9 ]*$'), // Allow +, digits, and spaces
+                    ),
+                  ],
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    labelText: labelText + " (exp: 0812345678910)",
+                    labelStyle: TextStyle(
+                      color: GlobalVar.baseColor,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Divider(
+            thickness: 1.0,
+            color: GlobalVar.baseColor,
+          ),
+        ],
       ),
     );
   }
@@ -232,6 +387,7 @@ class LoginPageState extends State<SignInPage> {
           child: Center(
             child: Text(
               errorMessage!,
+              textAlign: TextAlign.center,
               style: const TextStyle(
                 color: Colors.red,
                 fontFamily: 'Poppins-Bold',
@@ -250,22 +406,19 @@ class LoginPageState extends State<SignInPage> {
         child: GestureDetector(
           onTap: loginForm
               ? signInWithEmailAndPassword
-              : createUserWithEmailAndPassword,
+              : signUpUserWithEmailAndPassword,
           child: Container(
-            padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Color.fromARGB(255, 37, 150, 190),
-              borderRadius: BorderRadius.circular(12),
+              color: GlobalVar.secondaryColorGreen,
             ),
-            width: 170,
-            height: 75,
+            height: 35,
             child: Center(
               child: Text(
-                loginForm ? 'Next >>' : 'Buat Akun',
+                loginForm ? 'Sign In' : 'Sign Up',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: GlobalVar.mainColor,
                   fontWeight: FontWeight.normal,
-                  fontSize: 24,
+                  fontSize: 14,
                 ),
               ),
             ),
@@ -276,44 +429,41 @@ class LoginPageState extends State<SignInPage> {
   }
 
   Widget _loginRegisterButton() {
-    return Padding(
-      padding: const EdgeInsets.all(20),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          GestureDetector(
-            child: TextButton(
-              onPressed: () {
-                setState(() {
-                  loginForm =
-                      !loginForm; // Toggle antara mode login dan registrasi
-                });
-              },
-              child: RichText(
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text:
-                          loginForm ? 'Pengguna Baru? ' : 'Sudah punya Akun? ',
-                      style: TextStyle(
-                        color: Colors.black, // Warna teks untuk bagian pertama
-                      ),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        GestureDetector(
+          child: TextButton(
+            onPressed: () {
+              setState(() {
+                loginForm =
+                    !loginForm; // Toggle antara mode login dan registrasi
+              });
+            },
+            child: RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: loginForm ? 'Sign Up? ' : 'Already have an account? ',
+                    style: TextStyle(
+                      color: GlobalVar
+                          .baseColor, // Warna teks untuk bagian pertama
                     ),
-                    TextSpan(
-                      text: loginForm ? 'Buat Akun' : 'Masuk',
-                      style: TextStyle(
-                        color: Colors.blue, // Warna teks untuk bagian kedua
-                        fontWeight:
-                            FontWeight.bold, // Atur gaya teks menjadi tebal
-                      ),
+                  ),
+                  TextSpan(
+                    text: loginForm ? 'Register' : 'Sign In',
+                    style: TextStyle(
+                      color: Colors.blue, // Warna teks untuk bagian kedua
+                      fontWeight:
+                          FontWeight.bold, // Atur gaya teks menjadi tebal
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -335,79 +485,82 @@ class LoginPageState extends State<SignInPage> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Center(
-                                  child: Image.asset(
-                                "assets/images/logo.png",
-                              )),
-                              Padding(
-                                  padding: const EdgeInsets.all(25),
-                                  child: Center(
-                                    child: Text(
-                                      loginForm ? 'Masuk' : 'Daftar',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 30,
+                              loginForm
+                                  ? Center(
+                                      child: Column(
+                                        children: [
+                                          Image.asset(
+                                            'assets/images/logo.png',
+                                            height: 150,
+                                          ),
+                                          SizedBox(height: 30),
+                                          Text(
+                                            "Welcome to Green Ranger \n Please Sign In or Register New Account",
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                              color: GlobalVar.baseColor,
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 17,
+                                            ),
+                                          ),
+                                          SizedBox(height: 40),
+                                        ],
                                       ),
-                                    ),
-                                  )),
+                                    )
+                                  : Padding(
+                                      padding: const EdgeInsets.all(25),
+                                      child: Center(
+                                        child: Text(
+                                          loginForm ? 'Masuk' : 'Daftar',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 30,
+                                          ),
+                                        ),
+                                      )),
                               if (!loginForm) ...[
                                 Padding(
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 25),
-                                  child: Text(
-                                    "Username",
-                                    style: TextStyle(
-                                      color: GlobalVar.baseColor,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 17,
+                                  child: Center(
+                                    child: Text(
+                                      "Create Account",
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color: GlobalVar.baseColor,
+                                        fontWeight: FontWeight.w400,
+                                        fontSize: 30,
+                                      ),
                                     ),
                                   ),
+                                ),
+                                SizedBox(
+                                  height: 20,
                                 ),
                                 _entryFieldUsername(
                                     'Username', _controllerUsername),
                                 const SizedBox(height: 10),
                               ],
                               Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 25),
-                                child: Text(
-                                  "Email",
-                                  style: TextStyle(
-                                    color: GlobalVar.baseColor,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 17,
-                                  ),
-                                ),
-                              ),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 25)),
                               _entryField('Email', _controllerEmail),
                               const SizedBox(height: 10),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 25),
-                                child: Text(
-                                  "Password",
-                                  style: TextStyle(
-                                    color: GlobalVar.baseColor,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 17,
-                                  ),
-                                ),
-                              ),
                               _entryField('Password', _controllerPassword),
-                              SizedBox(
-                                height: 10,
-                              ),
+                              SizedBox(height: 10),
+                              if (!loginForm) ...[
+                                _entryFieldPhone('Phone', _controllerPhone),
+                                const SizedBox(height: 10),
+                              ],
                               _errorMessage(),
-                              SizedBox(
-                                height: 10,
-                              ),
+                              SizedBox(height: 10),
                               _submitButton(),
                               Divider(
                                 height: 50,
                                 thickness: 1,
                                 indent: 30,
                                 endIndent: 30,
-                                color: Colors.black,
+                                color: GlobalVar.baseColor,
                               ),
                             ],
                           ),

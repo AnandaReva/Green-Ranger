@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:green_ranger/components/infiniteScrollPagination/UserMarkedQuestList%20.dart';
-import 'package:green_ranger/components/infiniteScrollPagination/feedQuestHomePage.dart';
+
 
 class GlobalVar extends ChangeNotifier {
   static final GlobalVar _instance = GlobalVar._internal();
@@ -9,6 +8,7 @@ class GlobalVar extends ChangeNotifier {
   static const secondaryColorGreen = Color.fromARGB(255, 211, 255, 30);
   static const secondaryColorPuple = Color.fromRGBO(144, 110, 218, 1);
   static const secondaryColorPink = Color.fromRGBO(238, 51, 209, 1);
+  static const secondaryColorBlue = Color.fromARGB(255, 37, 150, 190);
   static const baseColor = Color.fromRGBO(240, 240, 240, 1.0);
 
   bool _isPanelOpened = false;

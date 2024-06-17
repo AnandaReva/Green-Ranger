@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:flutter/material.dart';
 import 'package:green_ranger/components/questDetailSlidePanel.dart';
 import 'package:green_ranger/pages/createQuestPage.dart';
@@ -33,7 +35,7 @@ String getInitialRoute(bool hasLoggedInOnce) {
 class MyApp extends StatelessWidget {
   final String initialRoute;
 
-  MyApp({required this.initialRoute});
+  const MyApp({super.key, required this.initialRoute});
 
   @override
   Widget build(BuildContext context) {
@@ -61,6 +63,8 @@ class MyApp extends StatelessWidget {
 }
 
 class MainPage extends StatefulWidget {
+  const MainPage({super.key});
+
   @override
   State<MainPage> createState() => _MainPageState();
 }
