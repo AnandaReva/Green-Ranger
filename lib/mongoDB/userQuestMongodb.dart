@@ -25,6 +25,78 @@ class UserQuestMongodb {
     "completed": []
   }
 } */
+  // static Future<void> fetchUserMarkedQuest() async {
+  //   final mongoConnection = MongoConnection();
+
+  //   try {
+  //     bool isConnected = await mongoConnection.openConnection();
+
+  //     if (!isConnected) {
+  //       print('Failed to connect to MongoDB.');
+  //       return;
+  //     }
+
+  //     var markedQuestIds =
+  //         GlobalVar.instance.userLoginData['quest']['marked'] as List<dynamic>;
+
+  //     if (markedQuestIds == null || markedQuestIds.isEmpty) {
+  //       print('No marked quest');
+  //       return;
+  //     }
+
+  //     var questCollection =
+  //         mongoConnection.db.collection(MongoConnection.QUEST_COLLECTION);
+
+  //     var questQuery = where.oneFrom(
+  //         '_id', markedQuestIds.map((id) => ObjectId.parse(id)).toList());
+
+  //     var markedQuests = await questCollection.find(questQuery).toList();
+
+  //     if (markedQuests != null && markedQuests.isNotEmpty) {
+  //       List<MarkedQuestSummary> markedQuestSummaries = [];
+
+  //       var userCollection =
+  //           mongoConnection.db.collection(MongoConnection.USER_COLLECTION);
+
+  //       for (var quest in markedQuests) {
+  //         var userId = quest['userId'] as String;
+  //         var userQuery = where.eq('_id', ObjectId.parse(userId));
+  //         var user = await userCollection.findOne(userQuery);
+
+  //         String questOwnerPhone = '';
+  //         if (user != null) {
+  //           questOwnerPhone = user['phone'];
+  //         }
+
+  //         markedQuestSummaries.add(MarkedQuestSummary(
+  //           questName: quest['questName'],
+  //           instance: quest['instance'],
+  //           duration: quest['duration'],
+  //           maxRangers: quest['maxRangers'],
+  //           levelRequirements: quest['levelRequirements'],
+  //           reward: quest['reward'],
+  //           description: quest['description'],
+  //           taskList: List<String>.from(quest['taskList'] ?? []),
+  //           address: quest['address'],
+  //           objectId: quest['_id'].toString(),
+  //           date: quest['date'],
+  //           categories: List<String>.from(quest['categories'] ?? []),
+  //           status: quest['status'],
+  //           questOwnerPhone: questOwnerPhone,
+  //         ));
+  //       }
+
+  //       // Update GlobalVar with the fetched data
+  //       GlobalVar.instance.userMarkedQuest = markedQuestSummaries;
+  //       print("Marked Quest Found ${GlobalVar.instance.userMarkedQuest}");
+  //     }
+  //   } catch (e) {
+  //     print('Error during fetching marked quests: $e');
+  //   } finally {
+  //     await mongoConnection.closeConnection();
+  //   }
+  // }
+
   static Future<void> fetchUserMarkedQuest() async {
     final mongoConnection = MongoConnection();
 
@@ -36,11 +108,24 @@ class UserQuestMongodb {
         return;
       }
 
-      var markedQuestIds = GlobalVar.instance.userLoginData['quest']['marked']
-          as List<dynamic>; // get user marked quest data
+      // Get updated user data including marked quest ids
+      var userCollection =
+          mongoConnection.db.collection(MongoConnection.USER_COLLECTION);
+      var query = where.eq('_id', GlobalVar.instance.userLoginData['_id']);
+      var updatedUserData = await userCollection.findOne(query);
+
+      GlobalVar.instance.userLoginData = updatedUserData;
+
+      if (updatedUserData == null) {
+        print('User data not found or updated.');
+        return;
+      }
+
+      var markedQuestIds = updatedUserData['quest']['marked'] as List<dynamic>;
 
       if (markedQuestIds == null || markedQuestIds.isEmpty) {
-        print('No marked quest');
+        print('No marked quests found for the user.');
+        GlobalVar.instance.userMarkedQuest = []; // Clear existing data
         return;
       }
 
@@ -54,8 +139,6 @@ class UserQuestMongodb {
       var markedQuests = await questCollection.find(questQuery).toList();
 
       if (markedQuests != null && markedQuests.isNotEmpty) {
-        print('Marked Quests found: $markedQuests');
-
         var userCollection =
             mongoConnection.db.collection(MongoConnection.USER_COLLECTION);
 
@@ -90,8 +173,11 @@ class UserQuestMongodb {
           ));
         }
 
-        // Save marked quest summaries to GlobalVar
+        // Update GlobalVar with the latest marked quests
         GlobalVar.instance.userMarkedQuest = markedQuestSummaries;
+
+        // Print for verification (optional)
+        print("Marked Quests found: $markedQuestSummaries");
       }
     } catch (e) {
       print('Error during fetching marked quests: $e');

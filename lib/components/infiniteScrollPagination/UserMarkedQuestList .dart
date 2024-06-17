@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:green_ranger/globalVar.dart';
-import 'package:green_ranger/mongoDB/questMongodb.dart';
 import 'package:green_ranger/mongoDB/userQuestMongodb.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
-import 'package:intl/intl.dart';
 
 class UserMarkedQuestList extends StatefulWidget {
   const UserMarkedQuestList({Key? key}) : super(key: key);
@@ -14,26 +13,27 @@ class UserMarkedQuestList extends StatefulWidget {
 }
 
 class _UserMarkedQuestListState extends State<UserMarkedQuestList> {
-  late final PagingController<int, MarkedQuestSummary> _pagingController;
-
   final List<Color> questColors = [
     GlobalVar.secondaryColorGreen,
     GlobalVar.secondaryColorPuple,
     GlobalVar.secondaryColorPink,
   ];
 
+  late PagingController<int, MarkedQuestSummary> _pagingController;
+
   @override
   void initState() {
     super.initState();
     _pagingController = PagingController(firstPageKey: 0);
     _pagingController.addPageRequestListener((pageKey) {
-      _fetchPage(pageKey);
+      _fetchMarkedQuests(pageKey);
     });
   }
 
-  Future<void> _fetchPage(int pageKey) async {
+ 
+  Future<void> _fetchMarkedQuests(int pageKey) async {
     try {
-      // Fetch marked quests from GlobalVar
+      // Fetch marked quests from MongoDB or any other source
       await UserQuestMongodb.fetchUserMarkedQuest();
 
       final allItems = GlobalVar.instance.userMarkedQuest ?? [];
@@ -41,6 +41,12 @@ class _UserMarkedQuestListState extends State<UserMarkedQuestList> {
       final isLastPage = newItems.length < 10 ||
           pageKey * 10 + newItems.length >= allItems.length;
 
+      // Clear existing data if it's the first page
+      if (pageKey == 0) {
+        _pagingController.itemList?.clear();
+      }
+
+      // Append data to _pagingController
       if (isLastPage) {
         _pagingController.appendLastPage(newItems);
       } else {
@@ -48,17 +54,14 @@ class _UserMarkedQuestListState extends State<UserMarkedQuestList> {
         _pagingController.appendPage(newItems, nextPageKey);
       }
     } catch (error) {
+      print("Error fetching marked quests: $error");
       _pagingController.error = error;
     }
   }
 
   Future<void> _refreshList() async {
-    // Optionally, you could update the data here by calling an API or database.
-
     _pagingController.refresh();
-    print('refresh user marked qusts');
   }
-
   @override
   Widget build(BuildContext context) {
     return RefreshIndicator(
@@ -66,10 +69,20 @@ class _UserMarkedQuestListState extends State<UserMarkedQuestList> {
       child: PagedListView<int, MarkedQuestSummary>(
         pagingController: _pagingController,
         builderDelegate: PagedChildBuilderDelegate<MarkedQuestSummary>(
-          itemBuilder: (context, item, index) => QuestListItem(
-            quest: item,
-            colorPattern: questColors[index % questColors.length],
-          ),
+          itemBuilder: (context, item, index) {
+            return QuestListItem(
+              quest: item,
+              colorPattern: questColors[index % questColors.length],
+            );
+          },
+          noItemsFoundIndicatorBuilder: (context) {
+            return Center(
+              child: Text(
+                'No marked quests found',
+                style: TextStyle(color: Colors.black54),
+              ),
+            );
+          },
         ),
       ),
     );
@@ -90,7 +103,7 @@ class QuestListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        // Mengakses dan mengupdate questDataSelected
+        // Handle tap event to update questDataSelected
         Provider.of<GlobalVar>(context, listen: false).questDataSelected = {
           'questName': quest.questName,
           'instance': quest.instance,
@@ -103,24 +116,8 @@ class QuestListItem extends StatelessWidget {
           'description': quest.description,
           'date': quest.date,
           'status': quest.status,
-          'contact': quest.questOwnerPhone
+          'contact': quest.questOwnerPhone,
         };
-
-        // Menampilkan notifikasi "Quest Selected" dengan nama quest dan warna yang dipilih
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Quest ${quest.questName} Selected',
-              style: TextStyle(
-                  color: GlobalVar
-                      .mainColor), // Menyesuaikan warna teks sesuai dengan warna card
-            ),
-
-            duration: Duration(seconds: 1), // Durasi notifikasi
-            backgroundColor: GlobalVar
-                .baseColor, // Mengubah warna latar belakang menjadi putih
-          ),
-        );
       },
       child: Card(
         margin: EdgeInsets.all(8),
@@ -131,25 +128,21 @@ class QuestListItem extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          quest.questName,
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: GlobalVar.mainColor,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Image.asset(
-                          "assets/images/timeIcon.png",
-                          width: 30,
-                        ),
-                      ],
+                    child: Text(
+                      quest.questName,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: GlobalVar.mainColor,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
+                  ),
+                  Image.asset(
+                    "assets/images/timeIcon.png",
+                    width: 30,
                   ),
                 ],
               ),
@@ -158,7 +151,6 @@ class QuestListItem extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 12,
                   color: GlobalVar.mainColor,
-                  fontWeight: FontWeight.w400,
                   fontStyle: FontStyle.italic,
                 ),
               ),
@@ -174,7 +166,6 @@ class QuestListItem extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(height: 10),
                   Row(
                     children: [
                       Container(

@@ -205,7 +205,7 @@ class LoginPageState extends State<SignInPage> {
 
       // fetch feed quest content
       // await QuestMongodb.fetchQuestDataHomePage();
-      await UserQuestMongodb.fetchUserMarkedQuest();
+      // await UserQuestMongodb.fetchUserMarkedQuest();
       // await QuestMongodb.fetchUserOnProgressQuest();
       // await QuestMongodb.fetchUserCompletedQuest();
 

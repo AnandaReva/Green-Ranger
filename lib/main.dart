@@ -28,7 +28,7 @@ Future<void> main() async {
 
 String getInitialRoute(bool hasLoggedInOnce) {
   if (hasLoggedInOnce) {
-    return 'loginPage';
+    return 'AuthPage';
   } else {
     return 'onboardScreen';
   }
@@ -52,7 +52,7 @@ class MyApp extends StatelessWidget {
               'onboardScreen': (context) => OnBoardingScreen(
                     globalVar: globalVar,
                   ),
-              'loginPage': (context) => SignInPage(
+              'AuthPage': (context) => SignInPage(
                     globalVar: globalVar,
                   ),
               // Add other routes here as needed

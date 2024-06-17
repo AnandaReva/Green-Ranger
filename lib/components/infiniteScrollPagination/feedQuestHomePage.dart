@@ -17,8 +17,8 @@ class AvailableQuestList extends StatefulWidget {
 
 class _AvailableQuestListState extends State<AvailableQuestList> {
   late final PagingController<int, QuestFeedSummary> _pagingController;
-  bool _isLoading = false; // Variabel untuk mengecek status loading
-  int _counter = 0;
+  bool _isLoading = false; 
+
 
   final List<Color> questColors = [
     GlobalVar.secondaryColorGreen,
@@ -56,7 +56,6 @@ class _AvailableQuestListState extends State<AvailableQuestList> {
   }
 
   Future<void> _refreshData() async {
-    // Reset the paging controller and fetch the first page again
     _pagingController.refresh();
   }
 
