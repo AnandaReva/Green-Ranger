@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # green_ranger
 
 A new Flutter project.
@@ -14,3 +15,8 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+=======
+# Green-Ranger
+Tubes PBB
+Pakai Dummy data
+>>>>>>> 95dec5bb3237a76a0ba090b6cc9615302e0c4886
