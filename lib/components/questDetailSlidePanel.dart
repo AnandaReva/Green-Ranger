@@ -71,10 +71,7 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Container(
-                  child: 
-                  
-                  Row(
-                    
+                  child: Row(
                     children: <Widget>[
                       Icon(
                         Icons.arrow_drop_down,
@@ -82,7 +79,6 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
                         color: GlobalVar.baseColor,
                       ),
                       SizedBox(width: 8.0),
-                    
                       Text(
                         'Close',
                         // textAlign: TextAlign.end,
@@ -496,20 +492,49 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
                                   Center(
                                     child: ElevatedButton(
                                       onPressed: () {
-                                        print('Executed');
-                                        // Tambahkan logika fungsi onPressed di sini
+                                        var status =
+                                            questData['status'] ?? 'No data';
+                                        if (status == 'open') {
+                                          // Add logic for when status is 'open'
+                                        } else if (status == 'closed') {
+                                          print('closed');
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            SnackBar(
+                                              content: Text('Quest is closed.'),
+                                              duration: Duration(seconds: 2),
+                                            ),
+                                          );
+                                        }
+                                        // Add any additional logic here
                                       },
                                       style: ButtonStyle(
                                         backgroundColor:
-                                            MaterialStateProperty.all(
-                                                GlobalVar.secondaryColorGreen),
+                                            MaterialStateProperty.resolveWith(
+                                                (states) {
+                                          if (questData['status'] == 'open') {
+                                            return GlobalVar
+                                                .secondaryColorGreen;
+                                          } else if (questData['status'] ==
+                                              'closed') {
+                                            return Colors
+                                                .grey; // Adjust color for closed state
+                                          }
+                                          return GlobalVar
+                                              .secondaryColorGreen; // Default color
+                                        }),
                                       ),
                                       child: Padding(
                                         padding: const EdgeInsets.all(8.0),
                                         child: Text(
-                                          'Execute it!',
+                                          questData['status'] == 'closed'
+                                              ? 'Closed'
+                                              : 'Execute it!',
                                           style: TextStyle(
-                                            color: GlobalVar.mainColor,
+                                            color:
+                                                questData['status'] == 'closed'
+                                                    ? GlobalVar.baseColor
+                                                    : GlobalVar.mainColor,
                                             fontSize: 30,
                                             fontWeight: FontWeight.bold,
                                             fontStyle: FontStyle.italic,

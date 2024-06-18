@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:green_ranger/components/infiniteScrollPagination/feedQuestHomePage.dart';
 import 'package:green_ranger/mongoDB/conn.dart';
 import 'package:green_ranger/globalVar.dart';
@@ -93,7 +95,6 @@ class QuestMongodb {
           // Convert 'date' string to DateTime object
           DateTime date = DateTime.parse(quest['date']);
 
-       
           print('Check 3 (explicit string): ${questId.toHexString()}');
           // Check if current quest is bookmarked
           bool isBookmarked = markedQuests.contains(questId.toHexString());
@@ -225,4 +226,69 @@ class QuestMongodb {
   //     await mongoConnection.closeConnection();
   //   }
   // }
+
+  static Future<bool> createQuestMongodb({
+    required String questName,
+    required String instance,
+    required String address,
+    required String duration,
+    required String maxRangers,
+    required String reward,
+    required String description,
+    required String levelRequirements,
+    required List<String> tasks,
+    required List<String> selectedCategories,
+    required String questOwnerPhone,
+  }) async {
+    final mongoConnection = MongoConnection();
+
+    try {
+      bool isConnected = await mongoConnection.openConnection();
+
+      if (!isConnected) {
+        print('Failed to connect to MongoDB.');
+        return false;
+      }
+
+      print('Connected to MongoDB!');
+
+      var documentToInsert = {
+        'questName': questName,
+        'instance': instance,
+        'address': address,
+        'duration': duration,
+        'maxRangers':
+            maxRangers, // Pastikan maxRangers sesuai dengan variabel yang Anda gunakan
+        'reward': reward,
+        'description': description,
+        'levelRequirements': levelRequirements,
+        'taskList':
+            List<dynamic>.from(tasks), // Pastikan tasks adalah List<dynamic>
+        'categories': List<dynamic>.from(
+            selectedCategories), // Pastikan selectedCategories adalah List<dynamic>
+        'questOwnerPhone': questOwnerPhone,
+        'status': 'open', // Default status
+        'rangers': [], // Jika tidak ada ranger, biarkan kosong seperti ini
+        'userId': GlobalVar.instance.userLoginData['_id'] is ObjectId
+            ? GlobalVar.instance.userLoginData['_id'].toHexString()
+            : GlobalVar.instance.userLoginData['_id'],
+
+        'date': DateTime.now().toIso8601String(),
+      };
+
+      var collection =
+          mongoConnection.db.collection(MongoConnection.QUEST_COLLECTION);
+
+      // Insert the new quest document
+      await collection.insert(documentToInsert);
+
+      print('Quest created successfully');
+      return true;
+    } catch (e) {
+      print('Error during quest creation: $e');
+      return false;
+    } finally {
+      await mongoConnection.closeConnection();
+    }
+  }
 }

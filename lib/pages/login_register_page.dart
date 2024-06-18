@@ -80,6 +80,8 @@ class LoginPageState extends State<SignInPage> {
         globalVar.isLoading = true;
       });
 
+      print('chek login 1');
+
       bool loginSuccess = await AuthMongodb.findUserDataMongodb(
         _controllerEmail.text,
         _controllerPassword.text,

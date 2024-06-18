@@ -4,6 +4,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:green_ranger/components/questDetailSlidePanel.dart';
+import 'package:green_ranger/components/succesCreatingQuestConfirmation.dart';
 import 'package:green_ranger/pages/createQuestPage.dart';
 import 'package:green_ranger/pages/homePage.dart';
 import 'package:green_ranger/globalVar.dart';
@@ -127,7 +128,9 @@ class MainPageState extends State<MainPage> with TickerProviderStateMixin {
           case 2:
             return UserQuestPage();
           case 3:
-            return CreateQuest(globalVar: globalVar);
+            return CreateQuest(globalVar: globalVar,);
+        case 4:
+            return SuccessCreatingQuestConfirmation();
           default:
             return Container();
         }
@@ -190,6 +193,9 @@ class MainPageState extends State<MainPage> with TickerProviderStateMixin {
     });
     return controller;
   }
+}
+
+class SuccesCreatingQuestConfirmationScreen {
 }
 
 class Destination {
