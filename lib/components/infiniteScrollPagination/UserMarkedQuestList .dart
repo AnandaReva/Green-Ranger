@@ -1,7 +1,8 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, must_be_immutable
 
 import 'package:flutter/material.dart';
 import 'package:green_ranger/globalVar.dart';
+import 'package:green_ranger/main.dart';
 import 'package:green_ranger/mongoDB/userQuestMongodb.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -22,6 +23,7 @@ class _UserMarkedQuestListState extends State<UserMarkedQuestList> {
   ];
 
   late PagingController<int, MarkedQuestSummary> _pagingController;
+  Map<String, bool> bookmarkStatus = {}; // Map to store bookmark status
 
   @override
   void initState() {
@@ -45,27 +47,43 @@ class _UserMarkedQuestListState extends State<UserMarkedQuestList> {
       final allItems = GlobalVar.instance.userMarkedQuest ?? [];
       final reversedItems = List.from(allItems.reversed); // Reverse the array
 
-      final newItems = reversedItems.skip(pageKey * 10).take(10).toList();
-      final isLastPage = newItems.length < 10 ||
-          pageKey * 10 + newItems.length >= reversedItems.length;
-
       // Clear existing data if it's the first page
       if (pageKey == 0) {
         _pagingController.itemList?.clear();
       }
 
       // Append data to _pagingController
-      if (isLastPage) {
-        _pagingController.appendLastPage(newItems.cast<MarkedQuestSummary>());
-      } else {
-        final nextPageKey = pageKey + 1;
-        _pagingController.appendPage(
-            newItems.cast<MarkedQuestSummary>(), nextPageKey);
-      }
+      _pagingController
+          .appendLastPage(reversedItems.cast<MarkedQuestSummary>());
     } catch (error) {
       print("Error fetching marked quests: $error");
-      _pagingController.error =   error.toString();
+      _pagingController.error = error.toString();
     }
+  }
+
+  void _unBookmarkMarkedQuest(MarkedQuestSummary quest) async {
+    print('check 2 : $quest');
+    bool isSuccess = await UserQuestMongodb.unBookMarkQuest(quest.objectId);
+
+    if (!isSuccess) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to unbookmark quest'),
+          duration: Duration(seconds: 1), // Optional, specify the duration
+        ),
+      );
+      setState(() {
+        _pagingController.error = "Failed to unbookmark quest";
+      });
+      return;
+    }
+
+    // Update bookmark status in the map
+    setState(() {
+      bookmarkStatus[quest.objectId] = false;
+    });
+
+    _refreshList();
   }
 
   Future<void> _refreshList() async {
@@ -80,16 +98,19 @@ class _UserMarkedQuestListState extends State<UserMarkedQuestList> {
         pagingController: _pagingController,
         builderDelegate: PagedChildBuilderDelegate<MarkedQuestSummary>(
           itemBuilder: (context, item, index) {
+            bool isBookmarked = bookmarkStatus[item.objectId] ?? false;
             return QuestListItem(
               quest: item,
               colorPattern: questColors[index % questColors.length],
+              isBookmark: isBookmarked,
+              unBookmarkCallback: _unBookmarkMarkedQuest,
             );
           },
           noItemsFoundIndicatorBuilder: (context) {
             return Center(
               child: Text(
                 'No marked quests found',
-                style: TextStyle(color: Colors.black54),
+                style: TextStyle(color: GlobalVar.baseColor),
               ),
             );
           },
@@ -102,19 +123,30 @@ class _UserMarkedQuestListState extends State<UserMarkedQuestList> {
 class QuestListItem extends StatelessWidget {
   final MarkedQuestSummary quest;
   final Color colorPattern;
+  final bool isBookmark;
+  final Function(MarkedQuestSummary) unBookmarkCallback;
 
-  const QuestListItem({
+  QuestListItem({
     Key? key,
     required this.quest,
     required this.colorPattern,
+    required this.isBookmark,
+    required this.unBookmarkCallback,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
+        MainPageState mainPageState = MainPage.of(context);
+
+        mainPageState.onTapController.add(() {
+          mainPageState.panelController.expand();
+        });
+
         // Handle tap event to update questDataSelected
         Provider.of<GlobalVar>(context, listen: false).questDataSelected = {
+          'objectId': quest.objectId,
           'questName': quest.questName,
           'instance': quest.instance,
           'tasks': quest.taskList,
@@ -150,9 +182,18 @@ class QuestListItem extends StatelessWidget {
                       ),
                     ),
                   ),
-                  Image.asset(
-                    "assets/images/timeIcon.png",
-                    width: 30,
+                  IconButton(
+                    icon: Icon(
+                      isBookmark
+                          ? Icons.bookmark_add_outlined
+                          : Icons.bookmark_add,
+                      color: GlobalVar.mainColor,
+                    ),
+                    onPressed: () {
+                      unBookmarkCallback(quest);
+
+                      print('check 1 : $quest');
+                    },
                   ),
                 ],
               ),
@@ -184,12 +225,12 @@ class QuestListItem extends StatelessWidget {
                           borderRadius: BorderRadius.circular(20),
                         ),
                         padding:
-                            EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            EdgeInsets.symmetric(horizontal: 4, vertical: 4),
                         margin: EdgeInsets.only(right: 8),
                         child: Text(
                           'Lvl ${quest.levelRequirements}',
                           style: TextStyle(
-                            fontSize: 10,
+                            fontSize: 8,
                             color: colorPattern,
                             fontWeight: FontWeight.w400,
                           ),

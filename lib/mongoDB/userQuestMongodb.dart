@@ -1,3 +1,4 @@
+
 import 'package:green_ranger/components/infiniteScrollPagination/UserMarkedQuestList%20.dart';
 import 'package:green_ranger/mongoDB/conn.dart';
 import 'package:green_ranger/globalVar.dart';
@@ -188,61 +189,67 @@ class UserQuestMongodb {
     }
   }
 
-  static Future<void> fetchUserOnProgressQuest() async {
-    final mongoConnection = MongoConnection();
-
-    try {
-      bool isConnected = await mongoConnection.openConnection();
-
-      if (!isConnected) {
-        print('Failed to connect to MongoDB.');
-        return;
-      }
-
-      var onProgressQuestIds = GlobalVar.instance.userLoginData['quest']
-          ['onProgress'] as List<dynamic>; // get user OnProgress quest data
-
-      if (onProgressQuestIds == null || onProgressQuestIds.isEmpty) {
-        print('No OnProgress quest');
-        return;
-      }
-
-      var collection =
-          mongoConnection.db.collection(MongoConnection.QUEST_COLLECTION);
-
-      // Creating a query to fetch all quests with ids in onProgressQuestIds
-      var query = where.oneFrom(
-          '_id', onProgressQuestIds.map((id) => ObjectId.parse(id)).toList());
-
-      var onProgressQuests = await collection.find(query).toList();
-
-      if (onProgressQuests != null && onProgressQuests.isNotEmpty) {
-        print('OnProgress Quests found: $onProgressQuests');
-
-        // Save OnProgress quests to GlobalVar
-        GlobalVar.instance.userOnProgressQuest = onProgressQuests;
-
-        // Print OnProgress quests
-        onProgressQuests.forEach((quest) {
-          print('Quest ID: ${quest['_id']}');
-          print('Quest Name: ${quest['questName']}');
-          print('Instance: ${quest['instance']}');
-          print('Duration: ${quest['duration']}');
-          print('Total Rangers: ${quest['totalRangers']}');
-          print('Level Requirements: ${quest['levelRequirements']}');
-          print('Reward: ${quest['reward']}');
-          print('Description: ${quest['description']}');
-          print('Address: ${quest['address']}');
-          print('Date: ${quest['date']}');
-          print('Status: ${quest['status']}');
-        });
-      } else {
-        print('No onProgress quests found.');
-      }
-    } catch (e) {
-      print('Error during fetching onProgress quests: $e');
-    } finally {
-      await mongoConnection.closeConnection();
-    }
+  //Sample data
+/* {
+  "profile_image": "assets/images/logo.png",
+  "username": "admin",
+  "email": "admin@gmail.com",
+  "password": "admin123",
+  "exp": 2450,
+  "wallet_value": 750000,
+  "phone": "08123456789",
+  "quest": {
+    "marked": [
+      "666da54aa8d882ad0fa0dc39",
+      "666da54aa8d882ad0fa0dc3a"
+    ],
+    "onProgress": [
+      "507fdgfdg77bcf86cd799439011"
+    ],
+    "completed": []
   }
+}  */
+
+ static Future<bool> unBookMarkQuest(String questId) async {
+  final mongoConnection = MongoConnection();
+
+  try {
+    bool isConnected = await mongoConnection.openConnection();
+
+    if (!isConnected) {
+      print('Failed to connect to MongoDB.');
+      return false;
+    }
+
+    var userId = GlobalVar.instance.userMarkedQuest['_id'];
+
+    print('userId: $userId , questId: $questId');
+
+    var userMarkedQuestCollection =
+        mongoConnection.db.collection(MongoConnection.USER_COLLECTION);
+
+    var result = await userMarkedQuestCollection.updateOne(
+      where.eq('_id', userId),
+      modify.pull('quest.marked', questId),
+    );
+
+    print('Quest unbookmarked successfully. $result');
+
+    // Update user data with latest data from the database
+    var userCollection =
+        mongoConnection.db.collection(MongoConnection.USER_COLLECTION);
+    var query = where.eq('_id', GlobalVar.instance.userLoginData['_id']);
+    var updatedUserData = await userCollection.findOne(query);
+
+    GlobalVar.instance.userLoginData = updatedUserData;
+
+    return true;
+  } catch (e) {
+    print('Error while unbookmarking: $e');
+    return false;
+  } finally {
+    await mongoConnection.closeConnection();
+  }
+}
+
 }

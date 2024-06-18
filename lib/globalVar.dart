@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-
 class GlobalVar extends ChangeNotifier {
   static final GlobalVar _instance = GlobalVar._internal();
   static const mainColor = Color.fromARGB(255, 26, 27, 27);
@@ -12,8 +11,6 @@ class GlobalVar extends ChangeNotifier {
   static const baseColor = Color.fromRGBO(240, 240, 240, 1.0);
 
   bool _isPanelOpened = false;
-
-  var _userLoginData;
 
   Map<String, dynamic> _newQuestData = {
     'questName': '',
@@ -32,6 +29,7 @@ class GlobalVar extends ChangeNotifier {
   Map<String, dynamic> _questDataSelected = {};
 
 //levels: Mythrill, Legendary, Epic, Rookie (500, 1000, 1500, 2000)
+  var _userLoginData;
 
   var _homePageQuestFeed;
   var _userMarkedQuest;

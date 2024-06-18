@@ -24,7 +24,7 @@ class MongoConnection {
 
       // Get server status
       var status = await _db.serverStatus();
-      print('status: $status');
+      // print('status: $status');
 
       return true;
     } catch (e) {

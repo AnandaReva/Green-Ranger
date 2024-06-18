@@ -33,6 +33,36 @@ class _AvailableQuestListState extends State<AvailableQuestList> {
       _fetchPage(pageKey);
     });
   }
+  // dont delete !!!
+  // Future<void> _fetchPage(int pageKey) async {
+  //   try {
+  //     bool isSuccess = await QuestMongodb.fetchQuestDataHomePage();
+
+  //     if (!isSuccess) {
+  //       _pagingController.error = "Failed to fetch quest data";
+  //       return;
+  //     }
+
+  //     // Fetch feed quests from GlobalVar
+  //     final allItems = GlobalVar.instance.homePageQuestFeed ?? [];
+  //     final reversedItems = List.from(allItems.reversed); // Reverse the array
+
+  //     final newItems = reversedItems.skip(pageKey * 10).take(10).toList();
+  //     final isLastPage = newItems.length < 10 ||
+  //         pageKey * 10 + newItems.length >= reversedItems.length;
+
+  //     if (isLastPage) {
+  //       _pagingController.appendLastPage(newItems.cast<QuestFeedSummary>());
+  //     } else {
+  //       final nextPageKey = pageKey + 1;
+  //       _pagingController.appendPage(
+  //           newItems.cast<QuestFeedSummary>(), nextPageKey);
+  //     }
+  //   } catch (error) {
+  //     _pagingController.error =
+  //         error.toString(); // Set error to string representation of error
+  //   }
+  // }
 
   Future<void> _fetchPage(int pageKey) async {
     try {
@@ -47,17 +77,13 @@ class _AvailableQuestListState extends State<AvailableQuestList> {
       final allItems = GlobalVar.instance.homePageQuestFeed ?? [];
       final reversedItems = List.from(allItems.reversed); // Reverse the array
 
-      final newItems = reversedItems.skip(pageKey * 10).take(10).toList();
-      final isLastPage = newItems.length < 10 ||
-          pageKey * 10 + newItems.length >= reversedItems.length;
-
-      if (isLastPage) {
-        _pagingController.appendLastPage(newItems.cast<QuestFeedSummary>());
-      } else {
-        final nextPageKey = pageKey + 1;
-        _pagingController.appendPage(
-            newItems.cast<QuestFeedSummary>(), nextPageKey);
+      // Clear existing data if it's the first page
+      if (pageKey == 0) {
+        _pagingController.itemList?.clear();
       }
+
+      // Append data to _pagingController
+      _pagingController.appendLastPage(reversedItems.cast<QuestFeedSummary>());
     } catch (error) {
       _pagingController.error =
           error.toString(); // Set error to string representation of error
@@ -137,6 +163,7 @@ class QuestListItem extends StatelessWidget {
         });
 
         Provider.of<GlobalVar>(context, listen: false).questDataSelected = {
+          'objectId': quest.objectId,
           'questName': quest.questName,
           'instance': quest.instance,
           'tasks': quest.taskList,
@@ -149,7 +176,8 @@ class QuestListItem extends StatelessWidget {
           'date': quest.date,
           'status': quest.status,
           'contact': quest.questOwnerPhone,
-          'rangers': quest.rangers
+          'rangers': quest.rangers,
+          'isBookmarked': quest.isBookmarked
         };
       },
       child: Card(
@@ -175,16 +203,26 @@ class QuestListItem extends StatelessWidget {
                             ),
                           ),
                         ),
+                        // Container(
+                        //   child: quest.isBookmarked
+                        //       ? Image.asset(
+                        //           "timeIcon.png") // Jika onProgress true, tampilkan gambar
+                        //       : SizedBox(), // Jika onProgress false, jangan tampilkan apapun
+                        // ),
                         IconButton(
-                          icon: Icon(Icons.favorite_border),
-                          onPressed: () {
-                            // Add your like functionality here
-                          },
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.bookmark_border),
+                          icon: Icon(
+                            quest.isBookmarked
+                                ? Icons.bookmark_add // saat true
+                                : Icons.bookmark_outline, // saat false
+                            color: GlobalVar.mainColor,
+                          ),
                           onPressed: () {
                             // Add your bookmark functionality here
+                            if (quest.isBookmarked) {
+                              // Remove bookmark logic
+                            } else {
+                              // Add bookmark logic
+                            }
                           },
                         ),
                       ],
@@ -280,6 +318,7 @@ class QuestListItem extends StatelessWidget {
 }
 
 class QuestFeedSummary {
+  final String objectId;
   final String questName;
   final String instance;
   final String duration;
@@ -289,14 +328,15 @@ class QuestFeedSummary {
   final String description;
   final List<String> taskList;
   final String address;
-  final String objectId;
   final String date;
   final List<String> rangers;
   final List<String> categories;
   final String status;
   final String questOwnerPhone;
+  final bool isBookmarked;
 
   QuestFeedSummary({
+    required this.objectId,
     required this.questName,
     required this.instance,
     required this.duration,
@@ -306,11 +346,11 @@ class QuestFeedSummary {
     required this.description,
     required this.taskList,
     required this.address,
-    required this.objectId,
     required this.date,
     required this.rangers,
     required this.categories,
     required this.status,
     required this.questOwnerPhone,
+    required this.isBookmarked,
   });
 }
