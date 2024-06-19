@@ -3,13 +3,15 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:green_ranger/components/questDetailSlidePanel.dart';
-import 'package:green_ranger/components/succesCreatingQuestConfirmation.dart';
+import 'package:green_ranger/components/slidingPanel/questDetailSlidePanel.dart';
+import 'package:green_ranger/components/slidingPanel/questReportSlidePanel.dart';
+
 import 'package:green_ranger/pages/createQuestPage.dart';
 import 'package:green_ranger/pages/homePage.dart';
 import 'package:green_ranger/globalVar.dart';
 import 'package:green_ranger/onboarding/onboarding_screen.dart';
 import 'package:green_ranger/pages/login_register_page.dart';
+import 'package:green_ranger/pages/profile_pages.dart';
 import 'package:green_ranger/pages/searchPage.dart';
 import 'package:flutter_sliding_up_panel/sliding_up_panel_widget.dart';
 import 'package:green_ranger/pages/userQuestPage.dart';
@@ -20,8 +22,10 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final SharedPreferences prefs = await SharedPreferences.getInstance();
 
+//  await prefs.clear();
   bool hasLoggedInOnce = prefs.getBool("hasLoggedInOnce") ?? false;
 
+  await prefs.setBool("hasLoggedInOnce", true);
   print('Has Logged In Once: $hasLoggedInOnce');
 
   runApp(MyApp(initialRoute: getInitialRoute(hasLoggedInOnce)));
@@ -77,7 +81,7 @@ class MainPage extends StatefulWidget {
 }
 
 class MainPageState extends State<MainPage> with TickerProviderStateMixin {
-  late GlobalVar globalVar;
+  GlobalVar globalVar = GlobalVar.instance;
   late List<GlobalKey<NavigatorState>> navigatorKeys;
   late List<AnimationController> destinationFaders;
   late List<Widget> destinationViews;
@@ -128,9 +132,11 @@ class MainPageState extends State<MainPage> with TickerProviderStateMixin {
           case 2:
             return UserQuestPage();
           case 3:
-            return CreateQuest(globalVar: globalVar,);
-        case 4:
-            return SuccessCreatingQuestConfirmation();
+            return CreateQuest(
+              globalVar: globalVar,
+            );
+          case 4:
+            return ProfilePages();
           default:
             return Container();
         }
@@ -161,6 +167,9 @@ class MainPageState extends State<MainPage> with TickerProviderStateMixin {
           }).toList(),
           QuestDetailSlidePanel(
               panelController: panelController, globalVar: globalVar),
+          // buat coba
+          //  QuestReportSlidePanel(
+          //   panelController: panelController, globalVar: globalVar),
         ],
       ),
       bottomNavigationBar: NavigationBar(
@@ -195,8 +204,7 @@ class MainPageState extends State<MainPage> with TickerProviderStateMixin {
   }
 }
 
-class SuccesCreatingQuestConfirmationScreen {
-}
+class SuccesCreatingQuestConfirmationScreen {}
 
 class Destination {
   const Destination(this.index, this.title, this.icon, this.color);

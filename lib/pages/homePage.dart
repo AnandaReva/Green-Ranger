@@ -134,18 +134,151 @@ class HomePage extends StatelessWidget {
                             endIndent: 185,
                           ),
                           Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Image.asset(
-                                "assets/images/coinIcon.png",
-                                width: 30,
+                              Row(
+                                children: [
+                                  Image.asset(
+                                    "assets/images/coinIcon.png",
+                                    width: 30,
+                                  ),
+                                  Text(
+                                    'Rp. ${NumberFormat.currency(locale: 'id_ID', decimalDigits: 0, symbol: '').format(userData['wallet_value'] ?? 0)}',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: GlobalVar.baseColor,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              Text(
-                                'Rp. ${NumberFormat.currency(locale: 'id_ID', decimalDigits: 0, symbol: '').format(userData['wallet_value'] ?? 0)}',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: GlobalVar.baseColor,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                              Row(
+                                children: [
+                                  Row(
+                                    children: [
+                                      Row(
+                                        children: [
+                                          SizedBox(
+                                            width:
+                                                80, // Atur lebar tombol sesuai kebutuhan
+                                            height:
+                                                30, // Atur tinggi tombol sesuai kebutuhan
+                                            child: ElevatedButton(
+                                              onPressed: () {},
+                                              style: ButtonStyle(
+                                                backgroundColor:
+                                                    MaterialStateProperty.all(
+                                                  Color.fromRGBO(
+                                                      17, 82, 255, 1),
+                                                ),
+                                                shape:
+                                                    MaterialStateProperty.all(
+                                                  RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            0.0),
+                                                  ),
+                                                ),
+                                                padding:
+                                                    MaterialStateProperty.all(
+                                                  EdgeInsets.symmetric(
+                                                      horizontal: 8,
+                                                      vertical:
+                                                          8), // Padding lebih kecil
+                                                ),
+                                              ),
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  Image.asset(
+                                                    "assets/images/depositIcon.png",
+                                                    width:
+                                                        20, // Ukuran ikon lebih kecil
+                                                  ),
+                                                  SizedBox(
+                                                      width:
+                                                          4), // Jarak antara ikon dan teks
+                                                  Text(
+                                                    "Deposit",
+                                                    style: TextStyle(
+                                                      fontSize:
+                                                          10, // Ukuran font lebih kecil
+                                                      color:
+                                                          GlobalVar.baseColor,
+                                                      fontWeight:
+                                                          FontWeight.w400,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            width:
+                                                5, // Jarak antara tombol-tombol
+                                          ),
+                                          SizedBox(
+                                            width:
+                                                85, // Atur lebar tombol sesuai kebutuhan
+                                            height:
+                                                30, // Atur tinggi tombol sesuai kebutuhan
+                                            child: ElevatedButton(
+                                              onPressed: () {},
+                                              style: ButtonStyle(
+                                                backgroundColor:
+                                                    MaterialStateProperty.all(
+                                                  Color.fromRGBO(
+                                                      17, 82, 255, 1),
+                                                ),
+                                                shape:
+                                                    MaterialStateProperty.all(
+                                                  RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            0.0),
+                                                  ),
+                                                ),
+                                                padding:
+                                                    MaterialStateProperty.all(
+                                                  EdgeInsets.symmetric(
+                                                      horizontal: 8,
+                                                      vertical:
+                                                          8), // Padding lebih kecil
+                                                ),
+                                              ),
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  Image.asset(
+                                                    "assets/images/withdrawIcon.png",
+                                                    width:
+                                                        20, // Ukuran ikon lebih kecil
+                                                  ),
+                                                  SizedBox(
+                                                      width:
+                                                          4), // Jarak antara ikon dan teks
+                                                  Text(
+                                                    "Withdraw",
+                                                    style: TextStyle(
+                                                      fontSize:
+                                                          10, // Ukuran font lebih kecil
+                                                      color:
+                                                          GlobalVar.baseColor,
+                                                      fontWeight:
+                                                          FontWeight.w400,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  )
+                                ],
                               ),
                             ],
                           ),

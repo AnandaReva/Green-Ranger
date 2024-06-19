@@ -45,7 +45,7 @@ class IntroPage2 extends StatelessWidget {
                       height: 55,
                     ),
                     Image.asset(
-                      "assets/images/image.png",
+                      "assets/images/nahidaIcon.png",
                       width: 250, // adjust the width to your desired size
                       /* height:,  */ // adjust the height to your desired size
                     ),

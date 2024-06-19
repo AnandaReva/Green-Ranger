@@ -177,7 +177,9 @@ class QuestListItem extends StatelessWidget {
           'status': quest.status,
           'contact': quest.questOwnerPhone,
           'rangers': quest.rangers,
-          'isBookmarked': quest.isBookmarked
+          'isBookmarked': quest.isBookmarked,
+          'isOnProgress': quest.isOnProgress,
+          'isCompleted': quest.isCompleted
         };
       },
       child: Card(
@@ -203,12 +205,6 @@ class QuestListItem extends StatelessWidget {
                             ),
                           ),
                         ),
-                        // Container(
-                        //   child: quest.isBookmarked
-                        //       ? Image.asset(
-                        //           "timeIcon.png") // Jika onProgress true, tampilkan gambar
-                        //       : SizedBox(), // Jika onProgress false, jangan tampilkan apapun
-                        // ),
                         IconButton(
                           icon: Icon(
                             quest.isBookmarked
@@ -225,6 +221,33 @@ class QuestListItem extends StatelessWidget {
                             }
                           },
                         ),
+                        if (quest.isOnProgress) ...[
+                          IconButton(
+                            onPressed: () {
+                              // Tidak melakukan apapun
+                            },
+                            icon: SizedBox(
+                              height: 24, // Sesuaikan ukuran tinggi gambar
+                              child: Image.asset(
+                                "assets/images/timeIcon.png", // Pastikan path benar
+                              ),
+                            ),
+                            color: GlobalVar.mainColor,
+                          ),
+                        ] else if (quest.isCompleted) ...[
+                          IconButton(
+                            onPressed: () {
+                              // Tidak melakukan apapun
+                            },
+                            icon: SizedBox(
+                              height: 24, // Sesuaikan ukuran tinggi gambar
+                              child: Image.asset(
+                                "assets/images/checkMarkIcon.png", // Pastikan path benar
+                              ),
+                            ),
+                            color: GlobalVar.mainColor,
+                          ),
+                        ],
                       ],
                     ),
                     Text(
@@ -334,23 +357,26 @@ class QuestFeedSummary {
   final String status;
   final String questOwnerPhone;
   final bool isBookmarked;
+  final bool isOnProgress;
+  final bool isCompleted;
 
-  QuestFeedSummary({
-    required this.objectId,
-    required this.questName,
-    required this.instance,
-    required this.duration,
-    required this.maxRangers,
-    required this.levelRequirements,
-    required this.reward,
-    required this.description,
-    required this.taskList,
-    required this.address,
-    required this.date,
-    required this.rangers,
-    required this.categories,
-    required this.status,
-    required this.questOwnerPhone,
-    required this.isBookmarked,
-  });
+  QuestFeedSummary(
+      {required this.objectId,
+      required this.questName,
+      required this.instance,
+      required this.duration,
+      required this.maxRangers,
+      required this.levelRequirements,
+      required this.reward,
+      required this.description,
+      required this.taskList,
+      required this.address,
+      required this.date,
+      required this.rangers,
+      required this.categories,
+      required this.status,
+      required this.questOwnerPhone,
+      required this.isBookmarked,
+      required this.isOnProgress,
+      required this.isCompleted});
 }

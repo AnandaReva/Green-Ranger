@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:green_ranger/globalVar.dart';
 
-class SuccessCreatingQuestConfirmation extends StatelessWidget {
-  const SuccessCreatingQuestConfirmation({super.key});
+class SuccessConfirmation extends StatelessWidget {
+  final String successMessage;
+
+  SuccessConfirmation({Key? key, required this.successMessage})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +18,7 @@ class SuccessCreatingQuestConfirmation extends StatelessWidget {
             children: <Widget>[
               Container(
                 width: 500.0, // Set the desired width
-                padding: const EdgeInsets.all(20.0), // Add padding
+                padding: EdgeInsets.all(20.0), // Add padding
                 child: Center(
                   child: Image.asset(
                     'assets/images/successIcon.png',
@@ -23,12 +26,13 @@ class SuccessCreatingQuestConfirmation extends StatelessWidget {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.all(8.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
-                    const Text(
-                      "Quest has been created successfully",
+                    Text(
+                      successMessage,
+                      textAlign: TextAlign.center,
                       style: TextStyle(
                         color: GlobalVar.baseColor,
                         fontWeight: FontWeight.bold,
@@ -49,10 +53,10 @@ class SuccessCreatingQuestConfirmation extends StatelessWidget {
                       child: const Text(
                         'Back',
                         style: TextStyle(
-                          color: GlobalVar.secondaryColorGreen, // Warna teks putih
-                          fontSize: 16,
+                          color: GlobalVar.secondaryColorGreen,
+                          fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          fontStyle: FontStyle.italic
+                          fontStyle: FontStyle.italic,
                         ),
                       ),
                     ),

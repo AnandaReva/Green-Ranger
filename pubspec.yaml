@@ -42,11 +42,17 @@ dependencies:
   flutter_sliding_up_panel: ^2.1.1
   mongo_dart: ^0.10.3
   loading_animation_widget: ^1.2.1
+  flutter_launcher_icons: ^0.13.1
     
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+flutter_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/logo.png"
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

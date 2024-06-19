@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:green_ranger/components/infiniteScrollPagination/feedQuestHomePage.dart';
 import 'package:green_ranger/mongoDB/conn.dart';
 import 'package:green_ranger/globalVar.dart';
@@ -65,15 +63,21 @@ class QuestMongodb {
 
         List<QuestFeedSummary> questFeedSummaryList = [];
 
-// Fetch user's bookmarked quests
-        List<String> markedQuests =
-            GlobalVar.instance.userLoginData['quest']['marked'] != null
-                ? List<String>.from(
-                    GlobalVar.instance.userLoginData['quest']['marked'])
-                : [];
+        // Fetch user's bookmarked quests
+        var markedQuests = List<String>.from(
+            GlobalVar.instance.userLoginData['quest']['marked'] ?? []);
 
-        print(
-            'Check 2: $markedQuests'); // Output: [666da54aa8d882ad0fa0dc39, 666da54aa8d882ad0fa0dc3a, 666da54aa8d882ad0fa0dc3c, 666ef99083fc113521b799b3, 666da54aa8d882ad0fa0dc3b]
+        // Fetch user's onProgress quests
+        var onProgress = List<String>.from(
+            GlobalVar.instance.userLoginData['quest']['onProgress'] ?? []);
+
+        // Fetch user's completed quests
+        var completed = List<String>.from(
+            GlobalVar.instance.userLoginData['quest']['completed'] ?? []);
+        // sample Output: [666da54aa8d882ad0fa0dc39,, 666da54aa8d882ad0fa0dc3b]
+        print('Check 2 marked QuestList : $markedQuests');
+        print('Check 2 onPrgress QuestList: $onProgress');
+        print('Check 2 completed QuestList: $completed');
 
 // Iterate through each quest
         var num = 0;
@@ -99,15 +103,32 @@ class QuestMongodb {
           // Check if current quest is bookmarked
           bool isBookmarked = markedQuests.contains(questId.toHexString());
 
+          // Check if current quest is on progress
+          bool isOnProgress = onProgress.contains(questId.toHexString());
+
+          // Check if current quest is completed
+          bool isCompleted = completed.contains(questId.toHexString());
+
           // Only print if the quest is bookmarked
           if (isBookmarked) {
             print(' is bookmarked');
           }
 
-          print('Check 4: $isBookmarked');
+          // Only print if the quest is on progress
+          if (isOnProgress) {
+            print(' is on progress');
+          }
+
+          // Only print if the quest is completed
+          if (isCompleted) {
+            print(' is completed');
+          }
+
+          print(
+              'Check 4: isBookmarked: $isBookmarked, isOnProgress : $isOnProgress, $isCompleted');
 
           questFeedSummaryList.add(QuestFeedSummary(
-            objectId: questId.toString(),
+            objectId: questId.toHexString(),
             questName: quest['questName'],
             instance: quest['instance'],
             duration: quest['duration'],
@@ -123,6 +144,8 @@ class QuestMongodb {
             status: quest['status'],
             questOwnerPhone: questOwnerPhone,
             isBookmarked: isBookmarked,
+            isOnProgress: isOnProgress,
+            isCompleted: isCompleted,
           ));
         }
 
@@ -286,6 +309,50 @@ class QuestMongodb {
       return true;
     } catch (e) {
       print('Error during quest creation: $e');
+      return false;
+    } finally {
+      await mongoConnection.closeConnection();
+    }
+  }
+
+  static Future<bool> executeQuestMongodb({
+    required String questId,
+    required String userId,
+  }) async {
+    final mongoConnection = MongoConnection();
+
+    try {
+      bool isConnected = await mongoConnection.openConnection();
+
+      if (!isConnected) {
+        print('Failed to connect to MongoDB.');
+        return false;
+      }
+
+      print('Connected to MongoDB!');
+      // update user
+      var collectionUser =
+          mongoConnection.db.collection(MongoConnection.USER_COLLECTION);
+      // update quest
+      var collectionQuest =
+          mongoConnection.db.collection(MongoConnection.QUEST_COLLECTION);
+
+      var result1 = await collectionUser.update(
+          where.eq('_id', ObjectId.fromHexString(userId)),
+          modify.push('quest.onProgress', questId));
+      // update data lokal user, tambahkan data quest
+      GlobalVar.instance.userLoginData['quest']['onProgress'].add(questId);
+      print(
+          "updated lokal data: ${GlobalVar.instance.userLoginData['quest']['onProgress']}");
+      var result2 = await collectionQuest.update(
+        where.eq('_id', ObjectId.fromHexString(questId)),
+        modify.push('rangers', userId),
+      );
+
+      print('Quest executed successfully: $result1, $result2 ');
+      return true;
+    } catch (e) {
+      print('Error during quest executing: $e');
       return false;
     } finally {
       await mongoConnection.closeConnection();

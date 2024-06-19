@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:green_ranger/components/loadingUI.dart';
-import 'package:green_ranger/components/succesCreatingQuestConfirmation.dart';
+import 'package:green_ranger/components/succesConfirmation.dart';
 import 'package:green_ranger/mongoDB/questMongodb.dart';
 import 'package:provider/provider.dart';
 import 'package:green_ranger/globalVar.dart';
@@ -237,7 +237,9 @@ class _CreateQuestState extends State<CreateQuest> {
       Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => SuccessCreatingQuestConfirmation()),
+          builder: (context) => SuccessConfirmation(
+              successMessage: "Quest has been created successfully"),
+        ),
       );
 
       // Reset form fields and state variables

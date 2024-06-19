@@ -15,7 +15,7 @@ class OnBoardingScreen extends StatefulWidget {
 
 class _OnBoardingScreenState extends State<OnBoardingScreen> {
   final PageController _pageController = PageController(initialPage: 0);
-  late final GlobalVar globalVar;
+GlobalVar globalVar = GlobalVar.instance;
 
   int currentPage = 0;
   List<Widget> listPage = [];
