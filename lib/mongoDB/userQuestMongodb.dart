@@ -217,7 +217,8 @@ class UserQuestMongodb {
             status: quest['status'],
             rangers: List<String>.from(quest['rangers'] ?? []),
             questOwnerPhone: questOwnerPhone,
-            isOnProgress: true,
+            isOnProgress: true, 
+            userId:  quest['userId'],
           ));
         }
 

@@ -342,7 +342,7 @@ class QuestListItem extends StatelessWidget {
 }
 
 class QuestFeedSummary {
-  final String objectId;
+  final objectId;
   final String questName;
   final String instance;
   final String duration;
@@ -381,5 +381,7 @@ class QuestFeedSummary {
       required this.questOwnerPhone,
       required this.isBookmarked,
       required this.isOnProgress,
-      required this.isCompleted});
+      required this.isCompleted
+      
+      });
 }

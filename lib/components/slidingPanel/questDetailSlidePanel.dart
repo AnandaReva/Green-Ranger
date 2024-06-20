@@ -6,8 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_sliding_up_panel/sliding_up_panel_widget.dart';
 import 'package:green_ranger/components/loadingUI.dart';
 import 'package:green_ranger/components/succesConfirmation.dart';
+import 'package:green_ranger/firebase/uploadResultReport.dart';
 import 'package:green_ranger/globalVar.dart';
 import 'package:green_ranger/mongoDB/questMongodb.dart';
+import 'package:green_ranger/mongoDB/resultReportMongodb.dart';
 
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -1464,7 +1466,20 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
                                                     );
                                                   }
                                                 } else {
-                                                  onSubmitQuest();
+                                                  var userId =
+                                                      questData['userId'] ??
+                                                          'No data';
+                                                  var questId =
+                                                      questData['objectId'] ??
+                                                          'No data';
+                                                  // questId =
+                                                  //     questId.toHexString();
+                                                  var rangerId = GlobalVar
+                                                      .instance
+                                                      .userLoginData['_id']
+                                                      .toHexString();
+                                                  onSubmitQuest(userId, questId,
+                                                      rangerId);
                                                 }
                                               },
                                               style: ButtonStyle(
@@ -1619,7 +1634,7 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
     }
   }
 
-  void onSubmitQuest() {
+  void onSubmitQuest(String userId, String questId, String rangerId) {
     if (mounted) {
       showDialog(
         context: context,
@@ -1659,8 +1674,90 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
                     Container(
                       child: ElevatedButton(
                         onPressed: () async {
-                          Navigator.of(context).pop(); // Close the dialog
-                          // pick files
+                          Navigator.of(context).pop();
+
+                          File? imageFile = _selectedFile;
+
+                          if (imageFile != null) {
+                            print(
+                                'data upload userId: $userId,  questId: $questId , rangerId: $rangerId');
+
+                            try {
+                              setState(() {
+                                GlobalVar.instance.isLoading = true;
+                              });
+
+                              String? url =
+                                  await UploadResultReport.getDownloadUrl(
+                                      questId, rangerId, imageFile);
+
+                              if (url != null) {
+                                print('Success Upload to firestorag URL: $url');
+
+                                // Panggil metode uploadDataResultReport
+                                bool success = await QuestResultReportMongodb
+                                    .uploadDataResultReport(
+                                        userId, questId, rangerId, url);
+
+                                if (success) {
+                                  print(
+                                      'Data result report uploaded successfully');
+                                  // Tampilkan snackbar jika menggunakan Flutter
+                                  if (mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                          content: Text(
+                                              'Data result report uploaded successfully')),
+                                    );
+                                  }
+                                } else {
+                                  print('Failed to upload data result report');
+                                  // Tampilkan snackbar jika menggunakan Flutter
+                                  if (mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                          content: Text(
+                                              'Failed to upload data result report')),
+                                    );
+                                  }
+                                }
+
+                                setState(() {
+                                  GlobalVar.instance.isLoading = false;
+                                });
+                              } else {
+                                print('Failed to get URL');
+                                setState(() {
+                                  GlobalVar.instance.isLoading = false;
+                                });
+
+                                if (mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        "Error while uploading result report, please try again.",
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          color: GlobalVar.baseColor,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      duration: Duration(seconds: 3),
+                                    ),
+                                  );
+                                }
+                              }
+                            } catch (e) {
+                              // Tangkap error jika terjadi kesalahan dalam mendapatkan url
+                              print('Error during getting download URL: $e');
+                              setState(() {
+                                GlobalVar.instance.isLoading = false;
+                              });
+                            }
+                          } else {
+                            // Handle jika file belum dipilih (imageFile == null)
+                            print('No file selected');
+                          }
                         },
                         style: ElevatedButton.styleFrom(
                           foregroundColor: GlobalVar.mainColor,

@@ -127,8 +127,9 @@ class QuestListItem extends StatelessWidget {
           'description': quest.description,
           'date': quest.date,
           'status': quest.status,
-          'rangers': quest.rangers,
           'contact': quest.questOwnerPhone,
+          'rangers': quest.rangers,
+          'userId': quest.userId,
           'isOnProgress': quest.isOnProgress,
         };
       },
@@ -250,6 +251,7 @@ class QuestListItem extends StatelessWidget {
 }
 
 class OnProgressQuestSummary {
+  final String objectId;
   final String questName;
   final String instance;
   final String duration;
@@ -259,30 +261,34 @@ class OnProgressQuestSummary {
   final String description;
   final List<String> taskList;
   final String address;
-  final String objectId;
   final String date;
+  final List<String> rangers;
+  final String userId;
   final List<String> categories;
   final String status;
-  final List<String> rangers;
   final String questOwnerPhone;
   final bool isOnProgress;
+ 
 
-  OnProgressQuestSummary({
-    required this.questName,
-    required this.instance,
-    required this.duration,
-    required this.maxRangers,
-    required this.levelRequirements,
-    required this.reward,
-    required this.description,
-    required this.taskList,
-    required this.address,
-    required this.objectId,
-    required this.date,
-    required this.categories,
-    required this.status,
-    required this.rangers,
-    required this.questOwnerPhone,
-    required this.isOnProgress,
-  });
+  OnProgressQuestSummary(
+      {required this.objectId,
+      required this.questName,
+      required this.instance,
+      required this.duration,
+      required this.maxRangers,
+      required this.levelRequirements,
+      required this.reward,
+      required this.description,
+      required this.taskList,
+      required this.address,
+      required this.date,
+      required this.rangers,
+      required this.userId,
+      required this.categories,
+      required this.status,
+      required this.questOwnerPhone,
+      required this.isOnProgress,
+ 
+      
+      });
 }

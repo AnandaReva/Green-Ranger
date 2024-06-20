@@ -56,10 +56,12 @@ Future<String> getInitialRoute(bool hasLoggedInOnce) async {
           await AuthMongodb.findUserDataWithouPasswordMongodb(userEmail);
       // Cek apakah data berhasil ditemukan
       if (!loginSuccess) {
+        print('Failed to fetch user data');
         return 'AuthPage';
       }
       return 'homeScreen'; // Navigate to home screen if logged in
     } else {
+      print('User not logged in');
       return 'AuthPage'; // Navigate to authentication page if no user found
     }
   } else {
