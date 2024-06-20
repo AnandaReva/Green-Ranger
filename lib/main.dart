@@ -1,11 +1,7 @@
 // ignore_for_file: prefer_const_constructors
-
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:green_ranger/components/slidingPanel/questDetailSlidePanel.dart';
-import 'package:green_ranger/components/slidingPanel/questReportSlidePanel.dart';
-
 import 'package:green_ranger/pages/createQuestPage.dart';
 import 'package:green_ranger/pages/homePage.dart';
 import 'package:green_ranger/globalVar.dart';

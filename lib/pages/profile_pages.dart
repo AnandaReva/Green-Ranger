@@ -2,6 +2,7 @@
 
 import 'package:date_picker_timeline/date_picker_timeline.dart';
 import 'package:flutter/material.dart';
+import 'package:green_ranger/pages/setting_pages.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:green_ranger/globalVar.dart';
@@ -54,9 +55,16 @@ class ProfilePages extends StatelessWidget {
             ),
             actions: [
               IconButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SettingPages(),
+                    ),
+                  );
+                },
                 icon: const Icon(
-                  Icons.add_alert,
+                  Icons.settings,
                   color: GlobalVar.baseColor,
                 ),
               ),
@@ -93,15 +101,23 @@ class _ProfileBodyState extends State<ProfileBody>
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.vertical,
+    return Expanded(
       child: Column(
-        children: <Widget>[
+        children: [
           profilePicture(),
           const SizedBox(height: 20),
           tabBar(),
           const SizedBox(height: 20),
-          tabBarView()
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                statisticContent(),
+                calendarContent(),
+                reviewContent(),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -114,14 +130,15 @@ class _ProfileBodyState extends State<ProfileBody>
       height: double.maxFinite,
       child: Column(
         children: [
-          TabBarView(
-            controller: _tabController,
-            children: [
-              // Tab Bar Content
-              statisticContent(),
-              calendarContent(),
-              reviewContent(),
-            ],
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                statisticContent(),
+                calendarContent(),
+                reviewContent(),
+              ],
+            ),
           ),
         ],
       ),
@@ -138,26 +155,26 @@ class _ProfileBodyState extends State<ProfileBody>
             height: 100,
             width: 80,
             initialSelectedDate: DateTime.now(),
-            selectedTextColor: Colors.white,
-            selectionColor: Colors.blueAccent,
+            selectedTextColor: GlobalVar.mainColor,
+            selectionColor: GlobalVar.secondaryColorBlue,
             dateTextStyle: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: GlobalVar.baseColor,
             ),
             dayTextStyle: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: Colors.white,
+              color: GlobalVar.baseColor,
             ),
             monthTextStyle: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: Colors.white,
+              color: GlobalVar.baseColor,
             ),
             onDateChange: (date) {
               setState(() {
-                _selectedDate = date;
+                date = _selectedDate;
               });
             },
           ),
@@ -167,51 +184,21 @@ class _ProfileBodyState extends State<ProfileBody>
           child: ListView(
             children: [
               Container(
+                height: 180,
                 margin: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                 padding: EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.blue,
+                  color: Colors.purpleAccent,
                   borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  "Task1",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
                 ),
               ),
               Container(
+                height: 180,
                 margin: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                 padding: EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.blue,
+                  color: Colors.orangeAccent,
                   borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  "Task2",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              Container(
-                margin: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                padding: EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.blue,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  "Task3",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
                 ),
               ),
             ],
