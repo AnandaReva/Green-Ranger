@@ -132,6 +132,7 @@ class _ProfileBodyState extends State<ProfileBody>
     return Column(
       children: [
         Container(
+          margin: EdgeInsets.symmetric(horizontal: 8),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
@@ -185,6 +186,7 @@ class _ProfileBodyState extends State<ProfileBody>
 
   Container tabBar() {
     return Container(
+      margin: EdgeInsets.symmetric(horizontal: 8),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(50.0),
         border: Border.all(
