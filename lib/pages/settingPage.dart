@@ -110,11 +110,13 @@ class SettingPage extends StatelessWidget {
                     globalVar.userCompletedQuest = [];
                     globalVar.isLoading = false;
 
-                    Navigator.pushReplacement(
+                    Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(
                         builder: (context) => AuthPage(globalVar: globalVar),
                       ),
+                      ModalRoute.withName(
+                          '/'), // Hapus semua halaman di bawah halaman awal
                     );
                   } catch (e) {
                     globalVar.isLoading = false;

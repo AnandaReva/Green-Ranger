@@ -1,7 +1,8 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
-import 'package:green_ranger/components/firebase/firebaseAuth.dart';
+import 'package:green_ranger/firebase/firebaseAuth.dart';
 import 'package:green_ranger/components/loadingUI.dart';
 import 'package:green_ranger/globalVar.dart';
 import 'package:green_ranger/main.dart';
@@ -228,8 +229,6 @@ class AuthPageState extends State<AuthPage> {
 
   Future<bool> signOutUser() async {
     try {
-      
-
       await FirebaseAuthService.signOut();
 
       globalVar.userLoginData = null;
@@ -237,8 +236,6 @@ class AuthPageState extends State<AuthPage> {
       globalVar.userMarkedQuest = null;
       globalVar.userOnProgressQuest = null;
       globalVar.userCompletedQuest = null;
-
-      
 
       return true;
     } catch (e) {
@@ -394,6 +391,83 @@ class AuthPageState extends State<AuthPage> {
             color: GlobalVar.baseColor,
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _googleAuth(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 32.0),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        decoration: BoxDecoration(
+          border: Border.all(color: GlobalVar.baseColor),
+          color: Color.fromRGBO(254, 63, 62, 1),
+        ),
+        child: InkWell(
+          onTap: () async {
+            try {
+              UserCredential? userCredential =
+                  await FirebaseAuthService.signInWithGoogle();
+              if (userCredential != null) {
+                User? user = userCredential.user;
+                if (user != null) {
+                  String email = user.email.toString();
+
+                  print('email: $email');
+
+                  setState(() {
+                    globalVar.isLoading = true;
+                  });
+                  // fetch data userlogin
+                  bool loginSuccess =
+                      await AuthMongodb.findUserDataWithouPasswordMongodb(
+                          email);
+                  // Cek apakah data berhasil ditemukan
+                  if (!loginSuccess) {
+                    // Jika gagal login, set pesan error
+                    setState(() {
+                      globalVar.isLoading = false;
+                      errorMessage = 'Invalid Email or Password';
+                    });
+
+                    return;
+                  }
+
+                  setState(() {
+                    globalVar.isLoading = false;
+                  });
+
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => MainPage()),
+                    (route) => false,
+                  );
+                }
+              }
+            } catch (e) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Error during sign in with Google: $e')),
+              );
+            }
+          },
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset(
+                'assets/images/googleIcon.png',
+                width: 24,
+                height: 14,
+              ),
+              SizedBox(width: 10), // Spacer
+              Text(
+                "Google Account",
+                style: TextStyle(
+                    fontWeight: FontWeight.normal, color: GlobalVar.mainColor),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -582,6 +656,7 @@ class AuthPageState extends State<AuthPage> {
                                 endIndent: 30,
                                 color: GlobalVar.baseColor,
                               ),
+                              _googleAuth(context)
                             ],
                           ),
                           _loginRegisterButton(),

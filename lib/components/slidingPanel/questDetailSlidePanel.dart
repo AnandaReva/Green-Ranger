@@ -1,5 +1,7 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables, sort_child_properties_last, prefer_const_constructors
 
+import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sliding_up_panel/sliding_up_panel_widget.dart';
 import 'package:green_ranger/components/loadingUI.dart';
@@ -30,6 +32,7 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
 
   final double minBound = 0;
   final double upperBound = 1.0;
+  File? _selectedFile;
 
   @override
   void initState() {
@@ -1319,148 +1322,174 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
                                                         endIndent: 32,
                                                       ),
                                                     ),
+                                                    if (questData != null &&
+                                                        questData['tasks'] !=
+                                                            null)
+                                                      for (int i = 0;
+                                                          i <
+                                                              questData['tasks']
+                                                                  .length;
+                                                          i++)
+                                                        Column(
+                                                          children: [
+                                                            SizedBox(height: 5),
+                                                            Row(
+                                                              children: [
+                                                                SizedBox(
+                                                                  width: 210,
+                                                                  child:
+                                                                      Container(
+                                                                    decoration:
+                                                                        BoxDecoration(
+                                                                      color: GlobalVar
+                                                                          .secondaryColorPuple,
+                                                                    ),
+                                                                    padding:
+                                                                        EdgeInsets.all(
+                                                                            8.0),
+                                                                    child: Text(
+                                                                      questData['tasks']
+                                                                              [
+                                                                              i] ??
+                                                                          'No data',
+                                                                      style:
+                                                                          TextStyle(
+                                                                        color: GlobalVar
+                                                                            .baseColor,
+                                                                        fontWeight:
+                                                                            FontWeight.w400,
+                                                                        fontSize:
+                                                                            14,
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                                Checkbox(
+                                                                  value: _taskCheckedStates
+                                                                              .length >
+                                                                          i
+                                                                      ? _taskCheckedStates[
+                                                                          i]
+                                                                      : false,
+                                                                  onChanged:
+                                                                      (bool?
+                                                                          value) {
+                                                                    if (_taskCheckedStates
+                                                                            .length <=
+                                                                        i) {
+                                                                      _taskCheckedStates =
+                                                                          List<
+                                                                              bool>.filled(
+                                                                        widget
+                                                                            .globalVar
+                                                                            .questDataSelected['tasks']
+                                                                            .length,
+                                                                        false,
+                                                                      );
+                                                                    }
+                                                                    setState(
+                                                                        () {
+                                                                      _taskCheckedStates[
+                                                                              i] =
+                                                                          value ??
+                                                                              false;
+                                                                    });
+                                                                  },
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ],
+                                                        ),
                                                   ],
                                                 ),
                                               ),
-                                              if (questData != null &&
-                                                  questData['tasks'] != null)
-                                                for (int i = 0;
-                                                    i <
-                                                        questData['tasks']
-                                                            .length;
-                                                    i++)
-                                                  Column(
-                                                    children: [
-                                                      SizedBox(height: 5),
-                                                      Row(
-                                                        children: [
-                                                          SizedBox(width: 5),
-                                                          Checkbox(
-                                                            value: _taskCheckedStates
-                                                                        .length >
-                                                                    i
-                                                                ? _taskCheckedStates[
-                                                                    i]
-                                                                : false,
-                                                            onChanged:
-                                                                (bool? value) {
-                                                              if (_taskCheckedStates
-                                                                      .length <=
-                                                                  i) {
-                                                                _taskCheckedStates =
-                                                                    List<
-                                                                        bool>.filled(
-                                                                  widget
-                                                                      .globalVar
-                                                                      .questDataSelected[
-                                                                          'tasks']
-                                                                      .length,
-                                                                  false,
-                                                                );
-                                                              }
-                                                              setState(() {
-                                                                _taskCheckedStates[
-                                                                        i] =
-                                                                    value ??
-                                                                        false;
-                                                              });
-                                                            },
-                                                          ),
-                                                          SizedBox(width: 5),
-                                                          SizedBox(
-                                                            width: 250,
-                                                            child: Container(
-                                                              decoration:
-                                                                  BoxDecoration(
-                                                                color: GlobalVar
-                                                                    .secondaryColorPuple,
-                                                              ),
-                                                              padding:
-                                                                  EdgeInsets
-                                                                      .all(8.0),
-                                                              child: Text(
-                                                                questData['tasks']
-                                                                        [i] ??
-                                                                    'No data',
-                                                                style:
-                                                                    TextStyle(
-                                                                  color: GlobalVar
-                                                                      .baseColor,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w400,
-                                                                  fontSize: 14,
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ],
-                                                  ),
                                             ],
                                           ),
                                           SizedBox(height: 10),
+
+                                          _uploadSection(context),
                                           SizedBox(height: 10),
                                           Center(
                                             child: ElevatedButton(
                                               onPressed: () {
                                                 int checkedCount =
                                                     _getCheckedTasksCount();
-                                                // jika belum semua task dicentang maka belum bisa sybmit
+                                                // Jika belum semua task dicentang atau file kosong, tampilkan pesan
                                                 if (checkedCount <
-                                                    questData['tasks'].length) {
+                                                        questData['tasks']
+                                                            .length ||
+                                                    _selectedFile == null) {
                                                   if (mounted) {
                                                     showDialog(
                                                       context: context,
                                                       barrierColor: GlobalVar
                                                           .secondaryColorGreen
-                                                          .withOpacity(
-                                                              0.1), // black background color
+                                                          .withOpacity(0.1),
                                                       builder: (context) {
                                                         return AlertDialog(
-                                                            content: Text(
-                                                              'Please complete all the task first before submiting.',
-                                                              textAlign:
-                                                                  TextAlign
-                                                                      .center,
-                                                              style: TextStyle(
-                                                                color: GlobalVar
-                                                                    .secondaryColorPink,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold, // Add this line
+                                                          content: Text(
+                                                            'Please complete all the tasks and select a file before submitting.',
+                                                            textAlign: TextAlign
+                                                                .center,
+                                                            style: TextStyle(
+                                                              color: GlobalVar
+                                                                  .secondaryColorPink,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                            ),
+                                                          ),
+                                                          backgroundColor:
+                                                              GlobalVar
+                                                                  .mainColor,
+                                                          actions: [
+                                                            TextButton(
+                                                              onPressed: () {
+                                                                Navigator.of(
+                                                                        context)
+                                                                    .pop(); // Close the dialog
+                                                              },
+                                                              child: Text(
+                                                                'OK',
+                                                                style:
+                                                                    TextStyle(
+                                                                  color: GlobalVar
+                                                                      .secondaryColorPink,
+                                                                ),
                                                               ),
                                                             ),
-                                                            backgroundColor:
-                                                                GlobalVar
-                                                                    .mainColor);
+                                                          ],
+                                                        );
                                                       },
                                                     );
                                                   }
+                                                } else {
+                                                  onSubmitQuest();
                                                 }
                                               },
                                               style: ButtonStyle(
                                                 backgroundColor:
                                                     MaterialStateProperty.all(
                                                         GlobalVar
-                                                            .secondaryColorGreen), // Set background color
+                                                            .secondaryColorGreen),
                                               ),
                                               child: Padding(
-                                                padding: const EdgeInsets.all(
-                                                    8.0), // Add padding to the button content
+                                                padding:
+                                                    const EdgeInsets.all(8.0),
                                                 child: Text(
                                                   "Submit",
                                                   style: TextStyle(
                                                     color: GlobalVar.mainColor,
-                                                    fontSize:
-                                                        30.0, // Use a floating-point literal for clarity
+                                                    fontSize: 30.0,
                                                     fontWeight: FontWeight.bold,
                                                   ),
                                                 ),
                                               ),
                                             ),
                                           ),
+                                          SizedBox(height: 10),
+
+                                          //submit
                                         ],
                                       ),
                                   ],
@@ -1473,6 +1502,88 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
           controlHeight: 0,
         );
       },
+    );
+  }
+
+  Widget _uploadSection(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 30),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              SizedBox(width: 0),
+              Text(
+                "Upload Results",
+                style: TextStyle(
+                  color: GlobalVar.baseColor,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+          Divider(
+            color: GlobalVar.baseColor,
+            thickness: 2,
+            endIndent: 32,
+          ),
+          Container(
+            width: 230,
+            height: 100,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: GlobalVar.baseColor,
+                width: 2,
+              ),
+            ),
+            child: ElevatedButton(
+              onPressed: () async {
+                File? pickedFile = await getFilesFromDevice(context);
+                if (pickedFile != null) {
+                  setState(() {
+                    _selectedFile = pickedFile;
+                  });
+                  print('User picked file: ${_selectedFile!.path}');
+                } else {
+                  print('No file picked');
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.transparent,
+                shadowColor: Colors.transparent,
+                padding: EdgeInsets.zero,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  side: BorderSide(color: GlobalVar.baseColor, width: 2),
+                ),
+              ),
+              child: _selectedFile != null
+                  ? Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        _selectedFile!.path.split('/').last,
+                        style: TextStyle(
+                          color: GlobalVar.secondaryColorGreen,
+                          fontSize: 14.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    )
+                  : Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Image.asset(
+                        'assets/images/uploadIcon.png',
+                        width: 50,
+                        height: 50,
+                      ),
+                    ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -1505,6 +1616,120 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
     } catch (e) {
       print('Error during quest execution: $e');
       return false;
+    }
+  }
+
+  void onSubmitQuest() {
+    if (mounted) {
+      showDialog(
+        context: context,
+        barrierColor: GlobalVar.secondaryColorGreen.withOpacity(0.1),
+        builder: (context) {
+          return AlertDialog(
+            content: Text(
+              "Are you sure you want to submit the quest report?",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: GlobalVar.secondaryColorGreen,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            backgroundColor: GlobalVar.mainColor,
+            actions: <Widget>[
+              Container(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop(); // Close the dialog
+                          // Add your action for 'No' here
+                          // For example, you can do nothing or show a message
+                          print('User clicked No');
+                        },
+                        child: Text(
+                          'No',
+                          style: TextStyle(
+                            color: GlobalVar.secondaryColorPink,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Container(
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          Navigator.of(context).pop(); // Close the dialog
+                          // pick files
+                        },
+                        style: ElevatedButton.styleFrom(
+                          foregroundColor: GlobalVar.mainColor,
+                          backgroundColor: GlobalVar.secondaryColorGreen,
+                        ),
+                        child: Text('Yes'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
+
+  Future<File?> getFilesFromDevice(BuildContext context) async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: [
+          'jpg',
+          'jpeg',
+          'webp',
+          'png',
+          'pdf',
+          'doc',
+          'docx',
+          'mp4',
+          'mov',
+          'avi',
+          'zip',
+          'rar',
+          'txt',
+          'ppt',
+        ],
+        allowMultiple: false,
+      );
+
+      if (result == null || result.files.isEmpty) {
+        return null;
+      }
+
+      File file = File(result.files.single.path!);
+      int fileSize = await file.length();
+
+      if (fileSize > 20 * 1024 * 1024) {
+        // File is too large, handle error
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('File size ecxeed 20 MB.'),
+            duration: Duration(seconds: 3),
+          ),
+        );
+        return null;
+      }
+
+      return file;
+    } catch (e) {
+      print('Error Image Picker: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error selecting image: $e'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+      return null;
     }
   }
 }

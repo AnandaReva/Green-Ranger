@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:green_ranger/components/slidingPanel/questDetailSlidePanel.dart';
+import 'package:green_ranger/mongoDB/authMongodb.dart';
 import 'package:green_ranger/pages/createQuestPage.dart';
 import 'package:green_ranger/pages/homePage.dart';
 import 'package:green_ranger/globalVar.dart';
@@ -41,26 +42,28 @@ Future<void> main() async {
   await prefs.setBool("hasLoggedInOnce", true);
   print('Has Logged In Once: $hasLoggedInOnce');
 
-  User? user = FirebaseAuth.instance.currentUser;
-  if (user != null) {
-
-    String userEmail = user.email ?? "Terjadi Kesalahan saat mengambil data";
-    String userUid = user.uid;
-    print("User Account firebase: $userEmail , $userUid ");
-
-    // // Load user data
-    // await LoginPageState().findUserDataFromDB(userEmail);
-    // print('cek user: ${globalVar.userLoginData}');
-  }
-
-  runApp(MyApp(initialRoute: getInitialRoute(hasLoggedInOnce)));
+  runApp(MyApp(initialRoute: await getInitialRoute(hasLoggedInOnce)));
 }
 
-String getInitialRoute(bool hasLoggedInOnce) {
+Future<String> getInitialRoute(bool hasLoggedInOnce) async {
   if (hasLoggedInOnce) {
-    return 'AuthPage';
+    User? user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      String userEmail = user.email ?? "Terjadi Kesalahan saat mengambil data";
+      print("User Account firebase: $userEmail  ");
+      bool loginSuccess =
+          await AuthMongodb.findUserDataWithouPasswordMongodb(userEmail);
+      // Cek apakah data berhasil ditemukan
+      if (!loginSuccess) {
+        return 'AuthPage';
+      }
+      return 'homeScreen'; // Navigate to home screen if logged in
+    } else {
+      return 'AuthPage'; // Navigate to authentication page if no user found
+    }
   } else {
-    return 'onboardScreen';
+    return 'onboardScreen'; // Navigate to onboarding screen if first time login
   }
 }
 
