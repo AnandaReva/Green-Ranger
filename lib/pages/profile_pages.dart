@@ -1,4 +1,9 @@
+// ignore_for_file: prefer_const_constructors
+
+import 'package:date_picker_timeline/date_picker_timeline.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:green_ranger/globalVar.dart';
 
 class ProfilePages extends StatelessWidget {
@@ -6,33 +11,68 @@ class ProfilePages extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: GlobalVar.mainColor,
-      appBar: AppBar(
-        backgroundColor: GlobalVar.mainColor,
-        toolbarHeight: 120,
-        centerTitle: true,
-        title: const Text(
-          "My Profile",
-          style: TextStyle(color: GlobalVar.baseColor),
-        ),
-        actions: [
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(
-              Icons.add_alert,
-              color: GlobalVar.baseColor,
+    return Consumer<GlobalVar>(
+      builder: (context, globalVar, _) {
+        Map<String, dynamic> userData = globalVar.userLoginData;
+
+        // Define _userLevel variable
+        // Define _userLevel variable
+        String _userLevel;
+        String _nextLevelExp;
+
+        // Determine user level
+        int userExp = userData['exp'] ?? 0;
+        int levelStep = 1500;
+        int userLevelValue = (userExp / levelStep).floor();
+
+        if (userLevelValue < 1) {
+          _userLevel = 'rookie';
+          _nextLevelExp = (levelStep * 1).toString();
+        } else if (userLevelValue < 2) {
+          _userLevel = 'epic';
+          _nextLevelExp = (levelStep * 2).toString();
+        } else if (userLevelValue < 3) {
+          _userLevel = 'legendary';
+          _nextLevelExp = (levelStep * 3).toString();
+        } else if (userLevelValue < 4) {
+          _userLevel = 'mythic';
+          _nextLevelExp = (levelStep * 4).toString();
+        } else {
+          _userLevel = 'mythic';
+          _nextLevelExp = 'max'; // max level reached
+        }
+
+        return Scaffold(
+          backgroundColor: GlobalVar.mainColor,
+          appBar: AppBar(
+            backgroundColor: GlobalVar.mainColor,
+            toolbarHeight: 120,
+            centerTitle: true,
+            title: const Text(
+              "My Profile",
+              style: TextStyle(color: GlobalVar.baseColor),
             ),
+            actions: [
+              IconButton(
+                onPressed: () {},
+                icon: const Icon(
+                  Icons.add_alert,
+                  color: GlobalVar.baseColor,
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-      body: const ProfileBody(),
+          body: ProfileBody(userData: userData),
+        );
+      },
     );
   }
 }
 
 class ProfileBody extends StatefulWidget {
-  const ProfileBody({super.key});
+  final Map<String, dynamic> userData;
+
+  const ProfileBody({super.key, required this.userData});
 
   @override
   _ProfileBodyState createState() => _ProfileBodyState();
@@ -41,6 +81,9 @@ class ProfileBody extends StatefulWidget {
 class _ProfileBodyState extends State<ProfileBody>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+
+  // DATE TIME VARIABLE
+  DateTime _selectedDate = DateTime.now();
 
   @override
   void initState() {
@@ -66,59 +109,193 @@ class _ProfileBodyState extends State<ProfileBody>
 
   Container tabBarView() {
     return Container(
+      margin: EdgeInsets.symmetric(horizontal: 8),
       width: double.maxFinite,
       height: double.maxFinite,
       child: Column(
         children: [
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                // Tab Bar Content
-                statisticContent(),
-                calendarContent(),
-                reviewContent(),
-              ],
-            ),
+          TabBarView(
+            controller: _tabController,
+            children: [
+              // Tab Bar Content
+              statisticContent(),
+              calendarContent(),
+              reviewContent(),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Text calendarContent() => const Text("Calendar Content Under Construction");
+  Column calendarContent() {
+    return Column(
+      children: [
+        Container(
+          margin: EdgeInsets.only(top: 20, left: 20),
+          child: DatePicker(
+            DateTime.now(),
+            height: 100,
+            width: 80,
+            initialSelectedDate: DateTime.now(),
+            selectedTextColor: Colors.white,
+            selectionColor: Colors.blueAccent,
+            dateTextStyle: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+            dayTextStyle: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+            monthTextStyle: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+            onDateChange: (date) {
+              setState(() {
+                _selectedDate = date;
+              });
+            },
+          ),
+        ),
+        SizedBox(height: 20),
+        Expanded(
+          child: ListView(
+            children: [
+              Container(
+                margin: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                padding: EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.blue,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  "Task1",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              Container(
+                margin: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                padding: EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.blue,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  "Task2",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              Container(
+                margin: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                padding: EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.blue,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  "Task3",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
 
   Column reviewContent() {
-    return const Column(
+    int userExp =
+        widget.userData['exp'] ?? 0; // Access user experience from userData
+    return Column(
       children: [
         // Coin
         Row(
           children: [
             Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Icon(
-                Icons.paid,
-                color: GlobalVar.secondaryColor,
-                size: 50,
+              padding: EdgeInsets.all(10.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Image.asset(
+                        "assets/images/coinIcon.png",
+                        width: 100,
+                      ),
+                      const SizedBox(width: 10),
+                      Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Ranger Coin',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: GlobalVar.baseColor,
+                                fontWeight: FontWeight.normal,
+                              ),
+                            ),
+                            Text(
+                              'Rp. ${NumberFormat.currency(locale: 'id_ID', decimalDigits: 0, symbol: '').format(widget.userData['wallet_value'] ?? 0)}',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: GlobalVar.baseColor,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ]),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Image.asset(
+                        "assets/images/cherryIcon.png",
+                        width: 100,
+                      ),
+                      const SizedBox(width: 10),
+                      Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Exp',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: GlobalVar.baseColor,
+                                fontWeight: FontWeight.normal,
+                              ),
+                            ),
+                            Text(
+                              // '$userExp / ${widget.nextLevelExp}',
+                              '$userExp ',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: GlobalVar.baseColor,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ]),
+                    ],
+                  ),
+                ],
               ),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Ranger Coin",
-                  style: TextStyle(
-                    color: GlobalVar.baseColor,
-                  ),
-                ),
-                Text(
-                  "10.040",
-                  style: TextStyle(
-                    fontSize: 20,
-                    color: GlobalVar.baseColor,
-                  ),
-                )
-              ],
             ),
           ],
         ),
@@ -132,7 +309,6 @@ class _ProfileBodyState extends State<ProfileBody>
     return Column(
       children: [
         Container(
-          margin: EdgeInsets.symmetric(horizontal: 8),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
@@ -152,7 +328,7 @@ class _ProfileBodyState extends State<ProfileBody>
                       height: 50,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10),
-                        color: GlobalVar.secondaryColor,
+                        color: GlobalVar.secondaryColorGreen,
                       ),
                       child: IconButton(
                         onPressed: () {},
@@ -197,7 +373,7 @@ class _ProfileBodyState extends State<ProfileBody>
       child: TabBar(
         indicatorSize: TabBarIndicatorSize.tab,
         indicator: BoxDecoration(
-          color: GlobalVar.secondaryColor,
+          color: GlobalVar.secondaryColorGreen,
           borderRadius: BorderRadius.circular(20),
         ),
         labelStyle: const TextStyle(color: GlobalVar.mainColor),
@@ -264,6 +440,32 @@ class _ProfileBodyState extends State<ProfileBody>
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class TaskTile extends StatelessWidget {
+  final String taskName;
+
+  TaskTile({required this.taskName});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+      padding: EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.blue,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Text(
+        taskName,
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }

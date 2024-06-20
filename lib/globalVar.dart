@@ -1,19 +1,16 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:green_ranger/components/infiniteScorllPagination.dart';
 
 class GlobalVar extends ChangeNotifier {
   static final GlobalVar _instance = GlobalVar._internal();
   static const mainColor = Color.fromARGB(255, 26, 27, 27);
-  static const secondaryColor = Color.fromARGB(255, 211, 255, 30);
+  static const secondaryColorGreen = Color.fromARGB(255, 211, 255, 30);
+  static const secondaryColorPuple = Color.fromRGBO(144, 110, 218, 1);
+  static const secondaryColorPink = Color.fromRGBO(238, 51, 209, 1);
+  static const secondaryColorBlue = Color.fromARGB(255, 37, 150, 190);
   static const baseColor = Color.fromRGBO(240, 240, 240, 1.0);
 
-  Map<String, dynamic> _userLoginData = {
-    'profile_image': 'assets/images/logo.png',
-    'username': 'admin',
-    'level': 'Mythrill',
-    'exp': '2000',
-    'wallet_value': '750000',
-  };
+  bool _isPanelOpened = false;
 
   Map<String, dynamic> _newQuestData = {
     'questName': '',
@@ -21,90 +18,24 @@ class GlobalVar extends ChangeNotifier {
     'tasks': [],
     'address': '',
     'duration': '',
-    'totalRangers': '',
+    'maxRangers': '',
     'reward': '',
     'levelRequirements': '',
     'description': '',
+    'date': '',
+    'categories': [],
   };
 
+  Map<String, dynamic> _questDataSelected = {};
+
 //levels: Mythrill, Legendary, Epic, Rookie (500, 1000, 1500, 2000)
+  var _userLoginData;
 
-  final List<QuestSummary> _currentQuestData = [
-    QuestSummary(
-      questName: 'Find Sample Cosmetics Trash',
-      instance: 'PT Paragon',
-      duration: '2',
-      totalRangers: '10',
-      levelRequirements: 'Rookie',
-      reward: '800000',
-      description: 'Find Sample Cosmetics Trash',
-      taskList: ['Organizing Rangers', 'Gathering Trash'],
-      address: 'Jalan Swadarma Raya Kampung Baru IV No. 1. Jakarta - 12250',
-    ),
-    QuestSummary(
-      questName: 'Recycle Oil and Biodiesel',
-      instance: 'CV Prima Oil Slepet',
-      duration: '5',
-      totalRangers: '20',
-      levelRequirements: 'Legendary',
-      reward: '1200000',
-      description: 'Find Oil and Biodiesel Trash and Recycle',
-      taskList: ['Collecting Oil Barrels', 'Sorting Biodiesel Waste'],
-      address: 'Jl Kemana Saja Sukanasi Jakarta',
-    ),
-    QuestSummary(
-      questName: 'Clean Up Beach Pollution',
-      instance: 'Green Earth Organization',
-      duration: '3',
-      totalRangers: '15',
-      levelRequirements: 'Mythrill',
-      reward: '1000000',
-      description: 'Clean up plastic and waste from beaches',
-      taskList: ['Organizing volunteers', 'Collecting plastic waste'],
-      address: 'Ocean Drive, Beach City',
-    ),
-    QuestSummary(
-      questName: 'Plant Trees in Urban Areas',
-      instance: 'EcoGreen Foundation',
-      duration: '7',
-      totalRangers: '30',
-      levelRequirements: 'Legendary',
-      reward: '1500000',
-      description: 'Plant trees in urban areas to increase green cover',
-      taskList: ['Preparation of saplings', 'Planting in designated areas'],
-      address: 'City Parks and Recreation Center',
-    ),
-    QuestSummary(
-      questName: 'Restore River Ecosystem',
-      instance: 'Water Conservation Alliance',
-      duration: '4',
-      totalRangers: '25',
-      levelRequirements: 'Epic',
-      reward: '1800000',
-      description: 'Restore natural habitat and improve water quality',
-      taskList: ['Monitoring water quality', 'Restocking fish population'],
-      address: 'Riverside Drive, Riverside City',
-    ),
-  ];
+  var _homePageQuestFeed;
+  var _userMarkedQuest;
+  var _userOnProgressQuest;
 
-  // Simulated asynchronous fetch of quest data
-  Future<List<QuestSummary>> getQuests(int pageKey, int pageSize) async {
-    await Future.delayed(
-        Duration(milliseconds: 500)); // Simulating network delay
-
-    final startIndex = pageKey * pageSize;
-    if (startIndex >= _currentQuestData.length) {
-      return []; // No more items
-    }
-
-    return _currentQuestData.sublist(
-        startIndex,
-        startIndex + pageSize < _currentQuestData.length
-            ? startIndex + pageSize
-            : _currentQuestData.length);
-  }
-
-  bool _isLogin = false;
+  String _errorMessageGlobal = "";
   bool _isLoading = false;
 
   int _selectedIndex = 0;
@@ -115,26 +46,57 @@ class GlobalVar extends ChangeNotifier {
     notifyListeners();
   }
 
-  Map<String, dynamic> get userLoginData => _userLoginData;
+  dynamic get userLoginData => _userLoginData;
+  dynamic get homePageQuestFeed => _homePageQuestFeed;
+  dynamic get userMarkedQuest => _userMarkedQuest;
+  dynamic get userOnProgressQuest => _userOnProgressQuest;
 
-  bool get isLogin => _isLogin;
+  Map<String, dynamic> get questDataSelected => _questDataSelected;
+  Map<String, dynamic> get newQuestData => _newQuestData;
+
+  bool get isPanelOpened => _isPanelOpened;
+  String get errorMessageGlobal => _errorMessageGlobal;
   bool get isLoading => _isLoading;
 
-  set userLoginData(Map<String, dynamic> value) {
+  // dont delete
+  // set userLoginData(Map<String, dynamic> value) {
+  //   _userLoginData = value;
+  //   notifyListeners();
+  // }
+
+  set userLoginData(dynamic value) {
     _userLoginData = value;
+  }
+
+  set homePageQuestFeed(dynamic value) {
+    _homePageQuestFeed = value;
+  }
+
+  set userMarkedQuest(dynamic value) {
+    _userMarkedQuest = value;
+  }
+
+  set userOnProgressQuest(dynamic value) {
+    _userOnProgressQuest = value;
+  }
+
+  set questDataSelected(Map<String, dynamic> value) {
+    _questDataSelected = value;
     notifyListeners();
   }
 
-  set isLogin(bool value) {
-    _isLogin = value;
+  set isPanelOpened(bool value) {
+    _isPanelOpened = value;
+    notifyListeners();
+  }
+
+  set errorMessageGlobal(String value) {
+    _errorMessageGlobal = value;
   }
 
   set isLoading(bool value) {
     _isLoading = value;
   }
-
-  // Getter for newQuestData
-  Map<String, dynamic> get newQuestData => _newQuestData;
 
   // Setter for newQuestData
   set newQuestData(Map<String, dynamic> value) {

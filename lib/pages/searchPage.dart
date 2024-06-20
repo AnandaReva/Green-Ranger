@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:green_ranger/components/appBar.dart';
-import 'package:green_ranger/components/infiniteScorllPagination.dart';
+import 'package:green_ranger/components/infiniteScrollPagination/feedQuestHomePage.dart';
 import 'package:provider/provider.dart';
 import 'package:green_ranger/globalVar.dart';
 import 'package:intl/intl.dart';
@@ -95,7 +95,7 @@ class SearchPage extends StatelessWidget {
                                 'Popular Search',
                                 style: TextStyle(
                                   fontSize: 18,
-                                  color: GlobalVar.secondaryColor,
+                                  color: GlobalVar.secondaryColorGreen,
                                   fontWeight: FontWeight.w400,
                                   fontStyle: FontStyle.italic,
                                 ),
@@ -107,7 +107,7 @@ class SearchPage extends StatelessWidget {
                                 'Categories',
                                 style: TextStyle(
                                   fontSize: 18,
-                                  color: GlobalVar.secondaryColor,
+                                  color: GlobalVar.secondaryColorGreen,
                                   fontWeight: FontWeight.w400,
                                   fontStyle: FontStyle.italic,
                                 ),

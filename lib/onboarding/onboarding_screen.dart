@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:green_ranger/globalVar.dart';
 import 'package:green_ranger/pages/login_register_page.dart';
-
 
 import 'package:green_ranger/onboarding/intro_page_1.dart';
 import 'package:green_ranger/onboarding/intro_page_2.dart';
 
 class OnBoardingScreen extends StatefulWidget {
-  const OnBoardingScreen({Key? key}) : super(key: key);
-
-
+  const OnBoardingScreen({Key? key, required GlobalVar globalVar})
+      : super(key: key);
 
   @override
   State<OnBoardingScreen> createState() => _OnBoardingScreenState();
@@ -16,7 +15,7 @@ class OnBoardingScreen extends StatefulWidget {
 
 class _OnBoardingScreenState extends State<OnBoardingScreen> {
   final PageController _pageController = PageController(initialPage: 0);
-
+GlobalVar globalVar = GlobalVar.instance;
 
   int currentPage = 0;
   List<Widget> listPage = [];
@@ -31,13 +30,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
     });
 
     // Initialize listPage here
-    listPage = [
-      IntroPage1(
-  
-      ),
-      IntroPage2(
-      )
-    ];
+    listPage = [IntroPage1(), IntroPage2()];
   }
 
   @override
@@ -97,7 +90,8 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => LoginPage(),
+                              builder: (context) =>
+                                  SignInPage(globalVar: globalVar),
                             ),
                           );
                         } else {
