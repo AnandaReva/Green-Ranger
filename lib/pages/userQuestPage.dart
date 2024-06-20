@@ -1,9 +1,11 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 import 'package:flutter/material.dart';
+import 'package:green_ranger/components/infiniteScrollPagination/UserCompletedQuestList.dart';
 import 'package:green_ranger/components/infiniteScrollPagination/UserMarkedQuestList%20.dart';
 
 import 'package:green_ranger/components/appBar.dart';
+import 'package:green_ranger/components/infiniteScrollPagination/UserOnProgressQuestList.dart';
 import 'package:provider/provider.dart';
 import 'package:green_ranger/globalVar.dart';
 import 'package:flutter_sliding_up_panel/flutter_sliding_up_panel.dart';
@@ -183,9 +185,10 @@ class _UserQuestPageState extends State<UserQuestPage>
                             UserMarkedQuestList(),
                             // Center(child: Text('On Marked Quests')),
                             // On Progress
-                            Center(child: Text('On Progress Quests')),
+                            UserOnProgressQuestList(),
+
                             // Finished
-                            Center(child: Text('Finished Quests')),
+                            UserCompletedQuestList(),
                           ],
                         ),
                       ),

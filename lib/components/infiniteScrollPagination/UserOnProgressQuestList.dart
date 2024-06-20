@@ -8,43 +8,44 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
-class UserMarkedQuestList extends StatefulWidget {
-  const UserMarkedQuestList({Key? key}) : super(key: key);
+class UserOnProgressQuestList extends StatefulWidget {
+  const UserOnProgressQuestList({Key? key}) : super(key: key);
 
   @override
-  _UserMarkedQuestListState createState() => _UserMarkedQuestListState();
+  _UserOnProgressQuestListState createState() =>
+      _UserOnProgressQuestListState();
 }
 
-class _UserMarkedQuestListState extends State<UserMarkedQuestList> {
+class _UserOnProgressQuestListState extends State<UserOnProgressQuestList> {
   final List<Color> questColors = [
     GlobalVar.secondaryColorGreen,
     GlobalVar.secondaryColorPuple,
     GlobalVar.secondaryColorPink,
   ];
 
-  late PagingController<int, MarkedQuestSummary> _pagingController;
-  Map<String, bool> bookmarkStatus = {}; // Map to store bookmark status
+  late PagingController<int, OnProgressQuestSummary> _pagingController;
+  Map<String, bool> completedStatus = {}; // Map to store bookmark status
 
   @override
   void initState() {
     super.initState();
     _pagingController = PagingController(firstPageKey: 0);
     _pagingController.addPageRequestListener((pageKey) {
-      _fetchMarkedQuests(pageKey);
+      _fetchOnProgressQuests(pageKey);
     });
   }
 
-  Future<void> _fetchMarkedQuests(int pageKey) async {
+  Future<void> _fetchOnProgressQuests(int pageKey) async {
     try {
-      // Fetch marked quests from MongoDB or any other source
-      bool isSuccess = await UserQuestMongodb.fetchUserMarkedQuests();
+      // Fetch onProgress quests from MongoDB or any other source
+      bool isSuccess = await UserQuestMongodb.fetchUserOnProgressQuests();
 
       if (!isSuccess) {
         _pagingController.error = "Failed to fetch quest data";
         return;
       }
 
-      final allItems = GlobalVar.instance.userMarkedQuest ?? [];
+      final allItems = GlobalVar.instance.userOnProgressQuest ?? [];
       final reversedItems = List.from(allItems.reversed); // Reverse the array
 
       // Clear existing data if it's the first page
@@ -54,36 +55,11 @@ class _UserMarkedQuestListState extends State<UserMarkedQuestList> {
 
       // Append data to _pagingController
       _pagingController
-          .appendLastPage(reversedItems.cast<MarkedQuestSummary>());
+          .appendLastPage(reversedItems.cast<OnProgressQuestSummary>());
     } catch (error) {
-      print("Error fetching marked quests: $error");
+      print("Error fetching onProgress quests: $error");
       _pagingController.error = error.toString();
     }
-  }
-
-  void _unBookmarkMarkedQuest(MarkedQuestSummary quest) async {
-    print('check 2 : $quest');
-    bool isSuccess = await UserQuestMongodb.unBookMarkQuest(quest.objectId);
-
-    if (!isSuccess) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to unbookmark quest'),
-          duration: Duration(seconds: 1), // Optional, specify the duration
-        ),
-      );
-      setState(() {
-        _pagingController.error = "Failed to unbookmark quest";
-      });
-      return;
-    }
-
-    // Update bookmark status in the map
-    setState(() {
-      bookmarkStatus[quest.objectId] = false;
-    });
-
-    _refreshList();
   }
 
   Future<void> _refreshList() async {
@@ -94,22 +70,19 @@ class _UserMarkedQuestListState extends State<UserMarkedQuestList> {
   Widget build(BuildContext context) {
     return RefreshIndicator(
       onRefresh: _refreshList,
-      child: PagedListView<int, MarkedQuestSummary>(
+      child: PagedListView<int, OnProgressQuestSummary>(
         pagingController: _pagingController,
-        builderDelegate: PagedChildBuilderDelegate<MarkedQuestSummary>(
+        builderDelegate: PagedChildBuilderDelegate<OnProgressQuestSummary>(
           itemBuilder: (context, item, index) {
-            bool isBookmarked = bookmarkStatus[item.objectId] ?? false;
             return QuestListItem(
               quest: item,
               colorPattern: questColors[index % questColors.length],
-              isBookmark: isBookmarked,
-              unBookmarkCallback: _unBookmarkMarkedQuest,
             );
           },
           noItemsFoundIndicatorBuilder: (context) {
             return Center(
               child: Text(
-                'No marked quests found',
+                'No onProgress quests found',
                 style: TextStyle(color: GlobalVar.baseColor),
               ),
             );
@@ -121,17 +94,13 @@ class _UserMarkedQuestListState extends State<UserMarkedQuestList> {
 }
 
 class QuestListItem extends StatelessWidget {
-  final MarkedQuestSummary quest;
+  final OnProgressQuestSummary quest;
   final Color colorPattern;
-  final bool isBookmark;
-  final Function(MarkedQuestSummary) unBookmarkCallback;
 
   QuestListItem({
     Key? key,
     required this.quest,
     required this.colorPattern,
-    required this.isBookmark,
-    required this.unBookmarkCallback,
   }) : super(key: key);
 
   @override
@@ -143,9 +112,6 @@ class QuestListItem extends StatelessWidget {
         mainPageState.onTapController.add(() {
           mainPageState.panelController.expand();
         });
-
-        // print(
-        //     ( 'disini' +GlobalVar.instance.homePageQuestFeed['isOnProgress']).runtimeType);
 
         // Handle tap event to update questDataSelected
         Provider.of<GlobalVar>(context, listen: false).questDataSelected = {
@@ -163,9 +129,7 @@ class QuestListItem extends StatelessWidget {
           'status': quest.status,
           'rangers': quest.rangers,
           'contact': quest.questOwnerPhone,
-          'isBookmarked': true,
           'isOnProgress': quest.isOnProgress,
-          'isCompleted': quest.isCompleted
         };
       },
       child: Card(
@@ -190,17 +154,14 @@ class QuestListItem extends StatelessWidget {
                     ),
                   ),
                   IconButton(
-                    icon: Icon(
-                      isBookmark
-                          ? Icons.bookmark_add_outlined
-                          : Icons.bookmark_add,
-                      color: GlobalVar.mainColor,
+                    onPressed: () {},
+                    icon: SizedBox(
+                      height: 24,
+                      child: Image.asset(
+                        "assets/images/timeIcon.png",
+                      ),
                     ),
-                    onPressed: () {
-                      unBookmarkCallback(quest);
-
-                      print('check 1 : $quest');
-                    },
+                    color: GlobalVar.mainColor,
                   ),
                 ],
               ),
@@ -288,7 +249,7 @@ class QuestListItem extends StatelessWidget {
   }
 }
 
-class MarkedQuestSummary {
+class OnProgressQuestSummary {
   final String questName;
   final String instance;
   final String duration;
@@ -303,12 +264,10 @@ class MarkedQuestSummary {
   final List<String> categories;
   final String status;
   final List<String> rangers;
-  final String questOwnerPhone; // New property
-  final bool isBookmarked;
+  final String questOwnerPhone;
   final bool isOnProgress;
-  final bool isCompleted;
 
-  MarkedQuestSummary({
+  OnProgressQuestSummary({
     required this.questName,
     required this.instance,
     required this.duration,
@@ -324,9 +283,6 @@ class MarkedQuestSummary {
     required this.status,
     required this.rangers,
     required this.questOwnerPhone,
-    required this.isBookmarked,
     required this.isOnProgress,
-    required this.isCompleted,
-    // New property
   });
 }

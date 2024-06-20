@@ -158,8 +158,9 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
                                 padding: EdgeInsets.all(20),
                                 child: ListView(
                                   children: [
-                                    // jika dalam progress,
-                                    if (questData['isOnProgress'] == false)
+                                    // jika dalam progress atau completed tampilkna section ini,
+                                    if (questData['isOnProgress'] ==
+                                        false /* && questData['completed'] == false */)
                                       Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
@@ -565,12 +566,53 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
                                                             .length >
                                                         0;
 
+                                                var userLoginId = GlobalVar
+                                                    .instance
+                                                    .userLoginData['_id']
+                                                    .toHexString();
+                                                var questOwnerId =
+                                                    questData['userId'];
+
+                                                print(
+                                                    'Execute pressed on quest id: ${questData['objectId'] ?? 'No data'}, userLoginId: $userLoginId, questOwnerId: $questOwnerId');
+
+                                                // Check if user is the owner
+                                                if (userLoginId ==
+                                                    questOwnerId) {
+                                                  // Disable the button with text "You Are The Owner"
+                                                  if (mounted) {
+                                                    showDialog(
+                                                      context: context,
+                                                      barrierColor: GlobalVar
+                                                          .secondaryColorGreen
+                                                          .withOpacity(0.1),
+                                                      builder: (context) {
+                                                        return AlertDialog(
+                                                          content: Text(
+                                                            'You Are The Owner of this Quest.',
+                                                            textAlign: TextAlign
+                                                                .center,
+                                                            style: TextStyle(
+                                                              color: GlobalVar
+                                                                  .secondaryColorPink,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                            ),
+                                                          ),
+                                                          backgroundColor:
+                                                              GlobalVar
+                                                                  .mainColor,
+                                                        );
+                                                      },
+                                                    );
+                                                  }
+                                                  return;
+                                                }
+
                                                 // Condition: Execute only if the quest status is 'open' and user has no 'onProgress' quest
                                                 if (status == 'open' &&
                                                     !hasOnProgressQuest) {
-                                                  print(
-                                                      'Execute pressed on quest id: ${questData['objectId'] ?? 'No data'}');
-
                                                   var objectId =
                                                       questData['objectId'];
                                                   setState(() {
@@ -578,13 +620,13 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
                                                         .isLoading = true;
                                                   });
 
-                                                  // Pastikan objectId bukan null
+                                                  // Make sure objectId is not null
                                                   if (objectId != null) {
                                                     bool isSuccess =
                                                         await executeQuest(
                                                             objectId);
 
-                                                    // Tindakan yang diambil setelah memanggil executeQuest
+                                                    // Actions after executing executeQuest
                                                     if (isSuccess) {
                                                       setState(() {
                                                         GlobalVar.instance
@@ -593,15 +635,16 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
 
                                                       print(
                                                           'Quest executed successfully');
-                                                      // Tambahkan logika yang sesuai jika quest berhasil dieksekusi
+                                                      // Add appropriate logic if quest is successfully executed
 
                                                       Navigator.push(
                                                         context,
                                                         MaterialPageRoute(
                                                           builder: (context) =>
                                                               SuccessConfirmation(
-                                                                  successMessage:
-                                                                      "Quests Already registered as yours, You can complete the task's"),
+                                                            successMessage:
+                                                                "Quests Already registered as yours, You can complete the task's",
+                                                          ),
                                                         ),
                                                       );
                                                     } else {
@@ -618,34 +661,34 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
                                                           context: context,
                                                           barrierColor: GlobalVar
                                                               .secondaryColorGreen
-                                                              .withOpacity(
-                                                                  0.1), // black background color
+                                                              .withOpacity(0.1),
                                                           builder: (context) {
                                                             return AlertDialog(
-                                                                content: Text(
-                                                                  'Failed When Executing Quest, Try Again.',
-                                                                  textAlign:
-                                                                      TextAlign
-                                                                          .center,
-                                                                  style:
-                                                                      TextStyle(
-                                                                    color: GlobalVar
-                                                                        .secondaryColorPink,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .bold, // Add this line
-                                                                  ),
+                                                              content: Text(
+                                                                'Failed When Executing Quest, Try Again.',
+                                                                textAlign:
+                                                                    TextAlign
+                                                                        .center,
+                                                                style:
+                                                                    TextStyle(
+                                                                  color: GlobalVar
+                                                                      .secondaryColorPink,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
                                                                 ),
-                                                                backgroundColor:
-                                                                    GlobalVar
-                                                                        .mainColor);
+                                                              ),
+                                                              backgroundColor:
+                                                                  GlobalVar
+                                                                      .mainColor,
+                                                            );
                                                           },
                                                         );
                                                       }
                                                     }
                                                   } else {
                                                     print('Invalid quest id');
-                                                  } //disini
+                                                  }
                                                 } else if (status == 'closed') {
                                                   print('closed');
                                                   if (mounted) {
@@ -653,26 +696,25 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
                                                       context: context,
                                                       barrierColor: GlobalVar
                                                           .secondaryColorGreen
-                                                          .withOpacity(
-                                                              0.1), // black background color
+                                                          .withOpacity(0.1),
                                                       builder: (context) {
                                                         return AlertDialog(
-                                                            content: Text(
-                                                              'Quest is Closed.',
-                                                              textAlign:
-                                                                  TextAlign
-                                                                      .center,
-                                                              style: TextStyle(
-                                                                color: GlobalVar
-                                                                    .secondaryColorPink,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold, // Add this line
-                                                              ),
+                                                          content: Text(
+                                                            'Quest is Closed.',
+                                                            textAlign: TextAlign
+                                                                .center,
+                                                            style: TextStyle(
+                                                              color: GlobalVar
+                                                                  .secondaryColorPink,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
                                                             ),
-                                                            backgroundColor:
-                                                                GlobalVar
-                                                                    .mainColor);
+                                                          ),
+                                                          backgroundColor:
+                                                              GlobalVar
+                                                                  .mainColor,
+                                                        );
                                                       },
                                                     );
                                                   }
@@ -682,26 +724,25 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
                                                       context: context,
                                                       barrierColor: GlobalVar
                                                           .secondaryColorGreen
-                                                          .withOpacity(
-                                                              0.1), // black background color
+                                                          .withOpacity(0.1),
                                                       builder: (context) {
                                                         return AlertDialog(
-                                                            content: Text(
-                                                              'You already have a quest in progress.',
-                                                              textAlign:
-                                                                  TextAlign
-                                                                      .center,
-                                                              style: TextStyle(
-                                                                color: GlobalVar
-                                                                    .secondaryColorPink,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold, // Add this line
-                                                              ),
+                                                          content: Text(
+                                                            'You already have a quest in progress.',
+                                                            textAlign: TextAlign
+                                                                .center,
+                                                            style: TextStyle(
+                                                              color: GlobalVar
+                                                                  .secondaryColorPink,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
                                                             ),
-                                                            backgroundColor:
-                                                                GlobalVar
-                                                                    .mainColor);
+                                                          ),
+                                                          backgroundColor:
+                                                              GlobalVar
+                                                                  .mainColor,
+                                                        );
                                                       },
                                                     );
                                                   }
@@ -749,7 +790,426 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
                                           ),
                                         ],
                                       )
-                                    else
+                                    else if (questData['isCompleted'] == true)
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Image.asset(
+                                                'assets/images/diamondIcon.png',
+                                                width: 30,
+                                              ),
+                                              SizedBox(width: 10),
+                                              Text(
+                                                questData['instance'] ??
+                                                    'No data',
+                                                style: TextStyle(
+                                                  color: GlobalVar.baseColor,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          SizedBox(height: 5),
+                                          Row(
+                                            children: [
+                                              Image.asset(
+                                                'assets/images/noteIcon.png',
+                                                width: 22,
+                                              ),
+                                              SizedBox(width: 5),
+                                              Text(
+                                                questData['questName'] ??
+                                                    'No data',
+                                                style: TextStyle(
+                                                  color: GlobalVar.baseColor,
+                                                  fontWeight: FontWeight.w500,
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          SizedBox(height: 10),
+                                          Padding(
+                                            padding: EdgeInsets.symmetric(
+                                                horizontal: 30),
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Container(
+                                                  margin: EdgeInsets.only(
+                                                      bottom: 8),
+                                                  child: Divider(
+                                                    color: Colors.grey,
+                                                    thickness: 2,
+                                                    endIndent: 32,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  questData['description'] ??
+                                                      'No data',
+                                                  style: TextStyle(
+                                                    color: GlobalVar.baseColor,
+                                                    fontWeight: FontWeight.w400,
+                                                    fontSize: 12,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          SizedBox(height: 10),
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  Image.asset(
+                                                    'assets/images/taskIcon.png',
+                                                    width: 22,
+                                                  ),
+                                                  SizedBox(width: 5),
+                                                  SizedBox(
+                                                    width: 250,
+                                                    child: Container(
+                                                      decoration: BoxDecoration(
+                                                        color:
+                                                            GlobalVar.baseColor,
+                                                      ),
+                                                      padding:
+                                                          EdgeInsets.all(8.0),
+                                                      child: Text(
+                                                        (questData != null &&
+                                                                questData[
+                                                                        'tasks'] !=
+                                                                    null &&
+                                                                questData[
+                                                                        'tasks']
+                                                                    .isNotEmpty)
+                                                            ? questData['tasks']
+                                                                    [0] ??
+                                                                'No data'
+                                                            : 'No data',
+                                                        style: TextStyle(
+                                                          color: GlobalVar
+                                                              .mainColor,
+                                                          fontWeight:
+                                                              FontWeight.w400,
+                                                          fontSize: 14,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              if (questData != null &&
+                                                  questData['tasks'] != null)
+                                                for (int i = 1;
+                                                    i <
+                                                        questData['tasks']
+                                                            .length;
+                                                    i++)
+                                                  Column(
+                                                    children: [
+                                                      SizedBox(height: 5),
+                                                      Row(
+                                                        children: [
+                                                          Image.asset(
+                                                            'assets/images/taskIcon.png',
+                                                            width: 22,
+                                                          ),
+                                                          SizedBox(width: 5),
+                                                          SizedBox(
+                                                            width: 250,
+                                                            child: Container(
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                color: GlobalVar
+                                                                    .baseColor,
+                                                              ),
+                                                              padding:
+                                                                  EdgeInsets
+                                                                      .all(8.0),
+                                                              child: Text(
+                                                                questData['tasks']
+                                                                        [i] ??
+                                                                    'No data',
+                                                                style:
+                                                                    TextStyle(
+                                                                  color: GlobalVar
+                                                                      .mainColor,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w400,
+                                                                  fontSize: 14,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ],
+                                                  ),
+                                            ],
+                                          ),
+                                          SizedBox(height: 10),
+                                          Row(
+                                            // Ini adalah Row utama
+                                            children: [
+                                              Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Row(
+                                                    children: [
+                                                      Image.asset(
+                                                        'assets/images/prizeIcon.png',
+                                                        width: 22,
+                                                      ),
+                                                      SizedBox(
+                                                        width: 5,
+                                                      ),
+                                                      Text(
+                                                        'Rewards',
+                                                        style: TextStyle(
+                                                          color: GlobalVar
+                                                              .baseColor,
+                                                          fontWeight:
+                                                              FontWeight.w500,
+                                                          fontSize: 16,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  SizedBox(
+                                                    height: 5,
+                                                  ),
+                                                  Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment.start,
+                                                    children: [
+                                                      Container(
+                                                        width:
+                                                            150, // Set the desired width here
+                                                        height: 35,
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          color: GlobalVar
+                                                              .mainColor,
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(20),
+                                                        ),
+                                                        child: Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .start, // Align children to the start
+                                                          children: [
+                                                            Image.asset(
+                                                              "assets/images/coinIcon.png",
+                                                              width:
+                                                                  30, // Reduced image width
+                                                            ),
+                                                            SizedBox(width: 5),
+                                                            Consumer<GlobalVar>(
+                                                              builder: (context,
+                                                                  globalVar,
+                                                                  _) {
+                                                                Map<String,
+                                                                        dynamic>
+                                                                    questData =
+                                                                    globalVar
+                                                                            .questDataSelected ??
+                                                                        {};
+
+                                                                // Ensure questData['reward'] can be parsed to integer
+                                                                int rewardAmount =
+                                                                    int.tryParse(questData['reward'] ??
+                                                                            '0') ??
+                                                                        0;
+
+                                                                return Text(
+                                                                  'Rp. ${NumberFormat.currency(locale: 'id_ID', decimalDigits: 0, symbol: '').format(rewardAmount)}',
+                                                                  style:
+                                                                      TextStyle(
+                                                                    fontSize:
+                                                                        12, // Reduced font size
+                                                                    color: GlobalVar
+                                                                        .secondaryColorGreen,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold,
+                                                                  ),
+                                                                  softWrap:
+                                                                      true, // Ensures text wraps within the row
+                                                                );
+                                                              },
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  SizedBox(
+                                                    height: 10,
+                                                  ),
+                                                  Row(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Image.asset(
+                                                        'assets/images/calendarIcon.png',
+                                                        width: 22,
+                                                      ),
+                                                      SizedBox(width: 5),
+                                                      Text(
+                                                        'Date & Duration',
+                                                        style: TextStyle(
+                                                          color: GlobalVar
+                                                              .baseColor,
+                                                          fontWeight:
+                                                              FontWeight.w500,
+                                                          fontSize: 16,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  SizedBox(height: 5),
+                                                  Container(
+                                                    padding:
+                                                        EdgeInsets.symmetric(
+                                                            horizontal: 10,
+                                                            vertical: 5),
+                                                    decoration: BoxDecoration(
+                                                      color:
+                                                          GlobalVar.baseColor,
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              8),
+                                                    ),
+                                                    child: Text(
+                                                      questData['date'] != null
+                                                          ? DateFormat(
+                                                                  'E, dd MMM yyyy \'at\' HH:mm')
+                                                              .format(DateTime
+                                                                  .parse(questData[
+                                                                      'date']))
+                                                          : 'No data',
+                                                      style: TextStyle(
+                                                        color:
+                                                            GlobalVar.mainColor,
+                                                        fontSize: 12,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  SizedBox(height: 5),
+                                                  Text(
+                                                    '${questData['duration'] ?? ''} days',
+                                                    style: TextStyle(
+                                                      color:
+                                                          GlobalVar.baseColor,
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                      fontSize: 14,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              SizedBox(
+                                                  width:
+                                                      5), // Tambahkan spasi horizontal di sini
+                                              Image.asset(
+                                                'assets/images/discussionIcon.png',
+                                                height: 75,
+                                              ),
+                                            ],
+                                          ),
+                                          SizedBox(height: 10),
+                                          Row(
+                                            children: [
+                                              Image.asset(
+                                                'assets/images/locationIcon.png',
+                                                width: 22,
+                                              ),
+                                              SizedBox(width: 5),
+                                              Text(
+                                                'Location',
+                                                style: TextStyle(
+                                                  color: GlobalVar.baseColor,
+                                                  fontWeight: FontWeight.w500,
+                                                  fontSize: 16,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          SizedBox(height: 5),
+                                          Text(
+                                            questData['address'] ?? 'No data',
+                                            style: TextStyle(
+                                              color: GlobalVar.baseColor,
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                          SizedBox(height: 10),
+                                          Row(
+                                            children: [
+                                              Image.asset(
+                                                'assets/images/personIcon.png',
+                                                width: 22,
+                                              ),
+                                              SizedBox(width: 5),
+                                              Text(
+                                                'RSVP',
+                                                style: TextStyle(
+                                                  color: GlobalVar.baseColor,
+                                                  fontWeight: FontWeight.w500,
+                                                  fontSize: 16,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          SizedBox(height: 5),
+                                          Text(
+                                            questData['contact'] ?? 'No data',
+                                            style: TextStyle(
+                                              color: GlobalVar.baseColor,
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                          SizedBox(height: 10),
+                                          Center(
+                                            child: ElevatedButton(
+                                              onPressed:
+                                                  null, // Disable the button
+                                              style: ButtonStyle(
+                                                backgroundColor:
+                                                    MaterialStateProperty
+                                                        .resolveWith((states) =>
+                                                            Colors.grey),
+                                              ),
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(8.0),
+                                                child: Text(
+                                                  'Quest Completed',
+                                                  style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 30,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontStyle: FontStyle.italic,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      )
+                                    else if (questData['isOnProgress'] == true)
                                       Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,

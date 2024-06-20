@@ -140,6 +140,7 @@ class QuestMongodb {
             address: quest['address'],
             date: date.toIso8601String(),
             rangers: List<String>.from(quest['rangers'] ?? []),
+            userId: quest['userId'],
             categories: List<String>.from(quest['categories'] ?? []),
             status: quest['status'],
             questOwnerPhone: questOwnerPhone,
