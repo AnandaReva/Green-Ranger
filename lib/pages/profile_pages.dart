@@ -1,9 +1,9 @@
-// ignore_for_file: prefer_const_constructors
-
+import 'package:date_picker_timeline/date_picker_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
-import 'package:green_ranger/globalVar.dart';
+import 'package:provider/provider.dart'; // Assuming you are using Provider for state management
+import 'package:green_ranger/globalVar.dart'; // Your global variables file
+import 'package:green_ranger/pages/settingPage.dart'; // Your SettingPage widget
 
 class ProfilePages extends StatelessWidget {
   const ProfilePages({super.key});
@@ -12,14 +12,15 @@ class ProfilePages extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<GlobalVar>(
       builder: (context, globalVar, _) {
-        Map<String, dynamic> userData = globalVar.userLoginData;
+        // Initialize userData as Map<String, dynamic>
+        Map<String, dynamic> userData =
+            Map<String, dynamic>.from(globalVar.userLoginData ?? {});
 
-        // Define _userLevel variable
-        // Define _userLevel variable
+        // Define _userLevel and _nextLevelExp variables
         String _userLevel;
         String _nextLevelExp;
 
-        // Determine user level
+        // Determine user level based on 'exp' key in userData
         int userExp = userData['exp'] ?? 0;
         int levelStep = 1500;
         int userLevelValue = (userExp / levelStep).floor();
@@ -53,15 +54,22 @@ class ProfilePages extends StatelessWidget {
             ),
             actions: [
               IconButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SettingPage(),
+                    ),
+                  );
+                },
                 icon: const Icon(
-                  Icons.add_alert,
+                  Icons.settings,
                   color: GlobalVar.baseColor,
                 ),
               ),
             ],
           ),
-          body: ProfileBody(userData: userData),
+          body: ProfileBody(userData: userData, nextLevelExp: _nextLevelExp),
         );
       },
     );
@@ -70,8 +78,10 @@ class ProfilePages extends StatelessWidget {
 
 class ProfileBody extends StatefulWidget {
   final Map<String, dynamic> userData;
+  final String nextLevelExp;
 
-  const ProfileBody({super.key, required this.userData});
+  const ProfileBody(
+      {super.key, required this.userData, required this.nextLevelExp});
 
   @override
   _ProfileBodyState createState() => _ProfileBodyState();
@@ -81,6 +91,9 @@ class _ProfileBodyState extends State<ProfileBody>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
+  // DATE TIME VARIABLE
+  DateTime _selectedDate = DateTime.now();
+
   @override
   void initState() {
     super.initState();
@@ -89,31 +102,17 @@ class _ProfileBodyState extends State<ProfileBody>
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.vertical,
+    return Expanded(
       child: Column(
-        children: <Widget>[
+        children: [
           profilePicture(),
           const SizedBox(height: 20),
           tabBar(),
           const SizedBox(height: 20),
-          tabBarView()
-        ],
-      ),
-    );
-  }
-
-  Container tabBarView() {
-    return Container(
-      width: double.maxFinite,
-      height: double.maxFinite,
-      child: Column(
-        children: [
           Expanded(
             child: TabBarView(
               controller: _tabController,
               children: [
-                // Tab Bar Content
                 statisticContent(),
                 calendarContent(),
                 reviewContent(),
@@ -125,7 +124,68 @@ class _ProfileBodyState extends State<ProfileBody>
     );
   }
 
-  Text calendarContent() => const Text("Calendar Content Under Construction");
+  Column calendarContent() {
+    return Column(
+      children: [
+        Container(
+          margin: EdgeInsets.only(top: 20, left: 20),
+          child: DatePicker(
+            DateTime.now(),
+            height: 100,
+            width: 80,
+            initialSelectedDate: DateTime.now(),
+            selectedTextColor: GlobalVar.mainColor,
+            selectionColor: GlobalVar.secondaryColorBlue,
+            dateTextStyle: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: GlobalVar.baseColor,
+            ),
+            dayTextStyle: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: GlobalVar.baseColor,
+            ),
+            monthTextStyle: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: GlobalVar.baseColor,
+            ),
+            onDateChange: (date) {
+              setState(() {
+                date = _selectedDate;
+              });
+            },
+          ),
+        ),
+        SizedBox(height: 20),
+        Expanded(
+          child: ListView(
+            children: [
+              Container(
+                height: 180,
+                margin: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                padding: EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.purpleAccent,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              Container(
+                height: 180,
+                margin: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                padding: EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.orangeAccent,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
 
   Column reviewContent() {
     int userExp =
@@ -156,7 +216,6 @@ class _ProfileBodyState extends State<ProfileBody>
                                 fontSize: 12,
                                 color: GlobalVar.baseColor,
                                 fontWeight: FontWeight.normal,
-                                
                               ),
                             ),
                             Text(
@@ -190,8 +249,7 @@ class _ProfileBodyState extends State<ProfileBody>
                               ),
                             ),
                             Text(
-                              // '$userExp / ${widget.nextLevelExp}',
-                              '$userExp ',
+                              '$userExp / ${widget.nextLevelExp}',
                               style: TextStyle(
                                 fontSize: 14,
                                 color: GlobalVar.baseColor,
@@ -269,6 +327,7 @@ class _ProfileBodyState extends State<ProfileBody>
 
   Container tabBar() {
     return Container(
+      margin: EdgeInsets.symmetric(horizontal: 8),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(50.0),
         border: Border.all(
@@ -346,6 +405,32 @@ class _ProfileBodyState extends State<ProfileBody>
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class TaskTile extends StatelessWidget {
+  final String taskName;
+
+  TaskTile({required this.taskName});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+      padding: EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.blue,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Text(
+        taskName,
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }

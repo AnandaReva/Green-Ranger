@@ -41,7 +41,7 @@ class _UserQuestPageState extends State<UserQuestPage>
   Widget build(BuildContext context) {
     return Consumer<GlobalVar>(
       builder: (context, globalVar, _) {
-        Map<String, dynamic> userData = globalVar.userLoginData;
+        // Map<String, dynamic> userData = globalVar.userLoginData;
 
         return DefaultTabController(
           length: 3,

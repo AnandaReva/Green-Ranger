@@ -1,16 +1,15 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:green_ranger/components/slidingPanel/questDetailSlidePanel.dart';
-import 'package:green_ranger/components/slidingPanel/questReportSlidePanel.dart';
-
 import 'package:green_ranger/pages/createQuestPage.dart';
 import 'package:green_ranger/pages/homePage.dart';
 import 'package:green_ranger/globalVar.dart';
 import 'package:green_ranger/onboarding/onboarding_screen.dart';
-import 'package:green_ranger/pages/login_register_page.dart';
+import 'package:green_ranger/pages/authPage.dart';
 import 'package:green_ranger/pages/profile_pages.dart';
 import 'package:green_ranger/pages/searchPage.dart';
 import 'package:flutter_sliding_up_panel/sliding_up_panel_widget.dart';
@@ -18,15 +17,41 @@ import 'package:green_ranger/pages/userQuestPage.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  GlobalVar globalVar = GlobalVar.instance;
 
+  Platform.isAndroid
+      ? await Firebase.initializeApp(
+          options: const FirebaseOptions(
+              apiKey: 'AIzaSyDHhS1joU9B_M61p2j6cADe_XOtBDI4NzM',
+              appId: '1:81206821612:android:5b681cf1e8b96625cedbc9',
+              messagingSenderId: '81206821612',
+              projectId: 'green-ranger-a112e',
+              storageBucket: "green-ranger-a112e.appspot.com"))
+      : await Firebase.initializeApp();
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+// dont delete
 //  await prefs.clear();
   bool hasLoggedInOnce = prefs.getBool("hasLoggedInOnce") ?? false;
 
   await prefs.setBool("hasLoggedInOnce", true);
   print('Has Logged In Once: $hasLoggedInOnce');
+
+  User? user = FirebaseAuth.instance.currentUser;
+  if (user != null) {
+
+    String userEmail = user.email ?? "Terjadi Kesalahan saat mengambil data";
+    String userUid = user.uid;
+    print("User Account firebase: $userEmail , $userUid ");
+
+    // // Load user data
+    // await LoginPageState().findUserDataFromDB(userEmail);
+    // print('cek user: ${globalVar.userLoginData}');
+  }
 
   runApp(MyApp(initialRoute: getInitialRoute(hasLoggedInOnce)));
 }
@@ -57,7 +82,7 @@ class MyApp extends StatelessWidget {
               'onboardScreen': (context) => OnBoardingScreen(
                     globalVar: globalVar,
                   ),
-              'AuthPage': (context) => SignInPage(
+              'AuthPage': (context) => AuthPage(
                     globalVar: globalVar,
                   ),
               // Add other routes here as needed

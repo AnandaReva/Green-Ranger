@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/foundation.dart';
+import 'package:green_ranger/components/firebase/firebaseAuth.dart';
 import 'package:green_ranger/components/loadingUI.dart';
 import 'package:green_ranger/globalVar.dart';
 import 'package:green_ranger/main.dart';
@@ -14,14 +15,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 bool loginForm = true; // Inisialisasi di luar blok if
 
-class SignInPage extends StatefulWidget {
-  const SignInPage({Key? key, required GlobalVar globalVar}) : super(key: key);
+class AuthPage extends StatefulWidget {
+  const AuthPage({Key? key, required GlobalVar globalVar}) : super(key: key);
 
   @override
-  State<SignInPage> createState() => LoginPageState();
+  State<AuthPage> createState() => AuthPageState();
 }
 
-class LoginPageState extends State<SignInPage> {
+class AuthPageState extends State<AuthPage> {
   GlobalVar globalVar = GlobalVar.instance;
 
   @override
@@ -48,48 +49,39 @@ class LoginPageState extends State<SignInPage> {
         setState(() {
           errorMessage = 'Please fill in all the data';
         });
-
         return;
       }
-
-      //  if (_controllerPassword.text.length < 8) {
-      //   setState(() {
-      //     errorMessage = 'Panjang kata sandi minimal 8';
-      //   });
-      //   return;
-      // }
-
-      // // Dummy validation dont delete
-      // if (_controllerEmail.text == 'admin@gmail.com' &&
-      //     _controllerPassword.text == 'admin123') {
-      //   final SharedPreferences prefs = await SharedPreferences.getInstance();
-      //   await prefs.setBool("hasLoggedInOnce", true);
-
-      //   Navigator.pushAndRemoveUntil(
-      //     context,
-      //     MaterialPageRoute(builder: (context) => MainPage()),
-      //     (route) => false,
-      //   );
-      // } else {
-      //   setState(() {
-      //     errorMessage = 'Email atau password salah';
-      //   });
-      // }
-
       setState(() {
         globalVar.isLoading = true;
       });
 
       print('chek login 1');
 
-      bool loginSuccess = await AuthMongodb.findUserDataMongodb(
-        _controllerEmail.text,
-        _controllerPassword.text,
+      bool firebaseAuthSuccess =
+          await FirebaseAuthService.signInWithEmailAndPassword(
+        email: _controllerEmail.text,
+        password: _controllerPassword.text,
       );
+      if (firebaseAuthSuccess) {
+        bool loginSuccess = await AuthMongodb.findUserDataMongodb(
+          _controllerEmail.text,
+          _controllerPassword.text,
+        );
 
-      // Cek apakah data berhasil ditemukan
-      if (!loginSuccess) {
-        // Jika gagal login, set pesan error
+        // Cek apakah data berhasil ditemukan
+        if (!loginSuccess) {
+          // Jika gagal login, set pesan error
+          setState(() {
+            globalVar.isLoading = false;
+          });
+
+          setState(() {
+            errorMessage = 'Invalid Email or Password';
+          });
+          return;
+        }
+      } else {
+        print('Failed to sign in');
         setState(() {
           globalVar.isLoading = false;
         });
@@ -99,6 +91,7 @@ class LoginPageState extends State<SignInPage> {
         });
         return;
       }
+
       // fetch feed quest content
       // await QuestMongodb.fetchQuestDataHomePage();
       // await UserQuestMongodb.fetchUserMarkedQuest();
@@ -230,6 +223,30 @@ class LoginPageState extends State<SignInPage> {
       if (kDebugMode) {
         print('Error during account creation: $e');
       }
+    }
+  }
+
+  Future<bool> signOutUser() async {
+    try {
+      
+
+      await FirebaseAuthService.signOut();
+
+      globalVar.userLoginData = null;
+      globalVar.questDataSelected = {};
+      globalVar.userMarkedQuest = null;
+      globalVar.userOnProgressQuest = null;
+      globalVar.userCompletedQuest = null;
+
+      
+
+      return true;
+    } catch (e) {
+      setState(() {
+        errorMessage = 'Error Logout from account: $e';
+      });
+
+      return false;
     }
   }
 

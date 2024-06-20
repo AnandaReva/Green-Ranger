@@ -16,7 +16,7 @@ class SearchPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<GlobalVar>(
       builder: (context, globalVar, _) {
-        Map<String, dynamic> userData = globalVar.userLoginData;
+        Map<dynamic, dynamic> userData = globalVar.userLoginData;
 
         return Scaffold(
           extendBody: true,

@@ -10,7 +10,7 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
     return Consumer<GlobalVar>(
       builder: (context, globalVar, _) {
         // Menggunakan data dummy
-        Map<String, dynamic> userData = globalVar.userLoginData;
+        Map<dynamic, dynamic> userData = globalVar.userLoginData;
 
         return AppBar(
           backgroundColor: GlobalVar.mainColor,
@@ -20,7 +20,7 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
             padding: EdgeInsets.only(left: 20),
             child: CircleAvatar(
               radius: 24,
-              backgroundImage: AssetImage(userData['profile_image']),
+              backgroundImage: AssetImage(userData['profile_image'] ?? 'assets\images\logo.png'),
             ),
           ),
           title: Column(
