@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "81206821612",
+    "project_id": "green-ranger-a112e",
+    "storage_bucket": "green-ranger-a112e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:81206821612:android:5b681cf1e8b96625cedbc9",
+        "android_client_info": {
+          "package_name": "com.example.green_ranger"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "81206821612-5g2oal33or4dqanglgf7amo746id8pn4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDHhS1joU9B_M61p2j6cADe_XOtBDI4NzM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "81206821612-5g2oal33or4dqanglgf7amo746id8pn4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

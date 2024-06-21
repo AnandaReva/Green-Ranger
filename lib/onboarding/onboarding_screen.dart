@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:green_ranger/globalVar.dart';
-import 'package:green_ranger/pages/login_register_page.dart';
+import 'package:green_ranger/pages/authPage.dart';
 
 import 'package:green_ranger/onboarding/intro_page_1.dart';
 import 'package:green_ranger/onboarding/intro_page_2.dart';
@@ -91,7 +91,7 @@ GlobalVar globalVar = GlobalVar.instance;
                             context,
                             MaterialPageRoute(
                               builder: (context) =>
-                                  SignInPage(globalVar: globalVar),
+                                  AuthPage(globalVar: globalVar),
                             ),
                           );
                         } else {

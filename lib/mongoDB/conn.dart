@@ -8,6 +8,7 @@ class MongoConnection {
 
   static const String USER_COLLECTION = "users";
   static const String QUEST_COLLECTION = "quests";
+  static const String RESULT_REPORT_COLLECTION = "result_report";
 
   late Db _db;
 

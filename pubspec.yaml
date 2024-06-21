@@ -44,7 +44,11 @@ dependencies:
   loading_animation_widget: ^1.2.1
   flutter_launcher_icons: ^0.13.1
   date_picker_timeline: ^1.2.6
-  fl_chart: ^0.68.0
+  firebase_auth: ^4.17.6
+  firebase_core: ^2.25.5
+  google_sign_in: ^6.2.1
+  file_picker: ^8.0.5
+  firebase_storage: ^11.7.7
     
 
 dev_dependencies:

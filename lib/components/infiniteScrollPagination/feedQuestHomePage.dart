@@ -177,6 +177,7 @@ class QuestListItem extends StatelessWidget {
           'status': quest.status,
           'contact': quest.questOwnerPhone,
           'rangers': quest.rangers,
+          'userId': quest.userId,
           'isBookmarked': quest.isBookmarked,
           'isOnProgress': quest.isOnProgress,
           'isCompleted': quest.isCompleted
@@ -341,7 +342,7 @@ class QuestListItem extends StatelessWidget {
 }
 
 class QuestFeedSummary {
-  final String objectId;
+  final objectId;
   final String questName;
   final String instance;
   final String duration;
@@ -353,6 +354,7 @@ class QuestFeedSummary {
   final String address;
   final String date;
   final List<String> rangers;
+  final String userId;
   final List<String> categories;
   final String status;
   final String questOwnerPhone;
@@ -373,10 +375,13 @@ class QuestFeedSummary {
       required this.address,
       required this.date,
       required this.rangers,
+      required this.userId,
       required this.categories,
       required this.status,
       required this.questOwnerPhone,
       required this.isBookmarked,
       required this.isOnProgress,
-      required this.isCompleted});
+      required this.isCompleted
+      
+      });
 }

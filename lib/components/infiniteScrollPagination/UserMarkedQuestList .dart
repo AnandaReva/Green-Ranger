@@ -37,7 +37,7 @@ class _UserMarkedQuestListState extends State<UserMarkedQuestList> {
   Future<void> _fetchMarkedQuests(int pageKey) async {
     try {
       // Fetch marked quests from MongoDB or any other source
-      bool isSuccess = await UserQuestMongodb.fetchUserMarkedQuest();
+      bool isSuccess = await UserQuestMongodb.fetchUserMarkedQuests();
 
       if (!isSuccess) {
         _pagingController.error = "Failed to fetch quest data";
@@ -144,6 +144,9 @@ class QuestListItem extends StatelessWidget {
           mainPageState.panelController.expand();
         });
 
+        // print(
+        //     ( 'disini' +GlobalVar.instance.homePageQuestFeed['isOnProgress']).runtimeType);
+
         // Handle tap event to update questDataSelected
         Provider.of<GlobalVar>(context, listen: false).questDataSelected = {
           'objectId': quest.objectId,
@@ -158,7 +161,11 @@ class QuestListItem extends StatelessWidget {
           'description': quest.description,
           'date': quest.date,
           'status': quest.status,
+          'rangers': quest.rangers,
           'contact': quest.questOwnerPhone,
+          'isBookmarked': true,
+          'isOnProgress': quest.isOnProgress,
+          'isCompleted': quest.isCompleted
         };
       },
       child: Card(
@@ -295,7 +302,11 @@ class MarkedQuestSummary {
   final String date;
   final List<String> categories;
   final String status;
+  final List<String> rangers;
   final String questOwnerPhone; // New property
+  final bool isBookmarked;
+  final bool isOnProgress;
+  final bool isCompleted;
 
   MarkedQuestSummary({
     required this.questName,
@@ -311,6 +322,11 @@ class MarkedQuestSummary {
     required this.date,
     required this.categories,
     required this.status,
-    required this.questOwnerPhone, // New property
+    required this.rangers,
+    required this.questOwnerPhone,
+    required this.isBookmarked,
+    required this.isOnProgress,
+    required this.isCompleted,
+    // New property
   });
 }

@@ -34,6 +34,7 @@ class GlobalVar extends ChangeNotifier {
   var _homePageQuestFeed;
   var _userMarkedQuest;
   var _userOnProgressQuest;
+  var _userCompletedQuest;
 
   String _errorMessageGlobal = "";
   bool _isLoading = false;
@@ -50,6 +51,7 @@ class GlobalVar extends ChangeNotifier {
   dynamic get homePageQuestFeed => _homePageQuestFeed;
   dynamic get userMarkedQuest => _userMarkedQuest;
   dynamic get userOnProgressQuest => _userOnProgressQuest;
+  dynamic get userCompletedQuest => _userCompletedQuest;
 
   Map<String, dynamic> get questDataSelected => _questDataSelected;
   Map<String, dynamic> get newQuestData => _newQuestData;
@@ -78,6 +80,10 @@ class GlobalVar extends ChangeNotifier {
 
   set userOnProgressQuest(dynamic value) {
     _userOnProgressQuest = value;
+  }
+
+  set userCompletedQuest(dynamic value) {
+    _userCompletedQuest = value;
   }
 
   set questDataSelected(Map<String, dynamic> value) {

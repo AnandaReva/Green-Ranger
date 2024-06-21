@@ -1,11 +1,10 @@
-// ignore_for_file: prefer_const_constructors
-
-import 'package:date_picker_timeline/date_picker_timeline.dart';
+import 'package:date_picker_timeline/date_picker_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:green_ranger/pages/setting_pages.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
-import 'package:green_ranger/globalVar.dart';
+import 'package:provider/provider.dart'; // Assuming you are using Provider for state management
+import 'package:green_ranger/globalVar.dart'; // Your global variables file
+import 'package:green_ranger/pages/settingPage.dart'; // Your SettingPage widget
 
 class ProfilePages extends StatelessWidget {
   const ProfilePages({super.key});
@@ -14,14 +13,15 @@ class ProfilePages extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<GlobalVar>(
       builder: (context, globalVar, _) {
-        Map<String, dynamic> userData = globalVar.userLoginData;
+        // Initialize userData as Map<String, dynamic>
+        Map<String, dynamic> userData =
+            Map<String, dynamic>.from(globalVar.userLoginData ?? {});
 
-        // Define _userLevel variable
-        // Define _userLevel variable
+        // Define _userLevel and _nextLevelExp variables
         String _userLevel;
         String _nextLevelExp;
 
-        // Determine user level
+        // Determine user level based on 'exp' key in userData
         int userExp = userData['exp'] ?? 0;
         int levelStep = 1500;
         int userLevelValue = (userExp / levelStep).floor();
@@ -59,7 +59,7 @@ class ProfilePages extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => SettingPages(),
+                      builder: (context) => SettingPage(),
                     ),
                   );
                 },
@@ -70,7 +70,7 @@ class ProfilePages extends StatelessWidget {
               ),
             ],
           ),
-          body: ProfileBody(userData: userData),
+          body: ProfileBody(userData: userData, nextLevelExp: _nextLevelExp),
         );
       },
     );
@@ -79,8 +79,10 @@ class ProfilePages extends StatelessWidget {
 
 class ProfileBody extends StatefulWidget {
   final Map<String, dynamic> userData;
+  final String nextLevelExp;
 
-  const ProfileBody({super.key, required this.userData});
+  const ProfileBody(
+      {super.key, required this.userData, required this.nextLevelExp});
 
   @override
   _ProfileBodyState createState() => _ProfileBodyState();
@@ -108,28 +110,6 @@ class _ProfileBodyState extends State<ProfileBody>
           const SizedBox(height: 20),
           tabBar(),
           const SizedBox(height: 20),
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                statisticContent(),
-                calendarContent(),
-                reviewContent(),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Container tabBarView() {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 8),
-      width: double.maxFinite,
-      height: double.maxFinite,
-      child: Column(
-        children: [
           Expanded(
             child: TabBarView(
               controller: _tabController,
@@ -216,61 +196,72 @@ class _ProfileBodyState extends State<ProfileBody>
         // Coin
         Row(
           children: [
-            Image.asset(
-              "assets/images/coinIcon.png",
-              width: 100,
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Ranger Coin',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: GlobalVar.baseColor,
-                    fontWeight: FontWeight.normal,
+            Padding(
+              padding: EdgeInsets.all(10.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Image.asset(
+                        "assets/images/coinIcon.png",
+                        width: 100,
+                      ),
+                      const SizedBox(width: 10),
+                      Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Ranger Coin',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: GlobalVar.baseColor,
+                                fontWeight: FontWeight.normal,
+                              ),
+                            ),
+                            Text(
+                              'Rp. ${NumberFormat.currency(locale: 'id_ID', decimalDigits: 0, symbol: '').format(widget.userData['wallet_value'] ?? 0)}',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: GlobalVar.baseColor,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ]),
+                    ],
                   ),
-                ),
-                Text(
-                  'Rp. ${NumberFormat.currency(locale: 'id_ID', decimalDigits: 0, symbol: '').format(widget.userData['wallet_value'] ?? 0)}',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: GlobalVar.baseColor,
-                    fontWeight: FontWeight.w500,
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Image.asset(
+                        "assets/images/cherryIcon.png",
+                        width: 100,
+                      ),
+                      const SizedBox(width: 10),
+                      Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Exp',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: GlobalVar.baseColor,
+                                fontWeight: FontWeight.normal,
+                              ),
+                            ),
+                            Text(
+                              '$userExp / ${widget.nextLevelExp}',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: GlobalVar.baseColor,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ]),
+                    ],
                   ),
-                ),
-              ],
-            ),
-          ],
-        ),
-        // Exp
-        Row(
-          children: [
-            Image.asset(
-              "assets/images/cherryIcon.png",
-              width: 100,
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Exp',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: GlobalVar.baseColor,
-                    fontWeight: FontWeight.normal,
-                  ),
-                ),
-                Text(
-                  // '$userExp / ${widget.nextLevelExp}',
-                  '$userExp ',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: GlobalVar.baseColor,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ),

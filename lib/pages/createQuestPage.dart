@@ -348,7 +348,7 @@ class _CreateQuestState extends State<CreateQuest> {
                                         "Your Wallet: " +
                                             GlobalVar.instance
                                                 .userLoginData['wallet_value']
-                                                .toString(),
+                                                .toString() ?? '0',
                                         style: TextStyle(
                                           color: GlobalVar.baseColor,
                                           fontSize: 18,
