@@ -49,6 +49,8 @@ dependencies:
   google_sign_in: ^6.2.1
   file_picker: ^8.0.5
   firebase_storage: ^11.7.7
+  flutter_floating_bottom_bar: ^1.2.0
+  flutter_svg: ^2.0.10+1
     
 
 dev_dependencies:

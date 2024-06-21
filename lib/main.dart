@@ -16,7 +16,6 @@ import 'package:flutter_sliding_up_panel/sliding_up_panel_widget.dart';
 import 'package:green_ranger/pages/userQuestPage.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 
@@ -41,7 +40,17 @@ Future<void> main() async {
   await prefs.setBool("hasLoggedInOnce", true);
   print('Has Logged In Once: $hasLoggedInOnce');
 
-  runApp(MyApp(initialRoute: await getInitialRoute(hasLoggedInOnce)));
+  runApp(
+    MaterialApp(
+      theme: ThemeData(
+        splashColor: Colors.transparent,
+        highlightColor: Colors.transparent,
+      ),
+      home: MyApp(
+        initialRoute: await getInitialRoute(hasLoggedInOnce),
+      ),
+    ),
+  );
 }
 
 Future<String> getInitialRoute(bool hasLoggedInOnce) async {
@@ -121,11 +130,16 @@ class MainPageState extends State<MainPage> with TickerProviderStateMixin {
 
   @override
   final List<Destination> allDestinations = [
-    Destination(0, '', Icons.home, GlobalVar.baseColor),
-    Destination(1, '', Icons.search, GlobalVar.baseColor),
-    Destination(3, '', Icons.task, GlobalVar.baseColor),
-    Destination(2, '', Icons.add_circle, GlobalVar.baseColor), // create quest
-    Destination(4, '', Icons.person, GlobalVar.baseColor), // profile
+    Destination(0, 'Dashboard', "assets/images/icon_dashboard.png",
+        GlobalVar.baseColor),
+    Destination(
+        1, 'Guilds', "assets/images/icon_guild.png", GlobalVar.baseColor),
+    Destination(2, 'Your Quest', "assets/images/icon_createquest.png",
+        GlobalVar.baseColor),
+    Destination(
+        3, 'Create Quest', "assets/images/icon_quest.png", GlobalVar.baseColor),
+    Destination(
+        4, 'Profile', "assets/images/icon_person.png", GlobalVar.baseColor),
   ];
 
   @override
@@ -201,20 +215,40 @@ class MainPageState extends State<MainPage> with TickerProviderStateMixin {
           //   panelController: panelController, globalVar: globalVar),
         ],
       ),
-      bottomNavigationBar: NavigationBar(
-        backgroundColor: GlobalVar.mainColor,
-        selectedIndex: globalVar.selectedIndex,
-        onDestinationSelected: (index) {
-          setState(() {
+      bottomNavigationBar: NavigationBarTheme(
+        data: NavigationBarThemeData(
+          indicatorColor: Colors.transparent,
+          backgroundColor: GlobalVar.mainColor,
+          labelTextStyle: WidgetStateProperty.all(
+            const TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w500,
+                color: GlobalVar.baseColor),
+          ),
+        ),
+        child: NavigationBar(
+          selectedIndex: globalVar.selectedIndex,
+          onDestinationSelected: (index) => setState(() {
             globalVar.selectedIndex = index;
-          });
-        },
-        destinations: allDestinations.map((destination) {
-          return NavigationDestination(
-            icon: Icon(destination.icon, color: GlobalVar.baseColor),
-            label: destination.title,
-          );
-        }).toList(),
+          }),
+          destinations: allDestinations.map((destination) {
+            return NavigationDestination(
+              icon: Image.asset(
+                color: const Color.fromARGB(255, 133, 132, 132),
+                destination.icon,
+                width: 24,
+                height: 24,
+              ),
+              selectedIcon: Image.asset(
+                color: GlobalVar.baseColor,
+                destination.icon,
+                width: 24,
+                height: 24,
+              ),
+              label: destination.title,
+            );
+          }).toList(),
+        ),
       ),
     );
   }
@@ -237,9 +271,8 @@ class SuccesCreatingQuestConfirmationScreen {}
 
 class Destination {
   const Destination(this.index, this.title, this.icon, this.color);
-
   final int index;
   final String title;
-  final IconData icon;
+  final String icon;
   final Color color;
 }
