@@ -216,78 +216,64 @@ class _ProfileBodyState extends State<ProfileBody>
         // Coin
         Row(
           children: [
-            Padding(
-              padding: EdgeInsets.all(10.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Image.asset(
-                        "assets/images/coinIcon.png",
-                        width: 100,
-                      ),
-                      const SizedBox(width: 10),
-                      Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Ranger Coin',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: GlobalVar.baseColor,
-                                fontWeight: FontWeight.normal,
-                              ),
-                            ),
-                            Text(
-                              'Rp. ${NumberFormat.currency(locale: 'id_ID', decimalDigits: 0, symbol: '').format(widget.userData['wallet_value'] ?? 0)}',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: GlobalVar.baseColor,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ]),
-                    ],
+            Image.asset(
+              "assets/images/coinIcon.png",
+              width: 100,
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Ranger Coin',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: GlobalVar.baseColor,
+                    fontWeight: FontWeight.normal,
                   ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Image.asset(
-                        "assets/images/cherryIcon.png",
-                        width: 100,
-                      ),
-                      const SizedBox(width: 10),
-                      Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Exp',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: GlobalVar.baseColor,
-                                fontWeight: FontWeight.normal,
-                              ),
-                            ),
-                            Text(
-                              // '$userExp / ${widget.nextLevelExp}',
-                              '$userExp ',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: GlobalVar.baseColor,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ]),
-                    ],
+                ),
+                Text(
+                  'Rp. ${NumberFormat.currency(locale: 'id_ID', decimalDigits: 0, symbol: '').format(widget.userData['wallet_value'] ?? 0)}',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: GlobalVar.baseColor,
+                    fontWeight: FontWeight.w500,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ],
         ),
-        //TODO:Exp
-        Row(),
+        // Exp
+        Row(
+          children: [
+            Image.asset(
+              "assets/images/cherryIcon.png",
+              width: 100,
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Exp',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: GlobalVar.baseColor,
+                    fontWeight: FontWeight.normal,
+                  ),
+                ),
+                Text(
+                  // '$userExp / ${widget.nextLevelExp}',
+                  '$userExp ',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: GlobalVar.baseColor,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ],
     );
   }
@@ -342,7 +328,6 @@ class _ProfileBodyState extends State<ProfileBody>
             ],
           ),
         ),
-        // TODO:Analytic Content Disini
       ],
     );
   }
