@@ -199,6 +199,18 @@ class AuthPageState extends State<AuthPage> {
         return;
       }
 
+      bool isSuccessFirebase =
+          await FirebaseAuthService.createUserWithEmailAndPassword(
+              email: _controllerEmail.text, password: _controllerPassword.text);
+
+      if (!isSuccessFirebase) {
+        setState(() {
+          globalVar.isLoading = false;
+
+          errorMessage = 'Error registering account, Please';
+        });
+      }
+
       // fetch feed quest content
       // await QuestMongodb.fetchQuestDataHomePage();
       // await UserQuestMongodb.fetchUserMarkedQuest();
@@ -229,14 +241,20 @@ class AuthPageState extends State<AuthPage> {
 
   Future<bool> signOutUser() async {
     try {
-      await FirebaseAuthService.signOut();
+      FirebaseAuthService firebaseAuth = FirebaseAuthService();
+      await firebaseAuth.signOut();
 
       globalVar.userLoginData = null;
       globalVar.questDataSelected = {};
       globalVar.userMarkedQuest = null;
       globalVar.userOnProgressQuest = null;
       globalVar.userCompletedQuest = null;
-
+      User? user = FirebaseAuth.instance.currentUser;
+      // if (user != null) {
+      //   String userEmail =
+      //       user.email ?? "Terjadi Kesalahan saat mengambil data";
+      //   print("User Account firebase: $userEmail  ");
+      // }
       return true;
     } catch (e) {
       setState(() {

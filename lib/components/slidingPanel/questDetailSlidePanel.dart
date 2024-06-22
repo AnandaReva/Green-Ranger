@@ -8,6 +8,7 @@ import 'package:green_ranger/components/loadingUI.dart';
 import 'package:green_ranger/components/succesConfirmation.dart';
 import 'package:green_ranger/firebase/uploadResultReport.dart';
 import 'package:green_ranger/globalVar.dart';
+import 'package:green_ranger/main.dart';
 import 'package:green_ranger/mongoDB/questMongodb.dart';
 import 'package:green_ranger/mongoDB/resultReportMongodb.dart';
 
@@ -164,8 +165,7 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
                                 child: ListView(
                                   children: [
                                     // jika dalam progress atau completed tampilkna section ini,
-                                    if (questData['isOnProgress'] ==
-                                        false /* && questData['completed'] == false */)
+                                    if (questData['isOnProgress'] == false  && questData['isCompleted'] == false  ) // execute
                                       Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
@@ -795,7 +795,7 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
                                           ),
                                         ],
                                       )
-                                    else if (questData['isCompleted'] == true)
+                                    else if (questData['isCompleted'] == true) // completed
                                       Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
@@ -1214,7 +1214,7 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
                                           ),
                                         ],
                                       )
-                                    else if (questData['isOnProgress'] == true)
+                                    else if (questData['isOnProgress'] == true) // submit
                                       Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
@@ -1480,6 +1480,16 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
                                                       .toHexString();
                                                   onSubmitQuest(userId, questId,
                                                       rangerId);
+
+                                                  // MainPageState mainPageState =
+                                                  //     MainPage.of(context);
+
+                                                  // mainPageState.onTapController
+                                                  //     .add(() {
+                                                  //   mainPageState
+                                                  //       .panelController
+                                                  //       .collapse();
+                                                  // });
                                                 }
                                               },
                                               style: ButtonStyle(
@@ -1674,6 +1684,7 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
                     Container(
                       child: ElevatedButton(
                         onPressed: () async {
+
                           Navigator.of(context).pop();
 
                           File? imageFile = _selectedFile;
@@ -1702,6 +1713,7 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
                                 if (success) {
                                   print(
                                       'Data result report uploaded successfully');
+
                                   // Tampilkan snackbar jika menggunakan Flutter
                                   if (mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
@@ -1710,6 +1722,27 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
                                               'Data result report uploaded successfully')),
                                     );
                                   }
+                                  // Collapse the panel
+
+                                  setState(() {
+                                    _selectedFile = null;
+                                    _taskCheckedStates = List<bool>.filled(
+                                        widget.globalVar
+                                            .questDataSelected['tasks'].length,
+                                        false);
+                                    widget.panelController.collapse();
+                                  });
+
+                                  // panelController.Close();
+
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => SuccessConfirmation(
+                                          successMessage:
+                                              "Quest Report Has Been Sent!"),
+                                    ),
+                                  );
                                 } else {
                                   print('Failed to upload data result report');
                                   // Tampilkan snackbar jika menggunakan Flutter

@@ -20,7 +20,9 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
             padding: EdgeInsets.only(left: 20),
             child: CircleAvatar(
               radius: 24,
-              backgroundImage: AssetImage(userData['profile_image'] ?? 'assets\images\logo.png'),
+              backgroundImage: userData['profile_image'] != null
+                  ? AssetImage(userData['profile_image'])
+                  : AssetImage('assets/images/logo.png'),
             ),
           ),
           title: Column(

@@ -13,8 +13,8 @@ class ProfilePages extends StatelessWidget {
     return Consumer<GlobalVar>(
       builder: (context, globalVar, _) {
         // Initialize userData as Map<String, dynamic>
-        Map<String, dynamic> userData =
-            Map<String, dynamic>.from(globalVar.userLoginData ?? {});
+        Map userData =
+            Map<dynamic, dynamic>.from(globalVar.userLoginData ?? {});
 
         // Define _userLevel and _nextLevelExp variables
         String _userLevel;
@@ -77,7 +77,7 @@ class ProfilePages extends StatelessWidget {
 }
 
 class ProfileBody extends StatefulWidget {
-  final Map<String, dynamic> userData;
+  final Map<dynamic, dynamic> userData;
   final String nextLevelExp;
 
   const ProfileBody(
@@ -105,10 +105,10 @@ class _ProfileBodyState extends State<ProfileBody>
     return Expanded(
       child: Column(
         children: [
-          profilePicture(),
-          const SizedBox(height: 20),
+          profilePicture(), // disini
           tabBar(),
           const SizedBox(height: 20),
+
           Expanded(
             child: TabBarView(
               controller: _tabController,
@@ -119,6 +119,23 @@ class _ProfileBodyState extends State<ProfileBody>
               ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Center profilePicture() {
+    return Center(
+      child: Column(
+        children: [
+          CircleAvatar(
+            radius: 70,
+            backgroundImage: widget.userData['profile_image'] != null &&
+                    widget.userData['profile_image'] != ''
+                ? AssetImage(widget.userData['profile_image'])
+                : AssetImage('assets/images/logo.png'),
+          ),
+          
         ],
       ),
     );
@@ -259,6 +276,7 @@ class _ProfileBodyState extends State<ProfileBody>
                           ]),
                     ],
                   ),
+                  
                 ],
               ),
             ),
@@ -391,21 +409,6 @@ class _ProfileBodyState extends State<ProfileBody>
           width: 8,
         ),
       ],
-    );
-  }
-
-  Center profilePicture() {
-    return const Center(
-      child: Column(
-        children: [
-          CircleAvatar(
-            radius: 70,
-            backgroundImage: NetworkImage(
-              "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQBaM3CxDawkcDk651EFI7xnHMSeMc2ddgZ3szAHmLYREZfO_ONZqhumm1vOQ&s",
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

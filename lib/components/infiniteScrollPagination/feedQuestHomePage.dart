@@ -17,7 +17,9 @@ class AvailableQuestList extends StatefulWidget {
 
 class _AvailableQuestListState extends State<AvailableQuestList> {
   late final PagingController<int, QuestFeedSummary> _pagingController;
-  bool _isLoading = false;
+
+  int numberOfItems = 0;
+  DateTime? lastItemDate;
 
   final List<Color> questColors = [
     GlobalVar.secondaryColorGreen,
@@ -30,41 +32,12 @@ class _AvailableQuestListState extends State<AvailableQuestList> {
     super.initState();
     _pagingController = PagingController(firstPageKey: 0);
     _pagingController.addPageRequestListener((pageKey) {
-      _fetchPage(pageKey);
+      _fetchData(pageKey);
     });
   }
-  // dont delete !!!
-  // Future<void> _fetchPage(int pageKey) async {
-  //   try {
-  //     bool isSuccess = await QuestMongodb.fetchQuestDataHomePage();
 
-  //     if (!isSuccess) {
-  //       _pagingController.error = "Failed to fetch quest data";
-  //       return;
-  //     }
-
-  //     // Fetch feed quests from GlobalVar
-  //     final allItems = GlobalVar.instance.homePageQuestFeed ?? [];
-  //     final reversedItems = List.from(allItems.reversed); // Reverse the array
-
-  //     final newItems = reversedItems.skip(pageKey * 10).take(10).toList();
-  //     final isLastPage = newItems.length < 10 ||
-  //         pageKey * 10 + newItems.length >= reversedItems.length;
-
-  //     if (isLastPage) {
-  //       _pagingController.appendLastPage(newItems.cast<QuestFeedSummary>());
-  //     } else {
-  //       final nextPageKey = pageKey + 1;
-  //       _pagingController.appendPage(
-  //           newItems.cast<QuestFeedSummary>(), nextPageKey);
-  //     }
-  //   } catch (error) {
-  //     _pagingController.error =
-  //         error.toString(); // Set error to string representation of error
-  //   }
-  // }
-
-  Future<void> _fetchPage(int pageKey) async {
+  Future<void> _fetchData(int pageKey) async {
+    print("pageKey: $pageKey");
     try {
       bool isSuccess = await QuestMongodb.fetchQuestDataHomePage();
 
@@ -72,10 +45,15 @@ class _AvailableQuestListState extends State<AvailableQuestList> {
         _pagingController.error = "Failed to fetch quest data";
         return;
       }
-
-      // Fetch feed quests from GlobalVar
       final allItems = GlobalVar.instance.homePageQuestFeed ?? [];
-      final reversedItems = List.from(allItems.reversed); // Reverse the array
+
+      print('Total number of quests: {${GlobalVar.instance.totalFeedCount}');
+
+      if (allItems.isNotEmpty) {
+        final lastItemDate =
+            allItems.last.date; // Accessing the date of the last item
+        print('Date of the last item: $lastItemDate');
+      }
 
       // Clear existing data if it's the first page
       if (pageKey == 0) {
@@ -83,10 +61,44 @@ class _AvailableQuestListState extends State<AvailableQuestList> {
       }
 
       // Append data to _pagingController
-      _pagingController.appendLastPage(reversedItems.cast<QuestFeedSummary>());
+      _pagingController.appendLastPage(allItems.cast<QuestFeedSummary>());
+      // Get the number of items currently in _pagingController
+      int numberOfItems = allItems.length ?? 0;
+      print("Number of items after appending: $numberOfItems"); // always 20
     } catch (error) {
       _pagingController.error =
           error.toString(); // Set error to string representation of error
+    }
+  }
+
+  Future<void> _fetchMoreData(int pageKey) async {
+    print("pageKey: $pageKey");
+    try {
+      bool isSuccess = await QuestMongodb.fetchMoreQuestData(lastItemDate);
+
+      if (!isSuccess) {
+        _pagingController.error = "Failed to fetch quest data";
+        return;
+      }
+      final allItems = GlobalVar.instance.homePageQuestFeed ?? [];
+
+      print('Total number of quests: ${GlobalVar.instance.totalFeedCount}');
+
+      if (allItems.isNotEmpty) {
+        lastItemDate = DateTime.parse(allItems
+            .last.date); // Accessing and parsing the date of the last item
+        print('Date of the last item: $lastItemDate');
+      }
+
+      if (pageKey == 0) {
+        _pagingController.itemList?.clear();
+      }
+
+      _pagingController.appendLastPage(allItems.cast<QuestFeedSummary>());
+      int numberOfItems = allItems.length ?? 0;
+      print("Number of items after appending: $numberOfItems");
+    } catch (error) {
+      _pagingController.error = error.toString();
     }
   }
 
@@ -94,7 +106,6 @@ class _AvailableQuestListState extends State<AvailableQuestList> {
     _pagingController.refresh();
   }
 
-  @override
   Widget build(BuildContext context) {
     return Container(
       child: Column(
@@ -105,32 +116,76 @@ class _AvailableQuestListState extends State<AvailableQuestList> {
               child: PagedListView<int, QuestFeedSummary>(
                 pagingController: _pagingController,
                 builderDelegate: PagedChildBuilderDelegate<QuestFeedSummary>(
-                  itemBuilder: (context, item, index) => QuestListItem(
-                    quest: item,
-                    colorPattern: questColors[index % questColors.length],
-                  ),
-                  noItemsFoundIndicatorBuilder: (context) {
-                    if (_isLoading) {
-                      return Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    } else {
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'No Quests Shown, Please Try Again',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: GlobalVar.mainColor,
+                  itemBuilder: (context, item, index) {
+                    // Check if current item is the last one
+
+                    return Column(
+                      children: [
+                        QuestListItem(
+                          quest: item,
+                          colorPattern: questColors[index % questColors.length],
+                        ),
+                        if (index == _pagingController.itemList!.length - 1 &&
+                            index <
+                                GlobalVar.instance.totalFeedCount -
+                                    1) // Show load more button for the last item and when there are more items to load
+
+                          TextButton(
+                            onPressed: () {
+                              _fetchMoreData(
+                                  _pagingController.nextPageKey ?? 0);
+                            },
+                            child: Container(
+                              width: 100,
+
+                              decoration: BoxDecoration(
+                                color: GlobalVar.mainColor.withOpacity(0.5),
+                                borderRadius: BorderRadius.circular(
+                                    10), // Adjust border radius as needed
+                              ),
+                              padding:
+                                  EdgeInsets.all(8), // Adjust padding as needed
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    'Load More',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                      color: GlobalVar.secondaryColorGreen,
+                                    ),
+                                  ),
+                                  SizedBox(
+                                      width: 4), // Adjust spacing as needed
+                                  Icon(
+                                    Icons.refresh,
+                                    size: 20,
+                                    color: GlobalVar.secondaryColorGreen,
+                                  ),
+                                ],
                               ),
                             ),
-                          ],
-                        ),
-                      );
-                    }
+                          ),
+                      ],
+                    );
+                  },
+                  noItemsFoundIndicatorBuilder: (context) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'No Quests Shown, Please Try Again',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: GlobalVar.baseColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
                   },
                 ),
               ),
@@ -156,12 +211,6 @@ class QuestListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        MainPageState mainPageState = MainPage.of(context);
-
-        mainPageState.onTapController.add(() {
-          mainPageState.panelController.expand();
-        });
-
         Provider.of<GlobalVar>(context, listen: false).questDataSelected = {
           'objectId': quest.objectId,
           'questName': quest.questName,
@@ -182,6 +231,14 @@ class QuestListItem extends StatelessWidget {
           'isOnProgress': quest.isOnProgress,
           'isCompleted': quest.isCompleted
         };
+
+        print(
+            '${quest.questName} : isCOmplete,${quest.isCompleted}  ,  isOnprogress ${quest.isOnProgress}');
+
+        MainPageState? mainPageState = MainPage.of(context);
+        mainPageState?.onTapController.add(() {
+          mainPageState.panelController.expand();
+        });
       },
       child: Card(
         margin: EdgeInsets.all(8),
@@ -381,7 +438,5 @@ class QuestFeedSummary {
       required this.questOwnerPhone,
       required this.isBookmarked,
       required this.isOnProgress,
-      required this.isCompleted
-      
-      });
+      required this.isCompleted});
 }

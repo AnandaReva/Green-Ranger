@@ -8,6 +8,8 @@ class UploadResultReport {
   static Future<String?> getDownloadUrl(
       String questId, String rangerId, File file) async {
     try {
+
+      
       String path = "quests/$questId/rangers/$rangerId/";
       final fileName = file.path.split("/").last;
       final timeStamp = DateTime.now().millisecondsSinceEpoch;

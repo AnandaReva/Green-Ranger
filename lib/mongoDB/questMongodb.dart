@@ -47,15 +47,20 @@ class QuestMongodb {
         return false;
       }
       // dont remove all print check
-      print('Check 1');
+      //  print('Check 1');
 
       var questCollection =
           mongoConnection.db.collection(MongoConnection.QUEST_COLLECTION);
 
-      // Query to limit results to 20 quests
-      var questQuery = where.limit(20);
+      GlobalVar.instance.totalFeedCount = await questCollection.count(where);
 
-      var quests = await questCollection.find(questQuery).toList();
+      var questQuery = await questCollection
+          .find(where.sortBy('date', descending: true).limit(20))
+          .toList();
+
+      var quests = questQuery;
+
+//var quests = await questCollection.find(questQuery).toList();
 
       if (quests.isNotEmpty) {
         var userCollection =
@@ -75,9 +80,9 @@ class QuestMongodb {
         var completed = List<String>.from(
             GlobalVar.instance.userLoginData['quest']['completed'] ?? []);
         // sample Output: [666da54aa8d882ad0fa0dc39,, 666da54aa8d882ad0fa0dc3b]
-        print('Check 2 marked QuestList : $markedQuests');
-        print('Check 2 onPrgress QuestList: $onProgress');
-        print('Check 2 completed QuestList: $completed');
+        // print('Check 2 marked QuestList : $markedQuests');
+        // print('Check 2 onPrgress QuestList: $onProgress');
+        // print('Check 2 completed QuestList: $completed');
 
 // Iterate through each quest
         var num = 0;
@@ -164,92 +169,95 @@ class QuestMongodb {
     }
   }
 
-  // static Future<bool> fetchMoreQuestData(int pageKey) async {
-  //   final mongoConnection = MongoConnection();
+  static Future<bool> fetchMoreQuestData(DateTime? lastItemDate) async {
+    final mongoConnection = MongoConnection();
 
-  //   try {
-  //     bool isConnected = await mongoConnection.openConnection();
+    try {
+      bool isConnected = await mongoConnection.openConnection();
 
-  //     if (!isConnected) {
-  //       print('Failed to connect to MongoDB.');
-  //       return false;
-  //     }
+      if (!isConnected) {
+        print('Failed to connect to MongoDB.');
+        return false;
+      }
 
-  //     var questCollection =
-  //         mongoConnection.db.collection(MongoConnection.QUEST_COLLECTION);
+      var questCollection =
+          mongoConnection.db.collection(MongoConnection.QUEST_COLLECTION);
 
-  //     // get 10 more quests data
-  //     final int limit = 10;
-  //     final int skip = pageKey * limit;
+      // Define the query to fetch more data based on the last item's date
+      var query = lastItemDate != null
+          ? where
+              .sortBy('date', descending: true)
+              .gt('date', lastItemDate.toIso8601String())
+              .limit(20)
+          : where.sortBy('date', descending: true).limit(20);
 
-  //     final cursor = questCollection.find(where.limit(limit).skip(skip));
-  //     final newQuestData = await cursor.toList();
+      var questQuery = await questCollection.find(query).toList();
+      var quests = questQuery;
 
-  //     print(
-  //         'Quests Data before adding: ${GlobalVar.instance.homePageQuestFeed}');
+      if (quests.isNotEmpty) {
+        var userCollection =
+            mongoConnection.db.collection(MongoConnection.USER_COLLECTION);
 
-  //     // cek apakah data baru null
-  //     if (newQuestData.isEmpty) {
-  //       return false; // tidak ada data baru
-  //     }
+        List<QuestFeedSummary> questFeedSummaryList = [];
 
-  //     var userCollection =
-  //         mongoConnection.db.collection(MongoConnection.USER_COLLECTION);
+        var markedQuests = List<String>.from(
+            GlobalVar.instance.userLoginData['quest']['marked'] ?? []);
+        var onProgress = List<String>.from(
+            GlobalVar.instance.userLoginData['quest']['onProgress'] ?? []);
+        var completed = List<String>.from(
+            GlobalVar.instance.userLoginData['quest']['completed'] ?? []);
 
-  //     // Iterate through each new quest to find the corresponding user phone number and add to the list
-  //     for (var quest in newQuestData) {
-  //       var userId = quest['userId'] as String;
-  //       var userQuery = where.eq('_id', ObjectId.parse(userId));
-  //       var user = await userCollection.findOne(userQuery);
+        for (var quest in quests) {
+          var questId = quest['_id'];
+          var userId = quest['userId'] as String;
+          var userQuery = where.eq('_id', ObjectId.parse(userId));
+          var user = await userCollection.findOne(userQuery);
 
-  //       String questOwnerPhone = '';
-  //       if (user != null) {
-  //         questOwnerPhone = user['phone'];
-  //       }
+          String questOwnerPhone = '';
+          if (user != null) {
+            questOwnerPhone = user['phone'];
+          }
 
-  //       // Convert 'date' string to DateTime object
-  //       DateTime date = DateTime.parse(quest['date']);
+          DateTime date = DateTime.parse(quest['date']);
 
-  //       // Check if current quest is bookmarked
-  //       bool isBookmarked = false;
-  //       List<String> markedQuests =
-  //           GlobalVar.instance.userLoginData['quest']['marked'];
-  //       if (markedQuests.contains(quest['_id'].toString())) {
-  //         isBookmarked = true;
-  //       }
+          bool isBookmarked = markedQuests.contains(questId.toHexString());
+          bool isOnProgress = onProgress.contains(questId.toHexString());
+          bool isCompleted = completed.contains(questId.toHexString());
 
-  //       GlobalVar.instance.homePageQuestFeed.add(QuestFeedSummary(
-  //         questName: quest['questName'],
-  //         instance: quest['instance'],
-  //         duration: quest['duration'],
-  //         maxRangers: quest['maxRangers'],
-  //         levelRequirements: quest['levelRequirements'],
-  //         reward: quest['reward'],
-  //         description: quest['description'],
-  //         taskList: List<String>.from(quest['taskList'] ?? []),
-  //         address: quest['address'],
-  //         objectId: quest['_id'].toString(),
-  //         date: date.toIso8601String(), // Convert DateTime to ISO 8601 string
-  //         rangers: List<String>.from(quest['rangers'] ?? []),
-  //         categories: List<String>.from(quest['categories'] ?? []),
-  //         status: quest['status'],
-  //         questOwnerPhone: questOwnerPhone,
-  //         isBookmarked: isBookmarked,
-  //       ));
-  //     }
+          questFeedSummaryList.add(QuestFeedSummary(
+            objectId: questId.toHexString(),
+            questName: quest['questName'],
+            instance: quest['instance'],
+            duration: quest['duration'],
+            maxRangers: quest['maxRangers'],
+            levelRequirements: quest['levelRequirements'],
+            reward: quest['reward'],
+            description: quest['description'],
+            taskList: List<String>.from(quest['taskList'] ?? []),
+            address: quest['address'],
+            date: date.toIso8601String(),
+            rangers: List<String>.from(quest['rangers'] ?? []),
+            userId: quest['userId'],
+            categories: List<String>.from(quest['categories'] ?? []),
+            status: quest['status'],
+            questOwnerPhone: questOwnerPhone,
+            isBookmarked: isBookmarked,
+            isOnProgress: isOnProgress,
+            isCompleted: isCompleted,
+          ));
+        }
 
-  //     // hitung jumlah data sekarang dan print
-  //     print(
-  //         'Quests Data after adding: ${GlobalVar.instance.homePageQuestFeed}');
+        GlobalVar.instance.homePageQuestFeed = questFeedSummaryList;
+      }
 
-  //     return true;
-  //   } catch (e) {
-  //     print('Error during fetching more quests: $e');
-  //     return false;
-  //   } finally {
-  //     await mongoConnection.closeConnection();
-  //   }
-  // }
+      return true;
+    } catch (e) {
+      print('Error during fetching quests: $e');
+      return false;
+    } finally {
+      await mongoConnection.closeConnection();
+    }
+  }
 
   static Future<bool> createQuestMongodb({
     required String questName,

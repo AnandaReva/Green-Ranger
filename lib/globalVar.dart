@@ -12,6 +12,9 @@ class GlobalVar extends ChangeNotifier {
 
   bool _isPanelOpened = false;
 
+  int FeedLimit = 0;
+  int totalFeedCount= 0;
+
   Map<String, dynamic> _newQuestData = {
     'questName': '',
     'instance': '',

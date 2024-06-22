@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:green_ranger/globalVar.dart';
+import 'package:green_ranger/main.dart';
 
 class SuccessConfirmation extends StatelessWidget {
   final String successMessage;
@@ -44,6 +45,7 @@ class SuccessConfirmation extends StatelessWidget {
                     ),
                     TextButton(
                       onPressed: () {
+                    
                         // Tombol untuk men-dispose halaman dan kembali ke halaman sebelumnya
                         Navigator.pop(context);
                       },

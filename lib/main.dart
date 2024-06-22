@@ -1,9 +1,3 @@
-// ignore_for_file: prefer_const_constructors
-
-import 'dart:async';
-import 'dart:io';
-
-import 'package:flutter/material.dart';
 import 'package:green_ranger/components/slidingPanel/questDetailSlidePanel.dart';
 import 'package:green_ranger/mongoDB/authMongodb.dart';
 import 'package:green_ranger/pages/createQuestPage.dart';
@@ -20,6 +14,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+// ignore_for_file: prefer_const_constructors
+
+import 'dart:async';
+import 'dart:io';
+import 'package:flutter/material.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -120,15 +119,22 @@ class MainPageState extends State<MainPage> with TickerProviderStateMixin {
   final StreamController<VoidCallback?> onTapController =
       StreamController<VoidCallback?>();
 
+  bool isPanelOpen = false;
+  late SlidingUpPanelStatus panelStatus;
+
   @override
   final List<Destination> allDestinations = [
-    Destination(0, '', Icons.home, GlobalVar.baseColor),
-    Destination(1, '', Icons.search, GlobalVar.baseColor),
-    Destination(3, '', Icons.task, GlobalVar.baseColor),
-    Destination(2, '', Icons.add_circle, GlobalVar.baseColor), // create quest
-    Destination(4, '', Icons.person, GlobalVar.baseColor), // profile
+    Destination(0, 'Dashboard', "assets/images/icon_dashboard.png",
+        GlobalVar.baseColor),
+    Destination(
+        1, 'Guilds', "assets/images/icon_guild.png", GlobalVar.baseColor),
+    Destination(2, 'Your Quest', "assets/images/icon_createquest.png",
+        GlobalVar.baseColor),
+    Destination(
+        3, 'Create Quest', "assets/images/icon_quest.png", GlobalVar.baseColor),
+    Destination(
+        4, 'Profile', "assets/images/icon_person.png", GlobalVar.baseColor),
   ];
-
   @override
   void initState() {
     super.initState();
@@ -148,6 +154,8 @@ class MainPageState extends State<MainPage> with TickerProviderStateMixin {
       allDestinations.length,
       (index) => buildFaderController(),
     );
+    // Initialize panel status
+   // Initialize panel status
 
     destinationFaders[globalVar.selectedIndex].value = 1.0;
 
@@ -202,20 +210,40 @@ class MainPageState extends State<MainPage> with TickerProviderStateMixin {
           //   panelController: panelController, globalVar: globalVar),
         ],
       ),
-      bottomNavigationBar: NavigationBar(
-        backgroundColor: GlobalVar.mainColor,
-        selectedIndex: globalVar.selectedIndex,
-        onDestinationSelected: (index) {
-          setState(() {
+      bottomNavigationBar: NavigationBarTheme(
+        data: NavigationBarThemeData(
+          indicatorColor: Colors.transparent,
+          backgroundColor: GlobalVar.mainColor,
+          labelTextStyle: MaterialStateProperty.all(
+            const TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w500,
+                color: GlobalVar.baseColor),
+          ),
+        ),
+        child: NavigationBar(
+          selectedIndex: globalVar.selectedIndex,
+          onDestinationSelected: (index) => setState(() {
             globalVar.selectedIndex = index;
-          });
-        },
-        destinations: allDestinations.map((destination) {
-          return NavigationDestination(
-            icon: Icon(destination.icon, color: GlobalVar.baseColor),
-            label: destination.title,
-          );
-        }).toList(),
+          }),
+          destinations: allDestinations.map((destination) {
+            return NavigationDestination(
+              icon: Image.asset(
+                color: const Color.fromARGB(255, 133, 132, 132),
+                destination.icon,
+                width: 24,
+                height: 24,
+              ),
+              selectedIcon: Image.asset(
+                color: GlobalVar.baseColor,
+                destination.icon,
+                width: 24,
+                height: 24,
+              ),
+              label: destination.title,
+            );
+          }).toList(),
+        ),
       ),
     );
   }
@@ -234,13 +262,10 @@ class MainPageState extends State<MainPage> with TickerProviderStateMixin {
   }
 }
 
-class SuccesCreatingQuestConfirmationScreen {}
-
 class Destination {
   const Destination(this.index, this.title, this.icon, this.color);
-
   final int index;
   final String title;
-  final IconData icon;
+  final String icon;
   final Color color;
 }

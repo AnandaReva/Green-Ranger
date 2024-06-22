@@ -1,5 +1,4 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:green_ranger/globalVar.dart';
 
@@ -8,6 +7,7 @@ class FirebaseAuthService {
   static final GlobalVar globalVar = GlobalVar.instance;
 
   static User? get currentUser => _firebaseAuth.currentUser;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   static Stream<User?> get authStateChanges => _firebaseAuth.authStateChanges();
 
@@ -27,9 +27,10 @@ class FirebaseAuthService {
     }
   }
 
-  static Future<void> signOut() async {
+  Future<void> signOut() async {
     try {
       await _firebaseAuth.signOut();
+      await _googleSignIn.disconnect();
       globalVar.userLoginData = null;
     } catch (e) {
       print('Firebase: Error signing out: $e');
@@ -76,6 +77,4 @@ class FirebaseAuthService {
       throw e;
     }
   }
-
- 
 }
