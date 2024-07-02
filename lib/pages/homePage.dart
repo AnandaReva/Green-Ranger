@@ -1,5 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:green_ranger/components/appBar.dart';
 import 'package:green_ranger/components/infiniteScrollPagination/feedQuestHomePage.dart';
@@ -27,28 +29,35 @@ class HomePage extends StatelessWidget {
         String _nextLevelExp;
 
         // Determine user level
-        int userExp = userData['exp'] ??
-            0; // Directly access the value, no need for int.parse()
+        int userExp = userData['exp'] ?? 0;
         int levelStep = 1500;
-        int userLevelValue = (userExp / levelStep).floor();
+        double factor = 1.5;
+        int userLevelValue = 0;
 
-        if (userLevelValue < 1) {
-          _userLevel = 'rookie';
-          _nextLevelExp = (levelStep * 1).toString();
-        } else if (userLevelValue < 2) {
-          _userLevel = 'epic';
-          _nextLevelExp = (levelStep * 2).toString();
-        } else if (userLevelValue < 3) {
-          _userLevel = 'legendary';
-          _nextLevelExp = (levelStep * 3).toString();
-        } else if (userLevelValue < 4) {
-          _userLevel = 'mythic';
-          _nextLevelExp = (levelStep * 4).toString();
-        } else {
-          _userLevel = 'mythic';
-          _nextLevelExp = 'max'; // max level reached
+        while (userExp >= levelStep * pow(factor, userLevelValue)) {
+          userLevelValue++;
         }
 
+        int nextLevelExpValue =
+            (levelStep * pow(factor, userLevelValue)).toInt();
+        _nextLevelExp = nextLevelExpValue.toString();
+
+        if (userLevelValue < 1) {
+          _userLevel = 'Rookie';
+        } else if (userLevelValue < 2) {
+          _userLevel = 'Epic';
+        } else if (userLevelValue < 3) {
+          _userLevel = 'Legendary';
+        } else if (userLevelValue < 4) {
+          _userLevel = 'Mythrill';
+        } else {
+          _userLevel = 'Mythrill';
+          _nextLevelExp = 'max'; // max level reached
+        }
+// Level 0 ke Level 1 (rookie): 1500 exp
+// Level 1 ke Level 2 (epic): 1500 * 1.5 = 2250 exp
+// Level 2 ke Level 3 (legendary): 1500 * 1.5^2 = 3375 exp
+// Level 3 ke Level 4 (mythic): 1500 * 1.5^3 = 5062 exp
         return Stack(
           children: <Widget>[
             Scaffold(

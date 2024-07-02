@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:green_ranger/mongoDB/conn.dart';
 import 'package:green_ranger/globalVar.dart';
 import 'package:mongo_dart/mongo_dart.dart';
@@ -38,8 +40,14 @@ class QuestResultReportMongodb {
   }
 } */
 
-  static Future<bool> uploadDataResultReport(
-      String userId, String questId, String rangerId, String url) async {
+  Future<bool> uploadDataResultReport(
+    String userId,
+    String questId,
+    String rangerId,
+    String url,
+    String reward,
+    String levelRequirements,
+  ) async {
     final mongoConnection = MongoConnection();
 
     try {
@@ -130,6 +138,8 @@ class QuestResultReportMongodb {
 
         print(' check 2 result: ${questId}');
 
+        print(' reward ${int.parse(reward)}');
+
         // Update user's quest status
         // var result2 = await userCollection.update(
         //     where.eq('_id', ObjectId.fromHexString(userId)),
@@ -137,12 +147,30 @@ class QuestResultReportMongodb {
         //         .pull('quest.onProgress', questId)
         //         .push('quest.completed', questId));
 
-           // Update user's quest status
+        //calculate user exp after completing quest
+        //curr exp + bonus
+
+      
+
+        int expGained = calculateExpGained(levelRequirements);
+        var totalExp =
+            GlobalVar.instance.userLoginData['exp'] + expGained;
+
+        //calculate user wallet after completing quest
+        //curr wallet + bonus
+
+        var totalWallet = GlobalVar.instance.userLoginData['wallet_value'] +
+            int.parse(reward);
+        print("totalWallet: $totalWallet, totalExp: $totalExp");
+
+        // Update user's quest status
         var result2 = await userCollection.updateOne(
             where.eq('_id', ObjectId.fromHexString(rangerId)),
             modify
                 .pull('quest.onProgress', questId)
-                .push('quest.completed', questId));
+                .push('quest.completed', questId)
+                .set('wallet_value', totalWallet)
+                .set('exp', totalExp));
 
         // Get updated data
         var query = where.eq('_id', ObjectId.fromHexString(rangerId));
@@ -152,7 +180,7 @@ class QuestResultReportMongodb {
           print('User found: $user');
 
           // Save user data to GlobalVar if found
-          
+
           GlobalVar.instance.userLoginData = user;
         }
 
@@ -170,5 +198,31 @@ class QuestResultReportMongodb {
     } finally {
       await mongoConnection.closeConnection();
     }
+  }
+
+  int calculateExpGained(String levelRequirements) {
+    print("levelRequirements $levelRequirements");
+    int expGained = 0;
+
+    switch (levelRequirements) {
+      case 'Rookie':
+        expGained = 250;
+        break;
+      case 'Epic':
+        expGained = 500;
+        break;
+      case 'Legendary':
+        expGained = 1150;
+        break;
+      case 'Mythrill':
+        expGained = 1500;
+        break;
+      default:
+        expGained = 0;
+    }
+
+    print("expGained $expGained");
+
+    return expGained;
   }
 }

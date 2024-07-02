@@ -1,9 +1,11 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
-
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:green_ranger/globalVar.dart';
 import 'package:green_ranger/main.dart';
 import 'package:green_ranger/mongoDB/questMongodb.dart';
+import 'package:green_ranger/mongoDB/userQuestMongodb.dart';
+import 'package:green_ranger/pages/userQuestPage.dart';
 import 'package:provider/provider.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:intl/intl.dart';
@@ -102,6 +104,59 @@ class _AvailableQuestListState extends State<AvailableQuestList> {
     }
   }
 
+  void _unBookmarkMarkedQuest(QuestFeedSummary quest) async {
+    String questId = quest.objectId;
+    String userId = GlobalVar.instance.userLoginData['_id'].toHexString();
+
+    questId = questId.replaceAll('ObjectId("', '').replaceAll('")', '');
+
+    print("qustId: $questId, userId : $userId");
+
+    bool isSuccess = await UserQuestMongodb.unBookMarkQuest(
+        questId: questId, userId: userId);
+
+    if (!isSuccess) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to unbookmark quest, Try Again',
+              textAlign: TextAlign.center),
+          duration: Duration(seconds: 1),
+        ),
+      );
+
+      return;
+    }
+
+    _refreshData();
+  }
+
+  void _addBookmarkMarkedQuest(QuestFeedSummary quest) async {
+    String questId = quest.objectId;
+    String userId = GlobalVar.instance.userLoginData['_id'].toHexString();
+
+    questId = questId.replaceAll('ObjectId("', '').replaceAll('")', '');
+
+    print("questId: $questId, userId : $userId");
+
+    bool isSuccess = await UserQuestMongodb.addBookmarkQuest(
+      questId: questId,
+      userId: userId,
+    );
+
+    if (!isSuccess) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to bookmark quest. Please try again.',
+              textAlign: TextAlign.center),
+          duration: Duration(seconds: 1),
+        ),
+      );
+      return;
+    }
+
+    _refreshData();
+  }
+
   Future<void> _refreshData() async {
     _pagingController.refresh();
   }
@@ -124,6 +179,8 @@ class _AvailableQuestListState extends State<AvailableQuestList> {
                         QuestListItem(
                           quest: item,
                           colorPattern: questColors[index % questColors.length],
+                          unBookmarkCallback: _unBookmarkMarkedQuest,
+                          addBookmarkCallback: _addBookmarkMarkedQuest,
                         ),
                         if (index == _pagingController.itemList!.length - 1 &&
                             index <
@@ -200,11 +257,15 @@ class _AvailableQuestListState extends State<AvailableQuestList> {
 class QuestListItem extends StatelessWidget {
   final QuestFeedSummary quest;
   final Color colorPattern;
+  final Function(QuestFeedSummary) unBookmarkCallback;
+  final Function(QuestFeedSummary) addBookmarkCallback;
 
   const QuestListItem({
     Key? key,
     required this.quest,
     required this.colorPattern,
+    required this.unBookmarkCallback,
+    required this.addBookmarkCallback,
   }) : super(key: key);
 
   @override
@@ -232,11 +293,11 @@ class QuestListItem extends StatelessWidget {
           'isCompleted': quest.isCompleted
         };
 
-        print(
-            '${quest.questName} : isCOmplete,${quest.isCompleted}  ,  isOnprogress ${quest.isOnProgress}');
+        // print(
+        //     '${quest.questName} : isCOmplete,${quest.isCompleted}  ,  isOnprogress ${quest.isOnProgress}');
 
         MainPageState? mainPageState = MainPage.of(context);
-        mainPageState?.onTapController.add(() {
+        mainPageState.onTapController.add(() {
           mainPageState.panelController.expand();
         });
       },
@@ -274,8 +335,13 @@ class QuestListItem extends StatelessWidget {
                             // Add your bookmark functionality here
                             if (quest.isBookmarked) {
                               // Remove bookmark logic
+                              unBookmarkCallback(quest);
+                              UserQuestPageState userQuestPageState =
+                                  UserQuestPageState();
+                              userQuestPageState.refreshList(); // refresh list
                             } else {
                               // Add bookmark logic
+                              addBookmarkCallback(quest);
                             }
                           },
                         ),

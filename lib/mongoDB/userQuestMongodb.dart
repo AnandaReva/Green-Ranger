@@ -44,8 +44,8 @@ class UserQuestMongodb {
           GlobalVar.instance.userLoginData['quest']['onProgress'] ?? []);
       var completed = List<String>.from(
           GlobalVar.instance.userLoginData['quest']['completed'] ?? []);
-      print('Check 2 onPrgress QuestList: $onProgress');
-      print('Check 2 completed QuestList: $completed');
+      // print('Check 2 onPrgress QuestList: $onProgress');
+      // print('Check 2 completed QuestList: $completed');
 
       // Get updated user data including marked quest ids
       var userCollection =
@@ -109,7 +109,7 @@ class UserQuestMongodb {
           }
 
           markedQuestSummaries.add(MarkedQuestSummary(
-            objectId: quest['_id'].toString(),
+            objectId: questId.toHexString(),
             questName: quest['questName'],
             instance: quest['instance'],
             duration: quest['duration'],
@@ -127,6 +127,7 @@ class UserQuestMongodb {
             isBookmarked: true,
             isOnProgress: isOnProgress,
             isCompleted: isCompleted,
+            userId: quest['userId'],
           ));
         }
 
@@ -155,12 +156,13 @@ class UserQuestMongodb {
         print('Failed to connect to MongoDB.');
         return false;
       }
-
       // Get updated user data including marked quest ids
       var userCollection =
           mongoConnection.db.collection(MongoConnection.USER_COLLECTION);
       var query = where.eq('_id', GlobalVar.instance.userLoginData['_id']);
       var updatedUserData = await userCollection.findOne(query);
+
+      // print("check 1 onProgress $query");
 
       GlobalVar.instance.userLoginData = updatedUserData;
 
@@ -168,6 +170,8 @@ class UserQuestMongodb {
         print('User data not found or updated.');
         return false;
       }
+
+      //  print("check 2 onProgress $query");
 
       var onProgressQuestIds =
           updatedUserData['quest']['onProgress'] as List<dynamic>;
@@ -178,12 +182,16 @@ class UserQuestMongodb {
         return true;
       }
 
+      //  print("check 3 onProgress $onProgressQuestIds");
+
       var questCollection =
           mongoConnection.db.collection(MongoConnection.QUEST_COLLECTION);
 
       // Creating a query to fetch all quests with ids in onProgressQuestIds
       var questQuery = where.oneFrom(
           '_id', onProgressQuestIds.map((id) => ObjectId.parse(id)).toList());
+
+      //    print("check 4 onProgress ${questQuery}");
 
       var onProgressQuests = await questCollection.find(questQuery).toList();
 
@@ -192,6 +200,7 @@ class UserQuestMongodb {
 
         // Iterate through each quest to find the corresponding user phone number
         for (var quest in onProgressQuests) {
+          var questId = quest['_id'];
           var userId = quest['userId'] as String;
           var userQuery = where.eq('_id', ObjectId.parse(userId));
           var user = await userCollection.findOne(userQuery);
@@ -202,7 +211,7 @@ class UserQuestMongodb {
           }
 
           onProgressQuestSummaries.add(OnProgressQuestSummary(
-            objectId: quest['_id'].toString(),
+            objectId: questId.toHexString(),
             questName: quest['questName'],
             instance: quest['instance'],
             duration: quest['duration'],
@@ -254,6 +263,7 @@ class UserQuestMongodb {
       var query = where.eq('_id', GlobalVar.instance.userLoginData['_id']);
       var updatedUserData = await userCollection.findOne(query);
 
+      print("check 1 completed $query");
       GlobalVar.instance.userLoginData = updatedUserData;
 
       if (updatedUserData == null) {
@@ -287,6 +297,7 @@ class UserQuestMongodb {
 
         // Iterate through each quest to find the corresponding user phone number
         for (var quest in completedQuests) {
+          var questId = quest['_id'];
           var userId = quest['userId'] as String;
           var userQuery = where.eq('_id', ObjectId.parse(userId));
           var user = await userCollection.findOne(userQuery);
@@ -296,7 +307,7 @@ class UserQuestMongodb {
             questOwnerPhone = user['phone'];
           }
           completedQuestSummary.add(CompletedQuestSummary(
-            objectId: quest['_id'].toString(),
+            objectId: questId.toHexString(),
             questName: quest['questName'],
             instance: quest['instance'],
             duration: quest['duration'],
@@ -332,28 +343,22 @@ class UserQuestMongodb {
 
   //Sample data
 /* {
-  "profile_image": "assets/images/logo.png",
-  "username": "admin",
-  "email": "admin@gmail.com",
-  "password": "admin123",
-  "exp": 2450,
-  "wallet_value": 750000,
-  "phone": "08123456789",
+  "_id": ObjectId("666e9cce6015fd82f31e5217"),
   "quest": {
     "marked": [
-      "666da54aa8d882ad0fa0dc39",
-      "666da54aa8d882ad0fa0dc3a"
-    ],
-    "onProgress": [
-      "507fdgfdg77bcf86cd799439011"
-    ],
-    "completed": []
+      "666da54aa8d882ad0fa0dc39"
+    ]
   }
-}  */
-
-  static Future<bool> unBookMarkQuest(String questId) async {
+}
+  */
+  static Future<bool> unBookMarkQuest({
+    required String questId,
+    required String userId,
+  }) async {
     final mongoConnection = MongoConnection();
 
+    print(
+        'check 1 unbookmark: ${userId}, ${questId}'); // output: 666e9cce6015fd82f31e5217, 666da54aa8d882ad0fa0dc39
     try {
       bool isConnected = await mongoConnection.openConnection();
 
@@ -362,31 +367,76 @@ class UserQuestMongodb {
         return false;
       }
 
-      var userId = GlobalVar.instance.userMarkedQuest['_id'];
+      print('Connected to MongoDB!');
 
-      print('userId: $userId , questId: $questId');
+      // Convert userId and questId to ObjectId
+      var userObjectId = ObjectId.fromHexString(userId);
+      // var questObjectId = ObjectId.fromHexString(questId);
 
-      var userMarkedQuestCollection =
+      // Update user
+      var collectionUser =
           mongoConnection.db.collection(MongoConnection.USER_COLLECTION);
 
-      var result = await userMarkedQuestCollection.updateOne(
-        where.eq('_id', userId),
-        modify.pull('quest.marked', questId),
-      );
+      var result1 = await collectionUser.updateOne(
+          where.eq('_id', userObjectId), modify.pull('quest.marked', questId));
 
-      print('Quest unbookmarked successfully. $result');
+      // Update local user data, remove questId from marked quests
+      GlobalVar.instance.userLoginData['quest']['marked'].remove(questId);
+      print(
+          "Updated local data: ${GlobalVar.instance.userLoginData['quest']['marked']}");
 
-      // Update user data with latest data from the database
-      var userCollection =
-          mongoConnection.db.collection(MongoConnection.USER_COLLECTION);
-      var query = where.eq('_id', GlobalVar.instance.userLoginData['_id']);
-      var updatedUserData = await userCollection.findOne(query);
-
-      GlobalVar.instance.userLoginData = updatedUserData;
-
+      print('Quest unbookmarked successfully: $result1');
       return true;
     } catch (e) {
-      print('Error while unbookmarking: $e');
+      print('Error during quest unbookmarking: $e');
+      return false;
+    } finally {
+      await mongoConnection.closeConnection();
+    }
+  }
+
+  static Future<bool> addBookmarkQuest({
+    required String questId,
+    required String userId,
+  }) async {
+    final mongoConnection = MongoConnection();
+
+    print(
+        'check 1 bookmark: ${userId}, ${questId}'); // output: 666e9cce6015fd82f31e5217, 666da54aa8d882ad0fa0dc39
+    try {
+      bool isConnected = await mongoConnection.openConnection();
+
+      if (!isConnected) {
+        print('Failed to connect to MongoDB.');
+        return false;
+      }
+
+      print('Connected to MongoDB!');
+
+      // Convert userId to ObjectId
+      var userObjectId = ObjectId.fromHexString(userId);
+      // var questObjectId = ObjectId.fromHexString(questId);
+
+      // Update user
+      var collectionUser =
+          mongoConnection.db.collection(MongoConnection.USER_COLLECTION);
+
+      var result1 = await collectionUser.updateOne(
+          where.eq('_id', userObjectId),
+          modify.addToSet('quest.marked', questId));
+
+      // Update local user data, add questId to marked quests
+      if (!GlobalVar.instance.userLoginData['quest']['marked']
+          .contains(questId)) {
+        GlobalVar.instance.userLoginData['quest']['marked'].add(questId);
+      }
+      print(
+          "Updated local data: ${GlobalVar.instance.userLoginData['quest']['marked']}");
+
+      print('Quest bookmarked successfully: $result1');
+      return true;
+    } catch (e) {
+      print('Error during quest bookmarking: $e');
       return false;
     } finally {
       await mongoConnection.closeConnection();

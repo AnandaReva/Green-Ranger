@@ -10,7 +10,7 @@ class UploadResultReport {
     try {
 
       
-      String path = "quests/$questId/rangers/$rangerId/";
+      String path = "quests/$questId/report/rangers/$rangerId/";
       final fileName = file.path.split("/").last;
       final timeStamp = DateTime.now().millisecondsSinceEpoch;
 

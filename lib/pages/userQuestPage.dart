@@ -1,5 +1,7 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:green_ranger/components/infiniteScrollPagination/UserCompletedQuestList.dart';
 import 'package:green_ranger/components/infiniteScrollPagination/UserMarkedQuestList%20.dart';
@@ -14,16 +16,19 @@ class UserQuestPage extends StatefulWidget {
   UserQuestPage({Key? key}) : super(key: key);
 
   @override
-  _UserQuestPageState createState() => _UserQuestPageState();
+  UserQuestPageState createState() => UserQuestPageState();
 }
 
-class _UserQuestPageState extends State<UserQuestPage>
+class UserQuestPageState extends State<UserQuestPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final TextEditingController _controllerSearcQuest = TextEditingController();
   final SlidingUpPanelController panelController = SlidingUpPanelController();
   final double minBound = 0;
   final double upperBound = 1.0;
+
+  final StreamController<void> _refreshController =
+      StreamController<void>.broadcast();
 
   @override
   void initState() {
@@ -182,8 +187,8 @@ class _UserQuestPageState extends State<UserQuestPage>
                           controller: _tabController,
                           children: [
                             // Marked
-                            UserMarkedQuestList(),
-                            // Center(child: Text('On Marked Quests')),
+                            UserMarkedQuestList(
+                                refreshStream: _refreshController.stream),
                             // On Progress
                             UserOnProgressQuestList(),
 
@@ -202,5 +207,10 @@ class _UserQuestPageState extends State<UserQuestPage>
         );
       },
     );
+  }
+
+  void refreshList() {
+    print('Refreshing list in UserQuestPageState with stream Builder');
+    _refreshController.add(null);
   }
 }

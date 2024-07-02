@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_literals_to_create_immutables, sort_child_properties_last, prefer_const_constructors
+// ignore_for_file: prefer_const_literals_to_create_immutables, sort_child_properties_last, prefer_const_constructors, must_be_immutable
 
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
@@ -8,7 +8,6 @@ import 'package:green_ranger/components/loadingUI.dart';
 import 'package:green_ranger/components/succesConfirmation.dart';
 import 'package:green_ranger/firebase/uploadResultReport.dart';
 import 'package:green_ranger/globalVar.dart';
-import 'package:green_ranger/main.dart';
 import 'package:green_ranger/mongoDB/questMongodb.dart';
 import 'package:green_ranger/mongoDB/resultReportMongodb.dart';
 
@@ -77,6 +76,7 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
       builder: (context, globalVar, _) {
         Map<String, dynamic> questData = globalVar.questDataSelected ?? {};
 
+        print("questDataSelected:  ${globalVar.questDataSelected["objectId"]}");
         return SlidingUpPanelWidget(
           panelController: widget.panelController, // Add this line
           child: Container(
@@ -165,7 +165,9 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
                                 child: ListView(
                                   children: [
                                     // jika dalam progress atau completed tampilkna section ini,
-                                    if (questData['isOnProgress'] == false  && questData['isCompleted'] == false  ) // execute
+                                    if (questData['isOnProgress'] == false &&
+                                        questData['isCompleted'] ==
+                                            false) // execute
                                       Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
@@ -795,7 +797,8 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
                                           ),
                                         ],
                                       )
-                                    else if (questData['isCompleted'] == true) // completed
+                                    else if (questData['isCompleted'] ==
+                                        true) // completed
                                       Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
@@ -1214,7 +1217,8 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
                                           ),
                                         ],
                                       )
-                                    else if (questData['isOnProgress'] == true) // submit
+                                    else if (questData['isOnProgress'] ==
+                                        true) // submit
                                       Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
@@ -1478,8 +1482,19 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
                                                       .instance
                                                       .userLoginData['_id']
                                                       .toHexString();
-                                                  onSubmitQuest(userId, questId,
-                                                      rangerId);
+                                                  var reward =
+                                                      questData['reward'] ??
+                                                          '0';
+
+                                                  var levelRequirements = questData[
+                                                          'levelRequirements'] ??
+                                                      'No data';
+                                                  onSubmitQuest(
+                                                      userId,
+                                                      questId,
+                                                      rangerId,
+                                                      reward,
+                                                      levelRequirements);
 
                                                   // MainPageState mainPageState =
                                                   //     MainPage.of(context);
@@ -1644,7 +1659,8 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
     }
   }
 
-  void onSubmitQuest(String userId, String questId, String rangerId) {
+  void onSubmitQuest(String userId, String questId, String rangerId,
+      String reward, String levelRequirements) {
     if (mounted) {
       showDialog(
         context: context,
@@ -1684,14 +1700,13 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
                     Container(
                       child: ElevatedButton(
                         onPressed: () async {
-
                           Navigator.of(context).pop();
 
                           File? imageFile = _selectedFile;
 
                           if (imageFile != null) {
                             print(
-                                'data upload userId: $userId,  questId: $questId , rangerId: $rangerId');
+                                'data upload userId: $userId,  questId: $questId , rangerId: $rangerId, reward: $reward, levelRequirements: $levelRequirements');
 
                             try {
                               setState(() {
@@ -1706,9 +1721,17 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
                                 print('Success Upload to firestorag URL: $url');
 
                                 // Panggil metode uploadDataResultReport
-                                bool success = await QuestResultReportMongodb
+                                QuestResultReportMongodb questResultReport =
+                                    QuestResultReportMongodb();
+                                bool success = await questResultReport
                                     .uploadDataResultReport(
-                                        userId, questId, rangerId, url);
+                                  userId,
+                                  questId,
+                                  rangerId,
+                                  url,
+                                  reward,
+                                  levelRequirements,
+                                );
 
                                 if (success) {
                                   print(

@@ -82,7 +82,7 @@ class _UserOnProgressQuestListState extends State<UserOnProgressQuestList> {
           noItemsFoundIndicatorBuilder: (context) {
             return Center(
               child: Text(
-                'No onProgress quests found',
+                'No on Progress quests found',
                 style: TextStyle(color: GlobalVar.baseColor),
               ),
             );
@@ -112,6 +112,9 @@ class QuestListItem extends StatelessWidget {
         mainPageState.onTapController.add(() {
           mainPageState.panelController.expand();
         });
+
+      print("OnProgress: ${quest.objectId.runtimeType}");
+
 
         // Handle tap event to update questDataSelected
         Provider.of<GlobalVar>(context, listen: false).questDataSelected = {
@@ -268,27 +271,24 @@ class OnProgressQuestSummary {
   final String status;
   final String questOwnerPhone;
   final bool isOnProgress;
- 
 
-  OnProgressQuestSummary(
-      {required this.objectId,
-      required this.questName,
-      required this.instance,
-      required this.duration,
-      required this.maxRangers,
-      required this.levelRequirements,
-      required this.reward,
-      required this.description,
-      required this.taskList,
-      required this.address,
-      required this.date,
-      required this.rangers,
-      required this.userId,
-      required this.categories,
-      required this.status,
-      required this.questOwnerPhone,
-      required this.isOnProgress,
- 
-      
-      });
+  OnProgressQuestSummary({
+    required this.objectId,
+    required this.questName,
+    required this.instance,
+    required this.duration,
+    required this.maxRangers,
+    required this.levelRequirements,
+    required this.reward,
+    required this.description,
+    required this.taskList,
+    required this.address,
+    required this.date,
+    required this.rangers,
+    required this.userId,
+    required this.categories,
+    required this.status,
+    required this.questOwnerPhone,
+    required this.isOnProgress,
+  });
 }

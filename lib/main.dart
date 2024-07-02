@@ -22,7 +22,7 @@ import 'package:flutter/material.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  GlobalVar globalVar = GlobalVar.instance;
+  //GlobalVar globalVar = GlobalVar.instance;
 
   Platform.isAndroid
       ? await Firebase.initializeApp(
