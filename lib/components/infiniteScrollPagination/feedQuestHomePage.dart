@@ -30,76 +30,100 @@ class _AvailableQuestListState extends State<AvailableQuestList> {
   ];
 
   @override
+  @override
   void initState() {
     super.initState();
     _pagingController = PagingController(firstPageKey: 0);
+
     _pagingController.addPageRequestListener((pageKey) {
-      _fetchData(pageKey);
+      // Hanya panggil _fetchData jika pageKey adalah 0
+      if (pageKey == 0) {
+        _fetchData(pageKey);
+      } else {
+        // Jika Anda memiliki logika lain untuk halaman lain, tambahkan di sini
+      }
     });
   }
 
-  Future<void> _fetchData(int pageKey) async {
-    print("pageKey: $pageKey");
+  Future<void> _fetchMoreData(int pageKey) async {
+    // print("pageKey fetch more: $pageKey");
+
     try {
-      bool isSuccess = await QuestMongodb.fetchQuestDataHomePage();
+      String latestDate = '';
+      String latestQuestName = '';
+
+      latestDate = GlobalVar.instance.homePageQuestFeed?.isNotEmpty == true
+          ? GlobalVar.instance.homePageQuestFeed!.last.date
+          : '';
+      latestQuestName = GlobalVar.instance.homePageQuestFeed?.isNotEmpty == true
+          ? GlobalVar.instance.homePageQuestFeed!.last.questName
+          : '';
+      print(
+          "latestDate : $latestDate , latestQuestName: $latestQuestName, ${GlobalVar.instance.homePageQuestFeed.length}, pageKey fetch more: $pageKey ");
+
+      bool isSuccess = await QuestMongodb.fetchMoreQuestData(latestDate);
 
       if (!isSuccess) {
         _pagingController.error = "Failed to fetch quest data";
         return;
       }
+
       final allItems = GlobalVar.instance.homePageQuestFeed ?? [];
 
-      print('Total number of quests: {${GlobalVar.instance.totalFeedCount}');
-
       if (allItems.isNotEmpty) {
-        final lastItemDate =
-            allItems.last.date; // Accessing the date of the last item
-        print('Date of the last item: $lastItemDate');
+        latestDate = allItems.last.date;
+        latestQuestName = allItems.last.questName;
       }
 
-      // Clear existing data if it's the first page
-      if (pageKey == 0) {
-        _pagingController.itemList?.clear();
-      }
+      _pagingController.itemList = [];
 
-      // Append data to _pagingController
-      _pagingController.appendLastPage(allItems.cast<QuestFeedSummary>());
-      // Get the number of items currently in _pagingController
-      int numberOfItems = allItems.length ?? 0;
-      print("Number of items after appending: $numberOfItems"); // always 20
+      _pagingController.appendPage(
+          allItems.cast<QuestFeedSummary>(), pageKey + 1);
+
+      print(
+          "Number of items after appending: ${_pagingController.itemList?.length}");
+      print(
+          'homePageQuestFeed length 2: ${GlobalVar.instance?.homePageQuestFeed?.length}');
     } catch (error) {
-      _pagingController.error =
-          error.toString(); // Set error to string representation of error
+      _pagingController.error = error.toString();
     }
   }
 
-  Future<void> _fetchMoreData(int pageKey) async {
-    print("pageKey: $pageKey");
+  Future<void> _fetchData(int pageKey) async {
+    print("_fetchData called with pageKey: $pageKey");
+
     try {
-      bool isSuccess = await QuestMongodb.fetchMoreQuestData(lastItemDate);
+      // Fetch quest data from MongoDB
+      bool isSuccess = await QuestMongodb.fetchQuestDataHomePage();
 
       if (!isSuccess) {
+        // Handle fetch failure
         _pagingController.error = "Failed to fetch quest data";
         return;
       }
+
+      // Retrieve the fetched items from the global variable
       final allItems = GlobalVar.instance.homePageQuestFeed ?? [];
 
       print('Total number of quests: ${GlobalVar.instance.totalFeedCount}');
 
       if (allItems.isNotEmpty) {
-        lastItemDate = DateTime.parse(allItems
-            .last.date); // Accessing and parsing the date of the last item
+        // Accessing the date of the last item
+        final lastItemDate = allItems.last.date;
         print('Date of the last item: $lastItemDate');
       }
 
-      if (pageKey == 0) {
-        _pagingController.itemList?.clear();
+      // Append data to _pagingController if itemList is empty or null
+      if (_pagingController.itemList == null ||
+          _pagingController.itemList!.isEmpty) {
+        _pagingController.appendLastPage(allItems.cast<QuestFeedSummary>());
       }
 
-      _pagingController.appendLastPage(allItems.cast<QuestFeedSummary>());
-      int numberOfItems = allItems.length ?? 0;
-      print("Number of items after appending: $numberOfItems");
+      // Get the number of items currently in _pagingController
+      int numberOfItems = allItems.length;
+      print("Number of items Fetch Data: $numberOfItems");
     } catch (error) {
+      // Set error to string representation of the error
       _pagingController.error = error.toString();
     }
   }
@@ -159,6 +183,7 @@ class _AvailableQuestListState extends State<AvailableQuestList> {
 
   Future<void> _refreshData() async {
     _pagingController.refresh();
+    print("_refreshData called");
   }
 
   Widget build(BuildContext context) {
@@ -233,11 +258,21 @@ class _AvailableQuestListState extends State<AvailableQuestList> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            'No Quests Shown, Please Try Again',
+                            'No quests found, please try again',
                             style: TextStyle(
-                              fontSize: 18,
+                              fontSize: 16,
                               fontWeight: FontWeight.bold,
                               color: GlobalVar.baseColor,
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: _refreshData,
+                            icon: SizedBox(
+                              height: 24,
+                              child: Icon(
+                                Icons.refresh,
+                                color: GlobalVar.baseColor,
+                              ),
                             ),
                           ),
                         ],

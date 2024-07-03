@@ -8,6 +8,7 @@ import 'package:green_ranger/components/loadingUI.dart';
 import 'package:green_ranger/components/succesConfirmation.dart';
 import 'package:green_ranger/firebase/uploadResultReport.dart';
 import 'package:green_ranger/globalVar.dart';
+import 'package:green_ranger/main.dart';
 import 'package:green_ranger/mongoDB/questMongodb.dart';
 import 'package:green_ranger/mongoDB/resultReportMongodb.dart';
 
@@ -164,7 +165,7 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
                                 padding: EdgeInsets.all(20),
                                 child: ListView(
                                   children: [
-                                    // jika dalam progress atau completed tampilkna section ini,
+                                    // jika tidak dalam progress atau completed tampilkna section ini,
                                     if (questData['isOnProgress'] == false &&
                                         questData['isCompleted'] ==
                                             false) // execute
@@ -642,7 +643,17 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
 
                                                       print(
                                                           'Quest executed successfully');
-                                                      // Add appropriate logic if quest is successfully executed
+                                                      // tutup panel disini
+                                                      MainPageState?
+                                                          mainPageState =
+                                                          MainPage.of(context);
+                                                      mainPageState
+                                                          .onTapController
+                                                          .add(() {
+                                                        mainPageState
+                                                            .panelController
+                                                            .collapse();
+                                                      });
 
                                                       Navigator.push(
                                                         context,
@@ -1417,7 +1428,7 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
                                           SizedBox(height: 10),
                                           Center(
                                             child: ElevatedButton(
-                                              onPressed: () {
+                                              onPressed: () async {
                                                 int checkedCount =
                                                     _getCheckedTasksCount();
                                                 // Jika belum semua task dicentang atau file kosong, tampilkan pesan
@@ -1489,22 +1500,69 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
                                                   var levelRequirements = questData[
                                                           'levelRequirements'] ??
                                                       'No data';
-                                                  onSubmitQuest(
-                                                      userId,
-                                                      questId,
-                                                      rangerId,
-                                                      reward,
-                                                      levelRequirements);
+                                                  // onSubmitQuest(
+                                                  //     userId,
+                                                  //     questId,
+                                                  //     rangerId,
+                                                  //     reward,
+                                                  //     levelRequirements);
 
-                                                  // MainPageState mainPageState =
-                                                  //     MainPage.of(context);
+                                                  bool result =
+                                                      await onSubmitQuest(
+                                                          userId,
+                                                          questId,
+                                                          rangerId,
+                                                          reward,
+                                                          levelRequirements);
 
-                                                  // mainPageState.onTapController
-                                                  //     .add(() {
-                                                  //   mainPageState
-                                                  //       .panelController
-                                                  //       .collapse();
-                                                  // });
+                                                  MainPageState? mainPageState =
+                                                      MainPage.of(context);
+                                                  mainPageState?.onTapController
+                                                      .add(() {
+                                                    mainPageState
+                                                        ?.panelController
+                                                        .collapse();
+                                                  });
+
+                                                  setState(() {
+                                                    GlobalVar.instance
+                                                        .isLoading = true;
+                                                  });
+
+                                                  if (result) {
+                                                    setState(() {
+                                                      GlobalVar.instance
+                                                          .isLoading = false;
+                                                    });
+                                                    print("Submit success");
+
+                                                    Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            SuccessConfirmation(
+                                                                successMessage:
+                                                                    "Quest Report Has Been Sent!"),
+                                                      ),
+                                                    );
+
+                                                    // Tambahkan tindakan lain yang diinginkan jika pengiriman quest berhasil
+                                                  } else {
+                                                    setState(() {
+                                                      GlobalVar.instance
+                                                          .isLoading = false;
+                                                    });
+                                                    print("Submit Failed");
+                                                    Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            SuccessConfirmation(
+                                                                successMessage:
+                                                                    "Quest Report Has Been Sent!"),
+                                                      ),
+                                                    );
+                                                  }
                                                 }
                                               },
                                               style: ButtonStyle(
@@ -1659,177 +1717,122 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
     }
   }
 
-  void onSubmitQuest(String userId, String questId, String rangerId,
-      String reward, String levelRequirements) {
-    if (mounted) {
-      showDialog(
-        context: context,
-        barrierColor: GlobalVar.secondaryColorGreen.withOpacity(0.1),
-        builder: (context) {
-          return AlertDialog(
-            content: Text(
-              "Are you sure you want to submit the quest report?",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: GlobalVar.secondaryColorGreen,
-                fontWeight: FontWeight.bold,
-              ),
+  Future<bool> onSubmitQuest(String userId, String questId, String rangerId,
+      String reward, String levelRequirements) async {
+    if (!mounted) return false;
+
+    bool result = false;
+
+    await showDialog(
+      context: context,
+      barrierColor: GlobalVar.secondaryColorGreen.withOpacity(0.1),
+      builder: (context) {
+        return AlertDialog(
+          content: Text(
+            "Are you sure you want to submit the quest report?",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: GlobalVar.secondaryColorGreen,
+              fontWeight: FontWeight.bold,
             ),
-            backgroundColor: GlobalVar.mainColor,
-            actions: <Widget>[
-              Container(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      child: TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop(); // Close the dialog
-                          // Add your action for 'No' here
-                          // For example, you can do nothing or show a message
-                          print('User clicked No');
-                        },
-                        child: Text(
-                          'No',
-                          style: TextStyle(
-                            color: GlobalVar.secondaryColorPink,
-                          ),
-                        ),
-                      ),
+          ),
+          backgroundColor: GlobalVar.mainColor,
+          actions: <Widget>[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    print('User clicked No');
+                    result = false;
+                  },
+                  child: Text(
+                    'No',
+                    style: TextStyle(
+                      color: GlobalVar.secondaryColorPink,
                     ),
-                    Container(
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          Navigator.of(context).pop();
-
-                          File? imageFile = _selectedFile;
-
-                          if (imageFile != null) {
-                            print(
-                                'data upload userId: $userId,  questId: $questId , rangerId: $rangerId, reward: $reward, levelRequirements: $levelRequirements');
-
-                            try {
-                              setState(() {
-                                GlobalVar.instance.isLoading = true;
-                              });
-
-                              String? url =
-                                  await UploadResultReport.getDownloadUrl(
-                                      questId, rangerId, imageFile);
-
-                              if (url != null) {
-                                print('Success Upload to firestorag URL: $url');
-
-                                // Panggil metode uploadDataResultReport
-                                QuestResultReportMongodb questResultReport =
-                                    QuestResultReportMongodb();
-                                bool success = await questResultReport
-                                    .uploadDataResultReport(
-                                  userId,
-                                  questId,
-                                  rangerId,
-                                  url,
-                                  reward,
-                                  levelRequirements,
-                                );
-
-                                if (success) {
-                                  print(
-                                      'Data result report uploaded successfully');
-
-                                  // Tampilkan snackbar jika menggunakan Flutter
-                                  if (mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                          content: Text(
-                                              'Data result report uploaded successfully')),
-                                    );
-                                  }
-                                  // Collapse the panel
-
-                                  setState(() {
-                                    _selectedFile = null;
-                                    _taskCheckedStates = List<bool>.filled(
-                                        widget.globalVar
-                                            .questDataSelected['tasks'].length,
-                                        false);
-                                    widget.panelController.collapse();
-                                  });
-
-                                  // panelController.Close();
-
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => SuccessConfirmation(
-                                          successMessage:
-                                              "Quest Report Has Been Sent!"),
-                                    ),
-                                  );
-                                } else {
-                                  print('Failed to upload data result report');
-                                  // Tampilkan snackbar jika menggunakan Flutter
-                                  if (mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                          content: Text(
-                                              'Failed to upload data result report')),
-                                    );
-                                  }
-                                }
-
-                                setState(() {
-                                  GlobalVar.instance.isLoading = false;
-                                });
-                              } else {
-                                print('Failed to get URL');
-                                setState(() {
-                                  GlobalVar.instance.isLoading = false;
-                                });
-
-                                if (mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        "Error while uploading result report, please try again.",
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          color: GlobalVar.baseColor,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      duration: Duration(seconds: 3),
-                                    ),
-                                  );
-                                }
-                              }
-                            } catch (e) {
-                              // Tangkap error jika terjadi kesalahan dalam mendapatkan url
-                              print('Error during getting download URL: $e');
-                              setState(() {
-                                GlobalVar.instance.isLoading = false;
-                              });
-                            }
-                          } else {
-                            // Handle jika file belum dipilih (imageFile == null)
-                            print('No file selected');
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          foregroundColor: GlobalVar.mainColor,
-                          backgroundColor: GlobalVar.secondaryColorGreen,
-                        ),
-                        child: Text('Yes'),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-            ],
-          );
-        },
-      );
-    }
+                ElevatedButton(
+                  onPressed: () async {
+                    File? imageFile = _selectedFile;
+                    Navigator.of(context).pop();
+
+                    if (imageFile != null) {
+                      print(
+                          'data upload userId: $userId, questId: $questId, rangerId: $rangerId, reward: $reward, levelRequirements: $levelRequirements');
+
+                      String? url = await UploadResultReport.getDownloadUrl(
+                          questId, rangerId, imageFile);
+
+                      if (url != null) {
+                        print('Success Upload to firestorag URL: $url');
+
+                        QuestResultReportMongodb questResultReport =
+                            QuestResultReportMongodb();
+                        bool success =
+                            await questResultReport.uploadDataResultReport(
+                          userId,
+                          questId,
+                          rangerId,
+                          url,
+                          reward,
+                          levelRequirements,
+                        );
+
+                        if (success) {
+                          print('Data result report uploaded successfully');
+                          setState(() {
+                            GlobalVar.instance.isLoading = false;
+                          });
+
+                          setState(() {
+                            _selectedFile = null;
+                            _taskCheckedStates = List<bool>.filled(
+                                widget.globalVar.questDataSelected['tasks']
+                                    .length,
+                                false);
+                          });
+
+                          result = true;
+                        } else {
+                          print('Failed to upload data result report');
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'Failed to submit quest report',
+                                  textAlign: TextAlign.center,
+                                ),
+                                duration: Duration(seconds: 3),
+                              ),
+                            );
+                          }
+                        }
+                      } else {
+                        print('Failed to get URL');
+                      }
+
+                      if (mounted) {}
+                    } else {
+                      print('No file selected');
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: GlobalVar.mainColor,
+                    backgroundColor: GlobalVar.secondaryColorGreen,
+                  ),
+                  child: Text('Yes'),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+
+    return result;
   }
 
   Future<File?> getFilesFromDevice(BuildContext context) async {

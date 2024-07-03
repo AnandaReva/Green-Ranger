@@ -55,7 +55,7 @@ class QuestMongodb {
       GlobalVar.instance.totalFeedCount = await questCollection.count(where);
 
       var questQuery = await questCollection
-          .find(where.sortBy('date', descending: true).limit(20))
+          .find(where.sortBy('date', descending: true).limit(10))
           .toList();
 
       var quests = questQuery;
@@ -88,7 +88,7 @@ class QuestMongodb {
         var num = 0;
         for (var quest in quests) {
           num = num + 1;
-          print('iteration: $num');
+          //print('iteration: $num');
 
           var questId = quest['_id']; // Use _id directly
 
@@ -104,7 +104,7 @@ class QuestMongodb {
           // Convert 'date' string to DateTime object
           DateTime date = DateTime.parse(quest['date']);
 
-          print('Check 3 (explicit string): ${questId.toHexString()}');
+          // print('Check 3 (explicit string): ${questId.toHexString()}');
           // Check if current quest is bookmarked
           bool isBookmarked = markedQuests.contains(questId.toHexString());
 
@@ -115,22 +115,22 @@ class QuestMongodb {
           bool isCompleted = completed.contains(questId.toHexString());
 
           // Only print if the quest is bookmarked
-          if (isBookmarked) {
-            print(' is bookmarked');
-          }
+          // if (isBookmarked) {
+          //   print(' is bookmarked');
+          // }
 
-          // Only print if the quest is on progress
-          if (isOnProgress) {
-            print(' is on progress');
-          }
+          // // Only print if the quest is on progress
+          // if (isOnProgress) {
+          //   print(' is on progress');
+          // }
 
-          // Only print if the quest is completed
-          if (isCompleted) {
-            print(' is completed');
-          }
+          // // Only print if the quest is completed
+          // if (isCompleted) {
+          //   print(' is completed');
+          // }
 
-          print(
-              'Check 4: isBookmarked: $isBookmarked, isOnProgress : $isOnProgress, $isCompleted');
+          // print(
+          //     'Check 4: isBookmarked: $isBookmarked, isOnProgress : $isOnProgress, $isCompleted');
 
           questFeedSummaryList.add(QuestFeedSummary(
             objectId: questId.toHexString(),
@@ -169,7 +169,7 @@ class QuestMongodb {
     }
   }
 
-  static Future<bool> fetchMoreQuestData(DateTime? lastItemDate) async {
+  static Future<bool> fetchMoreQuestData(String lastItemDate) async {
     final mongoConnection = MongoConnection();
 
     try {
@@ -187,11 +187,13 @@ class QuestMongodb {
       var query = lastItemDate != null
           ? where
               .sortBy('date', descending: true)
-              .gt('date', lastItemDate.toIso8601String())
-              .limit(20)
-          : where.sortBy('date', descending: true).limit(20);
+              .lt('date', lastItemDate)
+              .limit(10)
+          : where.sortBy('date', descending: false).limit(10);
 
       var questQuery = await questCollection.find(query).toList();
+      //  questQuery = questQuery.reversed.toList();
+
       var quests = questQuery;
 
       if (quests.isNotEmpty) {
@@ -224,7 +226,8 @@ class QuestMongodb {
           bool isOnProgress = onProgress.contains(questId.toHexString());
           bool isCompleted = completed.contains(questId.toHexString());
 
-          questFeedSummaryList.add(QuestFeedSummary(
+          // Create a new QuestFeedSummary object
+          var newQuest = QuestFeedSummary(
             objectId: questId.toHexString(),
             questName: quest['questName'],
             instance: quest['instance'],
@@ -244,10 +247,19 @@ class QuestMongodb {
             isBookmarked: isBookmarked,
             isOnProgress: isOnProgress,
             isCompleted: isCompleted,
-          ));
+          );
+
+          questFeedSummaryList.add(newQuest);
+
+          // Print the details of the newly fetched quest
+          print('Newly fetched quest:');
+          print('Quest Name: ${newQuest.questName}');
+          print('Date: ${newQuest.date}');
+          print('---------------------------------------');
         }
 
-        GlobalVar.instance.homePageQuestFeed = questFeedSummaryList;
+        // Append the newly fetched quests to the existing list
+        GlobalVar.instance.homePageQuestFeed.addAll(questFeedSummaryList);
       }
 
       return true;
@@ -258,6 +270,98 @@ class QuestMongodb {
       await mongoConnection.closeConnection();
     }
   }
+
+  // static Future<bool> fetchMoreQuestData(
+  //     DateTime? lastItemDate, int skipCount) async {
+  //   final mongoConnection = MongoConnection();
+
+  //   try {
+  //     bool isConnected = await mongoConnection.openConnection();
+
+  //     if (!isConnected) {
+  //       print('Failed to connect to MongoDB.');
+  //       return false;
+  //     }
+
+  //     var questCollection =
+  //         mongoConnection.db.collection(MongoConnection.QUEST_COLLECTION);
+
+  //     // Define the query to fetch more data based on the last item's date
+  //     var query = lastItemDate != null
+  //         ? where
+  //             .sortBy('date', descending: true)
+  //             .gt('date', lastItemDate.toIso8601String())
+  //             .skip(skipCount)
+  //             .limit(20)
+  //         : where.sortBy('date', descending: true).skip(skipCount).limit(20);
+
+  //     var questQuery = await questCollection.find(query).toList();
+  //     var quests = questQuery;
+
+  //     if (quests.isNotEmpty) {
+  //       var userCollection =
+  //           mongoConnection.db.collection(MongoConnection.USER_COLLECTION);
+
+  //       List<QuestFeedSummary> questFeedSummaryList = [];
+
+  //       var markedQuests = List<String>.from(
+  //           GlobalVar.instance.userLoginData['quest']['marked'] ?? []);
+  //       var onProgress = List<String>.from(
+  //           GlobalVar.instance.userLoginData['quest']['onProgress'] ?? []);
+  //       var completed = List<String>.from(
+  //           GlobalVar.instance.userLoginData['quest']['completed'] ?? []);
+
+  //       for (var quest in quests) {
+  //         var questId = quest['_id'];
+  //         var userId = quest['userId'] as String;
+  //         var userQuery = where.eq('_id', ObjectId.parse(userId));
+  //         var user = await userCollection.findOne(userQuery);
+
+  //         String questOwnerPhone = '';
+  //         if (user != null) {
+  //           questOwnerPhone = user['phone'];
+  //         }
+
+  //         DateTime date = DateTime.parse(quest['date']);
+
+  //         bool isBookmarked = markedQuests.contains(questId.toHexString());
+  //         bool isOnProgress = onProgress.contains(questId.toHexString());
+  //         bool isCompleted = completed.contains(questId.toHexString());
+
+  //         questFeedSummaryList.add(QuestFeedSummary(
+  //           objectId: questId.toHexString(),
+  //           questName: quest['questName'],
+  //           instance: quest['instance'],
+  //           duration: quest['duration'],
+  //           maxRangers: quest['maxRangers'],
+  //           levelRequirements: quest['levelRequirements'],
+  //           reward: quest['reward'],
+  //           description: quest['description'],
+  //           taskList: List<String>.from(quest['taskList'] ?? []),
+  //           address: quest['address'],
+  //           date: date.toIso8601String(),
+  //           rangers: List<String>.from(quest['rangers'] ?? []),
+  //           userId: quest['userId'],
+  //           categories: List<String>.from(quest['categories'] ?? []),
+  //           status: quest['status'],
+  //           questOwnerPhone: questOwnerPhone,
+  //           isBookmarked: isBookmarked,
+  //           isOnProgress: isOnProgress,
+  //           isCompleted: isCompleted,
+  //         ));
+  //       }
+
+  //       GlobalVar.instance.homePageQuestFeed = questFeedSummaryList;
+  //     }
+
+  //     return true;
+  //   } catch (e) {
+  //     print('Error during fetching quests: $e');
+  //     return false;
+  //   } finally {
+  //     await mongoConnection.closeConnection();
+  //   }
+  // }
 
   static Future<bool> createQuestMongodb({
     required String questName,
