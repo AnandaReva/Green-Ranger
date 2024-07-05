@@ -150,11 +150,8 @@ class QuestResultReportMongodb {
         //calculate user exp after completing quest
         //curr exp + bonus
 
-      
-
         int expGained = calculateExpGained(levelRequirements);
-        var totalExp =
-            GlobalVar.instance.userLoginData['exp'] + expGained;
+        var totalExp = GlobalVar.instance.userLoginData['exp'] + expGained;
 
         //calculate user wallet after completing quest
         //curr wallet + bonus
@@ -182,12 +179,14 @@ class QuestResultReportMongodb {
           // Save user data to GlobalVar if found
 
           GlobalVar.instance.userLoginData = user;
+          return true;
         }
 
         print('result1 : $result1 , $result2');
 
         // updated data
         // GlobalVar.instance.userLoginData = ;
+        return true;
       }
 
       // Return true even if no quests were found

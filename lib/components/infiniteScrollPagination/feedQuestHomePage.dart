@@ -5,7 +5,7 @@ import 'package:green_ranger/globalVar.dart';
 import 'package:green_ranger/main.dart';
 import 'package:green_ranger/mongoDB/questMongodb.dart';
 import 'package:green_ranger/mongoDB/userQuestMongodb.dart';
-import 'package:green_ranger/pages/userQuestPage.dart';
+
 import 'package:provider/provider.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:intl/intl.dart';
@@ -41,6 +41,8 @@ class _AvailableQuestListState extends State<AvailableQuestList> {
         _fetchData(pageKey);
       } else {
         // Jika Anda memiliki logika lain untuk halaman lain, tambahkan di sini
+
+        print('check ini');
       }
     });
   }
@@ -227,23 +229,36 @@ class _AvailableQuestListState extends State<AvailableQuestList> {
                               ),
                               padding:
                                   EdgeInsets.all(8), // Adjust padding as needed
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
+                              child: Column(
                                 children: [
                                   Text(
-                                    'Load More',
+                                    ' ${GlobalVar.instance?.homePageQuestFeed?.length}/${GlobalVar.instance.totalFeedCount}',
                                     style: TextStyle(
                                       fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      color: GlobalVar.secondaryColorGreen,
+                                      fontWeight: FontWeight.normal,
+                                      color: GlobalVar.baseColor,
                                     ),
                                   ),
-                                  SizedBox(
-                                      width: 4), // Adjust spacing as needed
-                                  Icon(
-                                    Icons.refresh,
-                                    size: 20,
-                                    color: GlobalVar.secondaryColorGreen,
+                                  SizedBox(height: 5),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        'Load More',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                          color: GlobalVar.secondaryColorGreen,
+                                        ),
+                                      ),
+                                      SizedBox(
+                                          width: 4), // Adjust spacing as needed
+                                      Icon(
+                                        Icons.refresh,
+                                        size: 20,
+                                        color: GlobalVar.secondaryColorGreen,
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
@@ -371,9 +386,9 @@ class QuestListItem extends StatelessWidget {
                             if (quest.isBookmarked) {
                               // Remove bookmark logic
                               unBookmarkCallback(quest);
-                              UserQuestPageState userQuestPageState =
-                                  UserQuestPageState();
-                              userQuestPageState.refreshList(); // refresh list
+                              // UserQuestPageState userQuestPageState =
+                              //     UserQuestPageState();
+                              // userQuestPageState(); // refresh list
                             } else {
                               // Add bookmark logic
                               addBookmarkCallback(quest);

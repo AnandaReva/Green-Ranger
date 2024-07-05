@@ -10,10 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
 class UserMarkedQuestList extends StatefulWidget {
-  final Stream<void> refreshStream;
-
-  const UserMarkedQuestList({Key? key, required this.refreshStream})
-      : super(key: key);
+  const UserMarkedQuestList({Key? key}) : super(key: key);
   @override
   _UserMarkedQuestListState createState() => _UserMarkedQuestListState();
 }
@@ -31,7 +28,6 @@ class _UserMarkedQuestListState extends State<UserMarkedQuestList> {
   @override
   void initState() {
     super.initState();
-    widget.refreshStream.listen((_) => refreshList());
 
     _pagingController = PagingController(firstPageKey: 0);
     _pagingController.addPageRequestListener((pageKey) {
@@ -67,7 +63,7 @@ class _UserMarkedQuestListState extends State<UserMarkedQuestList> {
     String questId = quest.objectId;
     String userId = GlobalVar.instance.userLoginData['_id'].toHexString();
 
-   // questId = questId.replaceAll('ObjectId("', '').replaceAll('")', '');
+    // questId = questId.replaceAll('ObjectId("', '').replaceAll('")', '');
 
     print("questId: $questId, userId : $userId");
 
@@ -101,35 +97,30 @@ class _UserMarkedQuestListState extends State<UserMarkedQuestList> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<void>(
-      stream: widget.refreshStream,
-      builder: (context, snapshot) {
-        return RefreshIndicator(
-          onRefresh: refreshList,
-          child: PagedListView<int, MarkedQuestSummary>(
-            pagingController: _pagingController,
-            builderDelegate: PagedChildBuilderDelegate<MarkedQuestSummary>(
-              itemBuilder: (context, item, index) {
-                bool isBookmarked = bookmarkStatus[item.objectId] ?? false;
-                return QuestListItem(
-                  quest: item,
-                  colorPattern: questColors[index % questColors.length],
-                  isBookmark: isBookmarked,
-                  unBookmarkCallback: _unBookmarkMarkedQuest,
-                );
-              },
-              noItemsFoundIndicatorBuilder: (context) {
-                return Center(
-                  child: Text(
-                    'No marked quests found',
-                    style: TextStyle(color: GlobalVar.baseColor),
-                  ),
-                );
-              },
-            ),
-          ),
-        );
-      },
+    return RefreshIndicator(
+      onRefresh: refreshList,
+      child: PagedListView<int, MarkedQuestSummary>(
+        pagingController: _pagingController,
+        builderDelegate: PagedChildBuilderDelegate<MarkedQuestSummary>(
+          itemBuilder: (context, item, index) {
+            bool isBookmarked = bookmarkStatus[item.objectId] ?? false;
+            return QuestListItem(
+              quest: item,
+              colorPattern: questColors[index % questColors.length],
+              isBookmark: isBookmarked,
+              unBookmarkCallback: _unBookmarkMarkedQuest,
+            );
+          },
+          noItemsFoundIndicatorBuilder: (context) {
+            return Center(
+              child: Text(
+                'No marked quests found',
+                style: TextStyle(color: GlobalVar.baseColor),
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
 }
