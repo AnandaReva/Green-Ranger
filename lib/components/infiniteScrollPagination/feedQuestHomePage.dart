@@ -200,7 +200,6 @@ class _AvailableQuestListState extends State<AvailableQuestList> {
                 builderDelegate: PagedChildBuilderDelegate<QuestFeedSummary>(
                   itemBuilder: (context, item, index) {
                     // Check if current item is the last one
-
                     return Column(
                       children: [
                         QuestListItem(
@@ -209,11 +208,11 @@ class _AvailableQuestListState extends State<AvailableQuestList> {
                           unBookmarkCallback: _unBookmarkMarkedQuest,
                           addBookmarkCallback: _addBookmarkMarkedQuest,
                         ),
-                        if (index == _pagingController.itemList!.length - 1 &&
-                            index <
-                                GlobalVar.instance.totalFeedCount -
-                                    1) // Show load more button for the last item and when there are more items to load
+                     
 
+                        // Conditional widget based on index
+                        if (index == _pagingController.itemList!.length - 1 &&
+                            index < GlobalVar.instance.totalFeedCount - 1)
                           TextButton(
                             onPressed: () {
                               _fetchMoreData(
@@ -221,25 +220,21 @@ class _AvailableQuestListState extends State<AvailableQuestList> {
                             },
                             child: Container(
                               width: 100,
-
                               decoration: BoxDecoration(
                                 color: GlobalVar.mainColor.withOpacity(0.5),
-                                borderRadius: BorderRadius.circular(
-                                    10), // Adjust border radius as needed
+                                borderRadius: BorderRadius.circular(10),
                               ),
-                              padding:
-                                  EdgeInsets.all(8), // Adjust padding as needed
                               child: Column(
                                 children: [
                                   Text(
-                                    ' ${GlobalVar.instance?.homePageQuestFeed?.length}/${GlobalVar.instance.totalFeedCount}',
+                                    '${GlobalVar.instance.homePageQuestFeed?.length}/${GlobalVar.instance.totalFeedCount}',
                                     style: TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.normal,
                                       color: GlobalVar.baseColor,
                                     ),
                                   ),
-                                  SizedBox(height: 5),
+                                  SizedBox(height: 5,),
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
@@ -251,8 +246,7 @@ class _AvailableQuestListState extends State<AvailableQuestList> {
                                           color: GlobalVar.secondaryColorGreen,
                                         ),
                                       ),
-                                      SizedBox(
-                                          width: 4), // Adjust spacing as needed
+                                      SizedBox(width: 4),
                                       Icon(
                                         Icons.refresh,
                                         size: 20,
@@ -261,6 +255,21 @@ class _AvailableQuestListState extends State<AvailableQuestList> {
                                     ],
                                   ),
                                 ],
+                              ),
+                            ),
+                          )
+                        else if (index ==
+                                _pagingController.itemList!.length - 1 &&
+                            index == GlobalVar.instance.totalFeedCount - 1)
+                          // Show available quests text at the end
+                          Container(
+                            margin: EdgeInsets.only(bottom: 10),
+                            child: Text(
+                              '${GlobalVar.instance.homePageQuestFeed?.length}/${GlobalVar.instance.totalFeedCount}',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.normal,
+                                color: GlobalVar.baseColor,
                               ),
                             ),
                           ),
@@ -282,12 +291,10 @@ class _AvailableQuestListState extends State<AvailableQuestList> {
                           ),
                           IconButton(
                             onPressed: _refreshData,
-                            icon: SizedBox(
-                              height: 24,
-                              child: Icon(
-                                Icons.refresh,
-                                color: GlobalVar.baseColor,
-                              ),
+                            icon: Icon(
+                              Icons.refresh,
+                              size: 24,
+                              color: GlobalVar.baseColor,
                             ),
                           ),
                         ],

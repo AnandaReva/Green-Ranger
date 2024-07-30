@@ -27,8 +27,6 @@ class UserQuestPageState extends State<UserQuestPage>
   final double minBound = 0;
   final double upperBound = 1.0;
 
-  // Instance of UserOnProgressQuestList or its state
-
   final StreamController<void> onProgressRefreshController =
       StreamController<void>.broadcast();
 
@@ -41,7 +39,6 @@ class UserQuestPageState extends State<UserQuestPage>
   @override
   void dispose() {
     _tabController.dispose();
-
     onProgressRefreshController.close();
     super.dispose();
   }
@@ -194,7 +191,15 @@ class UserQuestPageState extends State<UserQuestPage>
                             UserMarkedQuestList(),
                             // On Progress
                             // UserOnProgressQuestList(),
-                            UserOnProgressQuestList(),
+                            StreamBuilder<void>(
+                              stream: onProgressRefreshController.stream,
+                              builder: (context, snapshot) {
+                                return UserOnProgressQuestList(
+                                  refreshController:
+                                      onProgressRefreshController,
+                                );
+                              },
+                            ),
                             // Finished
                             UserCompletedQuestList(),
                           ],

@@ -1,9 +1,11 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables, sort_child_properties_last, prefer_const_constructors, must_be_immutable
 
+import 'dart:async';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sliding_up_panel/sliding_up_panel_widget.dart';
+import 'package:green_ranger/components/infiniteScrollPagination/UserOnProgressQuestList.dart';
 import 'package:green_ranger/components/loadingUI.dart';
 import 'package:green_ranger/components/succesConfirmation.dart';
 import 'package:green_ranger/firebase/uploadResultReport.dart';
@@ -31,6 +33,9 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
     with SingleTickerProviderStateMixin {
   final ScrollController scrollController = ScrollController();
   late AnimationController _animationController;
+  final StreamController<void> refreshController = StreamController<void>();
+  final GlobalKey<UserOnProgressQuestListState> userOnProgressQuestListKey =
+      GlobalKey<UserOnProgressQuestListState>();
   bool isDisposed = false;
 //  bool successSubmitReport = false;
   List<bool> _taskCheckedStates = [];
@@ -48,6 +53,10 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
     );
     _initializeTaskCheckedStates();
     print('scrollController and animationController initialized');
+  }
+
+  void _refreshQuestList() {
+    userOnProgressQuestListKey.currentState?.fetchOnProgressQuests(0);
   }
 
   void _initializeTaskCheckedStates() {
@@ -1516,6 +1525,12 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
                                                   //     reward,
                                                   //     levelRequirements);
 
+                                                  setState(() {
+                                                    GlobalVar.instance
+                                                            .isLoading =
+                                                        true; // Set isLoading to true here
+                                                  });
+
                                                   bool successSubmitReport =
                                                       await onSubmitQuest(
                                                           userId,
@@ -1529,17 +1544,36 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
 
                                                   if (successSubmitReport ==
                                                       true) {
+                                                    // UserQuestPageState?
+                                                    //     userQuestPageState =
+                                                    //     UserQuestPage.of(
+                                                    //         context);
+                                                    // userQuestPageState
+                                                    //     ?.triggerRefresh(); // refresh on Progress
+
+                                                    UserOnProgressQuestListState?
+                                                        userOnProgressQuestListState =
+                                                        UserOnProgressQuestListState
+                                                            .of(context);
+                                                    userOnProgressQuestListState
+                                                        ?.refreshList(); // fetxh on Progress
+
                                                     MainPageState?
                                                         mainPageState =
                                                         MainPage.of(context);
                                                     mainPageState
-                                                        ?.onTapController
+                                                        .onTapController
                                                         .add(() {
                                                       mainPageState
-                                                          ?.panelController
+                                                          .panelController
                                                           .collapse();
                                                     });
                                                     print("Submit success");
+
+                                                    setState(() {
+                                                      GlobalVar.instance
+                                                          .isLoading = false;
+                                                    });
 
                                                     Navigator.push(
                                                       context,
@@ -1551,6 +1585,10 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
                                                       ),
                                                     );
                                                   } else {
+                                                    setState(() {
+                                                      GlobalVar.instance
+                                                          .isLoading = false;
+                                                    });
                                                     print("Submit Failed");
                                                     if (mounted) {
                                                       ScaffoldMessenger.of(
@@ -1799,7 +1837,6 @@ class QuestDetailSlidePanelState extends State<QuestDetailSlidePanel>
           if (success) {
             print('Data result report uploaded successfully');
             setState(() {
-              GlobalVar.instance.isLoading = false;
               _selectedFile = null;
               _taskCheckedStates = List<bool>.filled(
                 widget.globalVar.questDataSelected['tasks'].length,

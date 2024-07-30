@@ -1,5 +1,7 @@
 // ignore_for_file: prefer_const_constructors, must_be_immutable
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:green_ranger/globalVar.dart';
 import 'package:green_ranger/main.dart';
@@ -9,14 +11,16 @@ import 'package:provider/provider.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
 class UserOnProgressQuestList extends StatefulWidget {
-  const UserOnProgressQuestList({Key? key}) : super(key: key);
+  final StreamController<void> refreshController;
+
+  const UserOnProgressQuestList({Key? key, required this.refreshController})
+      : super(key: key);
 
   @override
-  _UserOnProgressQuestListState createState() =>
-      _UserOnProgressQuestListState();
+  UserOnProgressQuestListState createState() => UserOnProgressQuestListState();
 }
 
-class _UserOnProgressQuestListState extends State<UserOnProgressQuestList> {
+class UserOnProgressQuestListState extends State<UserOnProgressQuestList> {
   final List<Color> questColors = [
     GlobalVar.secondaryColorGreen,
     GlobalVar.secondaryColorPuple,
@@ -31,13 +35,21 @@ class _UserOnProgressQuestListState extends State<UserOnProgressQuestList> {
     super.initState();
     _pagingController = PagingController(firstPageKey: 0);
     _pagingController.addPageRequestListener((pageKey) {
-      _fetchOnProgressQuests(pageKey);
+      fetchOnProgressQuests(pageKey);
+    });
+
+    widget.refreshController.stream.listen((_) {
+      refreshList();
     });
   }
 
-  Future<void> _fetchOnProgressQuests(int pageKey) async {
+  static UserOnProgressQuestListState? of(BuildContext context) {
+    return context.findAncestorStateOfType<UserOnProgressQuestListState>();
+  }
+
+  Future<void> fetchOnProgressQuests(int pageKey) async {
+    print("Fetching onProgress quests");
     try {
-      // Fetch onProgress quests from MongoDB or any other source
       bool isSuccess = await UserQuestMongodb.fetchUserOnProgressQuests();
 
       if (!isSuccess) {
@@ -46,30 +58,27 @@ class _UserOnProgressQuestListState extends State<UserOnProgressQuestList> {
       }
 
       final allItems = GlobalVar.instance.userOnProgressQuest ?? [];
-      final reversedItems = List.from(allItems.reversed); // Reverse the array
+      final reversedItems = List.from(allItems.reversed);
 
-      // Clear existing data if it's the first page
       if (pageKey == 0) {
         _pagingController.itemList?.clear();
       }
 
-      // Append data to _pagingController
-      _pagingController
-          .appendLastPage(reversedItems.cast<OnProgressQuestSummary>());
+      _pagingController.appendLastPage(reversedItems.cast<OnProgressQuestSummary>());
     } catch (error) {
       print("Error fetching onProgress quests: $error");
       _pagingController.error = error.toString();
     }
   }
 
-  Future<void> _refreshList() async {
+  Future<void> refreshList() async {
     _pagingController.refresh();
   }
 
   @override
   Widget build(BuildContext context) {
     return RefreshIndicator(
-      onRefresh: _refreshList,
+      onRefresh: refreshList,
       child: PagedListView<int, OnProgressQuestSummary>(
         pagingController: _pagingController,
         builderDelegate: PagedChildBuilderDelegate<OnProgressQuestSummary>(
@@ -93,6 +102,7 @@ class _UserOnProgressQuestListState extends State<UserOnProgressQuestList> {
   }
 }
 
+
 class QuestListItem extends StatelessWidget {
   final OnProgressQuestSummary quest;
   final Color colorPattern;
@@ -113,8 +123,7 @@ class QuestListItem extends StatelessWidget {
           mainPageState.panelController.expand();
         });
 
-      print("OnProgress: ${quest.objectId.runtimeType}");
-
+        print("OnProgress: ${quest.objectId.runtimeType}");
 
         // Handle tap event to update questDataSelected
         Provider.of<GlobalVar>(context, listen: false).questDataSelected = {
